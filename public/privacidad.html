@@ -11,6 +11,7 @@
         --tinta: #16240a;
         --fondo: #f4f7ea;
         --acento: #6b8f1f;
+        --borde: #d3ddc0;
       }
       * { box-sizing: border-box; }
       body {
@@ -19,14 +20,19 @@
         background: var(--fondo);
         color: var(--tinta);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        line-height: 1.6;
+        line-height: 1.65;
       }
       main {
-        max-width: 640px;
+        max-width: 680px;
         margin: 0 auto;
       }
       h1 {
         font-size: 1.5rem;
+        margin-bottom: 4px;
+      }
+      .subtitulo {
+        color: #4a5a3a;
+        font-size: 0.95rem;
         margin-bottom: 4px;
       }
       .fecha {
@@ -35,11 +41,16 @@
         margin-bottom: 32px;
       }
       h2 {
-        font-size: 1.1rem;
-        margin-top: 36px;
+        font-size: 1.05rem;
+        margin-top: 32px;
         border-bottom: 2px solid var(--acento);
         padding-bottom: 4px;
       }
+      h2 .numero {
+        color: var(--acento);
+        margin-right: 6px;
+      }
+      p { margin: 12px 0; }
       ul { padding-left: 20px; }
       li { margin-bottom: 8px; }
       a { color: var(--acento); }
@@ -50,77 +61,209 @@
         border-radius: 4px;
         margin-bottom: 32px;
       }
+      .ficha {
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin: 16px 0;
+        font-size: 0.92rem;
+      }
+      .ficha dt { font-weight: 700; margin-top: 8px; }
+      .ficha dt:first-child { margin-top: 0; }
+      .ficha dd { margin: 0 0 4px; }
+      footer {
+        margin-top: 48px;
+        padding-top: 16px;
+        border-top: 1px solid var(--borde);
+        font-size: 0.8rem;
+        color: #5a6a4a;
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Política de privacidad de Habitotchi</h1>
+      <p class="subtitulo">Aplicación de seguimiento de hábitos personales</p>
       <p class="fecha">Última actualización: agosto de 2026</p>
 
       <div class="resumen">
-        En una frase: Habitotchi guarda todo en tu propio teléfono o computadora,
-        no tiene cuentas ni servidor propio, y lo único que se conecta a un
-        servicio externo es la conexión opcional con Google Calendar.
+        <strong>Resumen:</strong> Habitotchi no posee servidores propios ni bases de
+        datos centralizadas. La información que cada usuaria registra se almacena
+        exclusivamente en el dispositivo desde el que se utiliza la aplicación. La
+        única integración con un tercero es la conexión opcional con Google
+        Calendar, activada únicamente por decisión expresa de la usuaria.
       </div>
 
-      <h2>Qué datos guarda la app</h2>
+      <h2><span class="numero">1.</span>Responsable del tratamiento</h2>
+      <div class="ficha">
+        <dl>
+          <dt>Aplicación</dt>
+          <dd>Habitotchi (<a href="https://habitotchi.netlify.app">habitotchi.netlify.app</a>)</dd>
+          <dt>Responsable</dt>
+          <dd>Catalina Florencia Sánchez</dd>
+          <dt>Contacto</dt>
+          <dd><a href="mailto:catalinaflorencia16@gmail.com">catalinaflorencia16@gmail.com</a></dd>
+          <dt>Jurisdicción</dt>
+          <dd>República Argentina</dd>
+        </dl>
+      </div>
       <p>
-        Todo lo que anotás en Habitotchi —tus hábitos, tu mascota, tus notas de
-        salud, tu calendario propio, tus puntos y monedas— se guarda
-        <strong>únicamente en el almacenamiento local de tu navegador</strong>
-        (localStorage), en tu propio dispositivo. Habitotchi no tiene un
-        servidor propio ni una base de datos: nadie más que vos, desde tu
-        mismo dispositivo y navegador, puede ver esa información.
-      </p>
-      <p>
-        No hay cuentas de usuario, no hay registro, no hay analítica ni
-        rastreo de tu uso de la app.
+        Esta política describe qué información procesa Habitotchi, con qué
+        finalidad, y qué derechos tiene la persona usuaria respecto de esa
+        información, en los términos de la Ley N.º 25.326 de Protección de los
+        Datos Personales de la República Argentina y su normativa complementaria.
       </p>
 
-      <h2>Google Calendar (opcional)</h2>
+      <h2><span class="numero">2.</span>Qué datos procesa la aplicación</h2>
       <p>
-        Si elegís conectar tu Google Calendar desde la pestaña Calendario,
-        Habitotchi te pide permiso de <strong>solo lectura</strong> sobre tus
-        eventos (el permiso <code>calendar.readonly</code>). Con eso:
+        Toda la información que la usuaria ingresa en Habitotchi —registro de
+        hábitos, estado de la mascota virtual, notas de bienestar personal,
+        eventos de calendario propios, puntuación y moneda interna del juego— se
+        almacena <strong>exclusivamente en el almacenamiento local del navegador
+        utilizado</strong> (mecanismo <code>localStorage</code>), en el dispositivo
+        de la usuaria.
+      </p>
+      <p>
+        Habitotchi no cuenta con servidor propio, base de datos, ni sistema de
+        cuentas de usuario. En consecuencia:
       </p>
       <ul>
-        <li>La app puede ver tus eventos para mostrarlos junto a tus notas propias.</li>
-        <li>Nunca puede crear, editar ni borrar nada en tu calendario real.</li>
-        <li>
-          El permiso (token de acceso) vive solo en la memoria de esa pestaña
-          del navegador mientras la tenés abierta. No se guarda en el disco,
-          no se manda a ningún servidor nuestro —porque no existe ninguno— y
-          desaparece al cerrar la pestaña.
-        </li>
-        <li>Podés desconectar el acceso en cualquier momento desde la misma pantalla.</li>
+        <li>No se transmite información a ningún servidor operado por Habitotchi, porque ninguno existe.</li>
+        <li>No se realiza recolección de datos con fines analíticos, publicitarios ni estadísticos.</li>
+        <li>No se emplean cookies de rastreo ni identificadores de seguimiento entre sitios.</li>
+        <li>Ninguna persona distinta de la usuaria, incluida quien desarrolla la aplicación, tiene acceso a esta información.</li>
       </ul>
       <p>
-        Podés revisar o revocar el acceso que le diste a Habitotchi en
-        cualquier momento desde
+        Si la usuaria borra los datos del navegador, desinstala la aplicación o
+        cambia de dispositivo sin exportar una copia, la información se pierde de
+        forma irrecuperable. La aplicación ofrece una función de exportación e
+        importación manual para quien desee conservar una copia de resguardo.
+      </p>
+
+      <h2><span class="numero">3.</span>Conexión opcional con Google Calendar</h2>
+      <p>
+        La aplicación ofrece, como función optativa y desactivada por defecto, la
+        posibilidad de visualizar eventos del calendario de Google de la usuaria
+        junto a sus notas propias. Esta función solo se activa si la usuaria lo
+        decide expresamente desde la pestaña Calendario.
+      </p>
+      <p><strong>Alcance del permiso solicitado:</strong></p>
+      <ul>
+        <li>
+          Se solicita el permiso <code>calendar.readonly</code>, de solo lectura.
+          La aplicación no tiene capacidad técnica para crear, modificar ni
+          eliminar eventos del calendario de la usuaria.
+        </li>
+        <li>
+          El permiso se otorga directamente a través de la pantalla de
+          autenticación de Google; Habitotchi no recibe ni almacena la contraseña
+          de la cuenta de Google de la usuaria en ningún momento.
+        </li>
+        <li>
+          El token de acceso otorgado por Google se conserva únicamente en la
+          memoria volátil de la pestaña del navegador activa. No se persiste en
+          almacenamiento local, no se envía a ningún servidor de Habitotchi (por
+          no existir ninguno) y se descarta al cerrar la pestaña o expirar por
+          vencimiento propio del token.
+        </li>
+        <li>
+          Los eventos obtenidos se utilizan exclusivamente para su despliegue
+          dentro de la interfaz de la aplicación, en el dispositivo de la
+          usuaria, y no se almacenan ni retransmiten a ningún tercero.
+        </li>
+      </ul>
+      <p>
+        La usuaria puede desconectar este permiso en cualquier momento desde la
+        misma pantalla de la aplicación, o revisarlo y revocarlo directamente
+        desde
         <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">
-          la configuración de tu cuenta de Google
+          el panel de permisos de su cuenta de Google
         </a>.
+        El uso de la información obtenida de Google Calendar por parte de
+        Habitotchi está sujeto, además de a esta política, a la
+        <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">
+          Política de Datos de Usuario de los Servicios de API de Google
+        </a>, incluidos sus requisitos de uso limitado.
       </p>
 
-      <h2>Con quién se comparten tus datos</h2>
+      <h2><span class="numero">4.</span>Transferencia internacional de datos</h2>
       <p>
-        Con nadie. Habitotchi no vende, no comparte ni transmite tus datos a
-        terceros. El único tercero involucrado es Google, y solo para la
-        conexión opcional del calendario que vos activás a propósito.
+        Dado que la conexión con Google Calendar se establece de manera directa
+        entre el navegador de la usuaria y los servidores de Google LLC (empresa
+        con sede en Estados Unidos), los eventos consultados durante esa sesión
+        son procesados por infraestructura de Google, conforme a sus propias
+        políticas de privacidad. Habitotchi no interviene en ese procesamiento ni
+        aloja, copia o reenvía esa información.
       </p>
 
-      <h2>Instalación como app</h2>
+      <h2><span class="numero">5.</span>Con quién se comparte la información</h2>
       <p>
-        Si instalás Habitotchi en tu celular (como acceso directo desde el
-        navegador), sigue funcionando exactamente igual: los datos quedan en
-        ese mismo dispositivo, no se sincronizan a ningún lado.
+        Habitotchi no vende, alquila, cede ni comparte información personal con
+        terceros con fines comerciales. El único tercero involucrado es Google,
+        exclusivamente en el marco de la conexión optativa descripta en la
+        sección 3, y únicamente cuando la usuaria la activa de forma voluntaria.
       </p>
 
-      <h2>Contacto</h2>
+      <h2><span class="numero">6.</span>Menores de edad</h2>
       <p>
-        Para preguntas sobre esta política, escribime a
+        Habitotchi no está dirigida específicamente a menores de 13 años ni
+        recolecta deliberadamente información de esa franja etaria. Al no existir
+        registro de cuentas ni recolección de datos identificatorios, la
+        aplicación no dispone de mecanismos para verificar la edad de quien la
+        utiliza; se recomienda la supervisión de madres, padres o tutores en el
+        uso por parte de menores.
+      </p>
+
+      <h2><span class="numero">7.</span>Derechos de la persona usuaria</h2>
+      <p>
+        En los términos de la Ley N.º 25.326, toda persona tiene derecho a
+        acceder, rectificar, actualizar y solicitar la supresión de sus datos
+        personales. En el caso de Habitotchi, dado que la información reside
+        exclusivamente en el dispositivo de la usuaria:
+      </p>
+      <ul>
+        <li><strong>Acceso y rectificación:</strong> la usuaria visualiza y edita sus propios datos directamente dentro de la aplicación, en todo momento.</li>
+        <li><strong>Supresión:</strong> puede eliminar la totalidad de sus datos desde la sección Ajustes ("Borrar todo"), o borrando los datos del sitio desde la configuración de su navegador.</li>
+        <li><strong>Portabilidad:</strong> puede exportar una copia de sus datos en formato legible desde la misma sección de Ajustes.</li>
+        <li><strong>Revocación del consentimiento:</strong> respecto de la conexión con Google Calendar, puede desconectarla en cualquier momento según lo descripto en la sección 3.</li>
+      </ul>
+      <p>
+        La Agencia de Acceso a la Información Pública, en su carácter de Órgano
+        de Control de la Ley N.º 25.326, tiene la atribución de atender las
+        denuncias y reclamos que interpongan quienes resulten afectados en sus
+        derechos por incumplimiento de las normas vigentes en materia de
+        protección de datos personales.
+      </p>
+
+      <h2><span class="numero">8.</span>Instalación como aplicación web progresiva</h2>
+      <p>
+        La instalación de Habitotchi como acceso directo en el dispositivo de la
+        usuaria (funcionalidad de aplicación web progresiva) no modifica ninguno
+        de los términos anteriores: los datos permanecen almacenados localmente,
+        sin sincronización remota.
+      </p>
+
+      <h2><span class="numero">9.</span>Modificaciones a esta política</h2>
+      <p>
+        Esta política puede actualizarse para reflejar cambios en la aplicación o
+        en la normativa aplicable. La fecha de la última actualización figura al
+        inicio del documento. Se recomienda su revisión periódica.
+      </p>
+
+      <h2><span class="numero">10.</span>Contacto</h2>
+      <p>
+        Ante cualquier consulta, solicitud vinculada al ejercicio de los derechos
+        descriptos en la sección 7, o reporte relacionado con esta política, puede
+        escribirse a
         <a href="mailto:catalinaflorencia16@gmail.com">catalinaflorencia16@gmail.com</a>.
       </p>
+
+      <footer>
+        Este documento constituye una política de privacidad orientativa,
+        elaborada para describir de forma precisa el funcionamiento técnico de
+        Habitotchi. No reemplaza el asesoramiento de un profesional matriculado
+        en derecho para casos que requieran certeza legal formal.
+      </footer>
     </main>
   </body>
 </html>
