@@ -44,6 +44,19 @@ export default defineConfig({
            afuera (tapas de libros, Gemini, Google Calendar) va
            siempre a la red: son datos que cambian. */
         globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
+
+        /* ----------------------------------------------------------
+           PÁGINAS SUELTAS, FUERA DEL "TODO ES index.html"
+           ----------------------------------------------------------
+           Por default el service worker manda CUALQUIER navegación
+           que no reconoce a index.html — así es como una SPA de una
+           sola página se banca que recargues en cualquier pestaña.
+           El problema es que privacidad.html es un archivo real y
+           aparte, no una ruta de la app: con el default, entrar a
+           /privacidad.html mostraba el tamagotchi en vez de la
+           política. Estas dos líneas la excluyen de ese redirect. */
+        navigateFallbackDenylist: [/^\/privacidad\.html$/],
+
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/covers\.openlibrary\.org\/.*/i,
