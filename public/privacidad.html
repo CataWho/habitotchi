@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Política de privacidad · Habitotchi</title>
+    <link rel="icon" type="image/png" href="/icono-192.png" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --tinta: #16240a;
+        --fondo: #f4f7ea;
+        --acento: #6b8f1f;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 32px 20px 64px;
+        background: var(--fondo);
+        color: var(--tinta);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+      }
+      .fecha {
+        color: #566;
+        font-size: 0.85rem;
+        margin-bottom: 32px;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin-top: 36px;
+        border-bottom: 2px solid var(--acento);
+        padding-bottom: 4px;
+      }
+      ul { padding-left: 20px; }
+      li { margin-bottom: 8px; }
+      a { color: var(--acento); }
+      .resumen {
+        background: rgba(107, 143, 31, 0.12);
+        border-left: 4px solid var(--acento);
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Política de privacidad de Habitotchi</h1>
+      <p class="fecha">Última actualización: agosto de 2026</p>
+
+      <div class="resumen">
+        En una frase: Habitotchi guarda todo en tu propio teléfono o computadora,
+        no tiene cuentas ni servidor propio, y lo único que se conecta a un
+        servicio externo es la conexión opcional con Google Calendar.
+      </div>
+
+      <h2>Qué datos guarda la app</h2>
+      <p>
+        Todo lo que anotás en Habitotchi —tus hábitos, tu mascota, tus notas de
+        salud, tu calendario propio, tus puntos y monedas— se guarda
+        <strong>únicamente en el almacenamiento local de tu navegador</strong>
+        (localStorage), en tu propio dispositivo. Habitotchi no tiene un
+        servidor propio ni una base de datos: nadie más que vos, desde tu
+        mismo dispositivo y navegador, puede ver esa información.
+      </p>
+      <p>
+        No hay cuentas de usuario, no hay registro, no hay analítica ni
+        rastreo de tu uso de la app.
+      </p>
+
+      <h2>Google Calendar (opcional)</h2>
+      <p>
+        Si elegís conectar tu Google Calendar desde la pestaña Calendario,
+        Habitotchi te pide permiso de <strong>solo lectura</strong> sobre tus
+        eventos (el permiso <code>calendar.readonly</code>). Con eso:
+      </p>
+      <ul>
+        <li>La app puede ver tus eventos para mostrarlos junto a tus notas propias.</li>
+        <li>Nunca puede crear, editar ni borrar nada en tu calendario real.</li>
+        <li>
+          El permiso (token de acceso) vive solo en la memoria de esa pestaña
+          del navegador mientras la tenés abierta. No se guarda en el disco,
+          no se manda a ningún servidor nuestro —porque no existe ninguno— y
+          desaparece al cerrar la pestaña.
+        </li>
+        <li>Podés desconectar el acceso en cualquier momento desde la misma pantalla.</li>
+      </ul>
+      <p>
+        Podés revisar o revocar el acceso que le diste a Habitotchi en
+        cualquier momento desde
+        <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">
+          la configuración de tu cuenta de Google
+        </a>.
+      </p>
+
+      <h2>Con quién se comparten tus datos</h2>
+      <p>
+        Con nadie. Habitotchi no vende, no comparte ni transmite tus datos a
+        terceros. El único tercero involucrado es Google, y solo para la
+        conexión opcional del calendario que vos activás a propósito.
+      </p>
+
+      <h2>Instalación como app</h2>
+      <p>
+        Si instalás Habitotchi en tu celular (como acceso directo desde el
+        navegador), sigue funcionando exactamente igual: los datos quedan en
+        ese mismo dispositivo, no se sincronizan a ningún lado.
+      </p>
+
+      <h2>Contacto</h2>
+      <p>
+        Para preguntas sobre esta política, escribime a
+        <a href="mailto:catalinaflorencia16@gmail.com">catalinaflorencia16@gmail.com</a>.
+      </p>
+    </main>
+  </body>
+</html>
