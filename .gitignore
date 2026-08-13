@@ -1,0 +1,37 @@
+# Dependencias
+node_modules/
+
+# Lo que genera el build
+dist/
+dist-ssr/
+*.local
+
+# Capacitor: las carpetas nativas SÍ se versionan (ahí van los
+# iconos, permisos y firmas), pero no lo que generan al compilar
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+ios/App/build/
+ios/App/Pods/
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Notas, planes e informes de uso personal: quedan en la compu,
+# no en el repo público.
+/informes/
+/PASOS-NATIVOS.md
+/CALENDARIO.md

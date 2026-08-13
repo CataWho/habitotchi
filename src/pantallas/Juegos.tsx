@@ -1,0 +1,216 @@
+import { useEffect, useRef, useState } from "react";
+import { useHabitotchi } from "@/estado/useHabitotchi";
+import { MASCOTAS } from "@/datos/mascotas";
+import {
+  crearPong, crearSaltador, crearViborita, guardarRecord, recordDe,
+} from "@/juegos/motor";
+import { Pagina } from "@/componentes/comunes/Pagina";
+import { Ayuda, Panel } from "@/componentes/comunes/Panel";
+
+/* ==========================================================
+   JUEGOS
+   ==========================================================
+   Tres juegos en un canvas, con la misma estética de la
+   pantallita.
+
+   ---------- NO DAN MONEDAS, A PROPÓSITO ----------
+   Solo guardan tu récord. Si jugar diera monedas, te
+   convendría jugar en vez de tomar agua, y la app terminaría
+   compitiendo contra su propio objetivo.
+   ========================================================== */
+
+const JUEGOS = [
+  { id: "viborita", nombre: "Viborita", ayuda: "Deslizá el dedo sobre la pantalla para girar (o usá las flechas)." },
+  { id: "pong", nombre: "Pong", ayuda: "Movés la paleta con el dedo o el mouse. Las primeras 5 jugadas van lentas." },
+  { id: "saltador", nombre: "Saltador", ayuda: "Tocá la pantalla para saltar los obstáculos." },
+];
+
+export function Juegos() {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const activo = useRef<any>(null);
+  const { vida } = useHabitotchi();
+
+  const [elegido, setElegido] = useState("viborita");
+  const [puntos, setPuntos] = useState(0);
+  const [mensaje, setMensaje] = useState("Elegí un juego para empezar.");
+  const [record, setRecord] = useState(() => recordDe("viborita"));
+
+  /* Apagar el juego al salir es importante: si no, sigue
+     corriendo invisible y gastando batería. */
+  const detener = () => {
+    activo.current?.detener?.();
+    activo.current = null;
+  };
+
+  useEffect(() => detener, []);
+
+  useEffect(() => {
+    detener();
+    setPuntos(0);
+    setRecord(recordDe(elegido));
+    setMensaje("Tocá Jugar para empezar.");
+  }, [elegido]);
+
+  /* ----------------------------------------------------------
+     EL CANVAS TAMBIÉN ES UN CONTROL
+     ----------------------------------------------------------
+     La viborita se maneja con el D-pad, pero los otros dos no
+     tienen botones: Pong sigue el dedo (o el mouse) de lado a
+     lado, y el Saltador salta al tocar. Sin esto, los dos
+     juegos arrancan y se ven, pero no responden a nada — que
+     es exactamente lo que pasaba.
+
+     Los eventos van acá y no dentro del motor porque el motor
+     no sabe nada del DOM: recibe el canvas y dibuja. Quién le
+     manda las órdenes es cosa de la pantalla.
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    const nodo = canvas.current;
+    if (!nodo) return;
+
+    /* De coordenada de pantalla a coordenada del canvas: el
+       canvas se dibuja a 300px de ancho pero se muestra más
+       chico (y encima todo el aparato está escalado), así que
+       hay que convertir o la paleta queda corrida. */
+    const aCoordenadaDelCanvas = (clienteX: number) => {
+      const caja = nodo.getBoundingClientRect();
+      return (clienteX - caja.left) * (nodo.width / caja.width);
+    };
+
+    const mover = (clienteX: number) => {
+      activo.current?.moverA?.(aCoordenadaDelCanvas(clienteX));
+    };
+
+    const alMoverMouse = (e: MouseEvent) => mover(e.clientX);
+
+    const alMoverDedo = (e: TouchEvent) => {
+      const dedo = e.touches[0];
+      if (!dedo) return;
+
+      /* Sin esto, arrastrar sobre el canvas también desliza la
+         página por debajo. */
+      if (activo.current?.moverA) e.preventDefault();
+      mover(dedo.clientX);
+    };
+
+    const alApretar = () => activo.current?.saltar?.();
+    const alSoltar = () => activo.current?.soltarSalto?.();
+
+    nodo.addEventListener("mousemove", alMoverMouse);
+    nodo.addEventListener("touchmove", alMoverDedo, { passive: false });
+    nodo.addEventListener("mousedown", alApretar);
+    nodo.addEventListener("mouseup", alSoltar);
+    nodo.addEventListener("touchstart", alApretar, { passive: true });
+    nodo.addEventListener("touchend", alSoltar, { passive: true });
+
+    return () => {
+      nodo.removeEventListener("mousemove", alMoverMouse);
+      nodo.removeEventListener("touchmove", alMoverDedo);
+      nodo.removeEventListener("mousedown", alApretar);
+      nodo.removeEventListener("mouseup", alSoltar);
+      nodo.removeEventListener("touchstart", alApretar);
+      nodo.removeEventListener("touchend", alSoltar);
+    };
+  }, []);
+
+  const dibujarMascotaEnCanvas = (
+    ctx: CanvasRenderingContext2D, x: number, y: number, ancho: number, alto: number
+  ) => {
+    const mascota = MASCOTAS[vida?.mascota ?? "dragoncito"];
+    if (!mascota) return;
+
+    const datos = mascota.etapas.bebe;
+    const filas = datos.pixeles.length;
+    const columnas = datos.pixeles[0]?.length ?? 0;
+    const tam = Math.min(ancho / columnas, alto / filas);
+
+    for (let fila = 0; fila < filas; fila++) {
+      for (let col = 0; col < columnas; col++) {
+        const letra = datos.pixeles[fila]?.[col];
+        if (!letra || letra === ".") continue;
+
+        ctx.fillStyle = mascota.colores[letra] ?? "#3a4a1c";
+        ctx.fillRect(x + col * tam, y + fila * tam, Math.ceil(tam), Math.ceil(tam));
+      }
+    }
+  };
+
+  const jugar = () => {
+    const nodo = canvas.current;
+    if (!nodo) return;
+
+    detener();
+
+    const alPerder = (puntaje: number) => {
+      const esRecord = guardarRecord(elegido, puntaje);
+      setRecord(recordDe(elegido));
+      setMensaje(
+        esRecord
+          ? `¡Récord nuevo! ${puntaje} puntos.`
+          : `Perdiste con ${puntaje}. Tu récord es ${recordDe(elegido)}.`
+      );
+    };
+
+    if (elegido === "viborita") activo.current = crearViborita(nodo, setPuntos, alPerder);
+    else if (elegido === "pong") activo.current = crearPong(nodo, setPuntos, alPerder);
+    else activo.current = crearSaltador(nodo, setPuntos, alPerder, dibujarMascotaEnCanvas);
+
+    setMensaje("¡Dale!");
+    activo.current.arrancar();
+  };
+
+  const ayuda = JUEGOS.find((j) => j.id === elegido)?.ayuda ?? "";
+
+  return (
+    <Pagina nombre="Juegos">
+      <Panel>
+        <div className="juego-elegir">
+          {JUEGOS.map((juego) => (
+            <button
+              key={juego.id}
+              type="button"
+              className={elegido === juego.id ? "juego-opcion is-on" : "juego-opcion"}
+              onClick={() => setElegido(juego.id)}
+            >
+              {juego.nombre}
+            </button>
+          ))}
+        </div>
+
+        <div className="juego-marcador">
+          <span>Puntos: {puntos}</span>
+          <span>Récord: {record}</span>
+        </div>
+
+        <canvas id="juegoCanvas" ref={canvas} width={300} height={230} />
+
+        <p className="juego-mensaje">{mensaje}</p>
+
+        <button type="button" className="habit-btn" onClick={jugar}>Jugar</button>
+
+        {elegido === "viborita" && <Dpad activo={activo} />}
+
+        <Ayuda>{ayuda}</Ayuda>
+      </Panel>
+    </Pagina>
+  );
+}
+
+/* Los botones táctiles de la viborita: en el celular no hay
+   teclado, y deslizar sobre un canvas chico es incómodo. */
+function Dpad({ activo }: { activo: React.RefObject<any> }) {
+  const girar = (hacia: string) => activo.current?.girar?.(hacia);
+
+  /* Los cuatro botones son hijos directos de la grilla: cada
+     uno se ubica con su clase (dpad-arriba, dpad-izquierda...).
+     Agruparlos en filas rompe la crucecita, porque el div del
+     medio pasa a ocupar una sola celda. */
+  return (
+    <div className="juego-dpad">
+      <button type="button" className="dpad-btn dpad-arriba" onClick={() => girar("arriba")} aria-label="Arriba">▲</button>
+      <button type="button" className="dpad-btn dpad-izquierda" onClick={() => girar("izquierda")} aria-label="Izquierda">◀</button>
+      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label="Abajo">▼</button>
+      <button type="button" className="dpad-btn dpad-derecha" onClick={() => girar("derecha")} aria-label="Derecha">▶</button>
+    </div>
+  );
+}

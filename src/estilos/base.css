@@ -1,0 +1,257 @@
+/* ==========================================================
+   HABITOTCHI · style.css
+   el aspecto retro lila
+   ==========================================================
+   Este archivo dice COMO SE VE todo.
+   Empezamos definiendo los colores en un solo lugar
+   para poder cambiarlos despues sin buscar por todos lados.
+   ========================================================== */
+
+:root {
+  /* --- Paleta lila · plástico "clear purple" tipo Y2K ---
+     Los dos primeros son el violeta caramelo de la carcasa;
+     --lila-interior es el violeta oscuro que se ve por dentro,
+     detrás del plástico esmerilado. */
+  --lila-claro:    #c9a6f0;
+  --lila:          #b47fe8;
+  --lila-medio:    #9d6bd4;
+  --lila-oscuro:   #7a4fb8;
+  --lila-sombra:   #5b3a8c;
+  --lila-interior: #5b3a8c;
+
+  /* --- Botones: rosa chicle mate --- */
+  --rosa-boton:   #f2a6c4;
+  --rosa-sombra:  #d97fa8;
+
+  /* --- Pantalla LCD (verde lima retro) --- */
+  --lcd:         #b9ea3d;
+  --lcd-claro:   #cbf265;
+
+  /* ----------------------------------------------------------
+     LA TINTA, EN UN SOLO NÚMERO
+     ----------------------------------------------------------
+     --lcd-tinta-rgb son los tres canales sueltos, sin envolver
+     en rgb(). Eso permite armar abajo todas las variantes con
+     distinta transparencia a partir del mismo color.
+
+     La gracia es que los fondos de pantalla de la tienda pisan
+     SOLO esta variable (desde dibujarFondoDePantalla) y con eso
+     cambia la tinta de toda la interfaz de una. Antes el verde
+     oscuro estaba escrito a mano en veintipico de lugares, así
+     que al poner el fondo "Noche" quedaba texto oscuro sobre
+     azul oscuro: ilegible.
+
+     --lcd-brillo es el resplandor del LCD encendido, que también
+     tiene que acompañar al color de la pantalla.
+     ---------------------------------------------------------- */
+  --lcd-tinta-rgb: 22, 36, 10;
+  --lcd-brillo:    rgba(185, 234, 61, 0.28);
+
+  /* El color para escribir ENCIMA de la tinta: los botones de
+     la pantalla son una pastilla de tinta llena con la letra
+     del color del fondo. Sin esto, en los fondos claros la
+     letra quedaba blanca sobre casi blanco. */
+  --lcd-contratinta: #cbf265;
+
+  --lcd-tinta:       rgb(var(--lcd-tinta-rgb));
+
+  /* Tintas derivadas, para dibujar la interfaz DENTRO de la
+     pantalla. Todo lo que va sobre el verde usa estos tonos:
+     así los paneles, los campos y las listas se leen como
+     parte de la misma pantalla encendida y no como tarjetas
+     pegadas encima. */
+  --lcd-panel:       rgba(255, 255, 255, 0.22);
+  --lcd-panel-hueco: rgba(var(--lcd-tinta-rgb), 0.07);
+  --lcd-borde:       rgba(var(--lcd-tinta-rgb), 0.30);
+  --lcd-borde-fuerte:rgba(var(--lcd-tinta-rgb), 0.55);
+  /* La tinta de las ayudas y los textos secundarios. Estaba en
+     0.62 y con el fondo "Noche" quedaba en 2.2 de contraste,
+     ilegible. A 0.80 el peor caso da 4.6 y se sigue notando
+     más suave que el texto principal. */
+  --lcd-tinta-suave: rgba(var(--lcd-tinta-rgb), 0.80);
+
+  /* --- Detalles --- */
+  --rosa:        #f6a8cd;
+  --blanco:      #fdf9ff;
+
+  /* --- Tipografías --- */
+  --pixel: 'Press Start 2P', monospace;
+  --texto: 'Quicksand', sans-serif;
+
+  /* --- Tamaño del aparato ---
+     Un solo lugar donde se define cuán grande es el
+     tamagotchi. Es el mismo en los dos estados de vista: al
+     cambiar de pestaña se redistribuye el espacio interno,
+     pero la carcasa nunca cambia de tamaño. */
+  --ancho-aparato: 520px;
+  --alto-aparato:  880px;
+
+  /* Cuánto tarda el chasis en replegarse al cambiar de pestaña */
+  --dur-zoom: 0.38s;
+}
+
+/* Reset simple: que el padding no rompa los tamaños */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================
+   QUE "hidden" GANE SIEMPRE
+   ==========================================================
+   El navegador esconde los elementos con hidden usando
+   display:none, PERO cualquier regla nuestra que diga
+   display (flex, grid...) le gana y lo vuelve a mostrar.
+   Por eso el modal del chef aparecía solo y no se cerraba.
+   Esta regla arregla eso de una vez para toda la app.
+   ========================================================== */
+[hidden] { display: none !important; }
+
+/* ==========================================================
+   EL NODO DONDE MONTA REACT
+   ==========================================================
+   React necesita un div propio para colgar la app, pero el
+   body centra a sus hijos con flex y el aparato quedaba
+   descolocado, porque el hijo directo pasaba a ser este div y
+   no el aparato.
+
+   display: contents lo saca del cálculo del layout: el div
+   sigue existiendo para React, pero para el CSS es como si
+   sus hijos colgaran directo del body, igual que antes.
+   ========================================================== */
+#raiz { display: contents; }
+
+/* --- El fondo de la página --- */
+body {
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;          /* el scroll ocurre dentro de la pantalla */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Poco margen: el aparato tiene que ocupar lo máximo posible */
+  padding: clamp(4px, 1.2vw, 14px);
+
+  font-family: var(--texto);
+  color: var(--lila-sombra);
+
+  /* Cielo nocturno azul violáceo */
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, #2c2358 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 50% 100%, #241d4a 0%, transparent 60%),
+    linear-gradient(170deg, #161233 0%, #1d1740 50%, #120f28 100%);
+
+  /* Evita que el texto se seleccione al tocar botones */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+
+/* ==========================================================
+   EL CIELO DE FONDO
+   ==========================================================
+   Estrellitas fijas que titilan, más algunas fugaces cada
+   tanto. Todo con CSS: las estrellas son degradados radiales
+   diminutos repartidos por la pantalla, en dos capas con
+   ritmos de parpadeo distintos para que no titilen todas a la
+   vez (que es lo que delataría el truco).
+
+   Va con position: fixed y z-index 0 para quedar detrás del
+   aparato, que está en z-index 1.
+   ========================================================== */
+.cielo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cielo::before,
+.cielo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Capa 1 · las estrellas más grandes y brillantes */
+.cielo::before {
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 18%, #ffffff, transparent),
+    radial-gradient(1.4px 1.4px at 27% 62%, #e8e0ff, transparent),
+    radial-gradient(1.8px 1.8px at 41% 11%, #ffffff, transparent),
+    radial-gradient(1.3px 1.3px at 58% 78%, #dcd4ff, transparent),
+    radial-gradient(1.7px 1.7px at 73% 32%, #ffffff, transparent),
+    radial-gradient(1.4px 1.4px at 88% 68%, #e8e0ff, transparent),
+    radial-gradient(1.5px 1.5px at 6% 84%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 94% 14%, #f0eaff, transparent),
+    radial-gradient(1.3px 1.3px at 34% 92%, #ffffff, transparent),
+    radial-gradient(1.5px 1.5px at 66% 6%, #e4dcff, transparent);
+  animation: titilar 3.6s ease-in-out infinite alternate;
+}
+
+/* Capa 2 · el polvo de estrellas, más chico y apagado */
+.cielo::after {
+  background-image:
+    radial-gradient(1px 1px at 19% 41%, rgba(255,255,255,0.85), transparent),
+    radial-gradient(1px 1px at 48% 27%, rgba(226,216,255,0.75), transparent),
+    radial-gradient(1px 1px at 61% 55%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 82% 47%, rgba(226,216,255,0.7), transparent),
+    radial-gradient(1px 1px at 9% 57%, rgba(255,255,255,0.75), transparent),
+    radial-gradient(1px 1px at 37% 74%, rgba(240,234,255,0.7), transparent),
+    radial-gradient(1px 1px at 91% 88%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 54% 95%, rgba(226,216,255,0.7), transparent),
+    radial-gradient(1px 1px at 76% 22%, rgba(255,255,255,0.75), transparent),
+    radial-gradient(1px 1px at 24% 8%, rgba(240,234,255,0.7), transparent);
+  animation: titilar 5.2s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes titilar {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+
+/* ----------------------------------------------------------
+   LAS ESTRELLAS FUGACES
+   ----------------------------------------------------------
+   Una rayita con la cola difuminada que cruza en diagonal.
+   Pasa poco y nada (la animación dura mucho pero el trazo
+   ocupa una fracción chica), para que sea un detalle y no una
+   distracción.
+   ---------------------------------------------------------- */
+.fugaz {
+  position: absolute;
+  width: 120px;
+  height: 2px;
+  border-radius: 2px;
+  opacity: 0;
+
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.85) 60%,
+    #ffffff 100%);
+
+  animation: fugaz 9s linear infinite;
+}
+
+.fugaz:nth-child(1) { top: 14%; left: -140px; animation-delay: 1s;  }
+.fugaz:nth-child(2) { top: 46%; left: -140px; animation-delay: 5.5s; animation-duration: 11s; }
+.fugaz:nth-child(3) { top: 72%; left: -140px; animation-delay: 8s;  animation-duration: 13s; }
+
+@keyframes fugaz {
+  0%   { transform: translate(0, 0) rotate(14deg);            opacity: 0; }
+  4%   { opacity: 1; }
+  16%  { transform: translate(115vw, 28vh) rotate(14deg);     opacity: 0; }
+  100% { transform: translate(115vw, 28vh) rotate(14deg);     opacity: 0; }
+}
+
+/* Quien prefiere menos movimiento ve el cielo quieto */
+@media (prefers-reduced-motion: reduce) {
+  .cielo::before,
+  .cielo::after { animation: none; opacity: 0.85; }
+  .fugaz { display: none; }
+}

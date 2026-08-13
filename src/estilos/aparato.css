@@ -1,0 +1,2854 @@
+/* ==========================================================
+   HABITOTCHI · el aparato y la pantalla
+   ==========================================================
+   Todo lo que no son los colores base ni el cielo de fondo:
+   la carcasa, la pantallita LCD y lo que se dibuja adentro.
+
+   Sigue siendo un archivo grande. Se va a ir partiendo en
+   pedazos a medida que se porte cada pantalla a React, que es
+   cuando se sabe con certeza qué regla pertenece a cuál. Hacerlo
+   antes es adivinar, y el aspecto de la app depende de estos
+   estilos estando bien calibrados.
+   ========================================================== */
+
+
+/* El aparato mide siempre lo mismo, en los dos estados: lo
+   único que cambia es cómo se reparte el espacio adentro. */
+
+/* ==========================================================
+   EL APARATO (la carcasa con forma de huevo)
+   ========================================================== */
+.device {
+  position: relative;
+  z-index: 1;
+
+  /* ----------------------------------------------------------
+     EL TAMAÑO NO CAMBIA: CAMBIA LA ESCALA
+     ----------------------------------------------------------
+     El ancho y el alto los pone el componente en píxeles fijos
+     (520x880) y lo achica entero con transform: scale().
+
+     Antes acá decía min(ancho, 100%) y min(alto, 100%), o sea
+     que el ancho y el alto se achicaban por separado: en una
+     ventana baja y ancha el aparato quedaba achatado y
+     redondito. Escalándolo, las proporciones no se tocan.
+
+     flex: 0 0 auto evita que el flex del body lo encoja; el
+     margin: auto lo centra aunque su caja sin escalar sea más
+     grande que la ventana.
+     ---------------------------------------------------------- */
+  /* Centrado con posición absoluta y no con el flex del body:
+     la caja de layout sigue midiendo 520x880 aunque se vea más
+     chica, así que en una ventana baja desbordaba y el centrado
+     del flex la empujaba fuera de vista. Con left/top al 50% y
+     el translate del transform, queda centrada siempre. */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+
+  width:  min(var(--ancho-aparato), 100%);
+  height: min(var(--alto-aparato), 100%);
+
+  /* El alto lo fija el componente y la escala lo ajusta, así
+     que acá no hace falta ningún tope. */
+
+  display: flex;
+  flex-direction: column;
+
+  /* El padding lateral es el aire de plástico que rodea a la
+     pantalla. Es generoso a propósito: cuanto más redondas son
+     las esquinas, más se mete la curva hacia adentro, y lo que
+     quede cerca del borde se saldría del contorno. */
+  /* Más aire arriba y abajo: con la carcasa más redonda, la
+     curva se mete bastante hacia adentro en las puntas y la
+     pantalla verde tiene que replegarse para no tocarla. */
+  padding: 104px 60px 52px;
+  text-align: center;
+
+  /* ----------------------------------------------------------
+     LA FORMA
+     ----------------------------------------------------------
+     Rectángulo de lados rectos con las esquinas muy
+     redondeadas, como en la referencia. Va en píxeles y no en
+     porcentaje para que las cuatro esquinas sean arcos de
+     círculo parejos: con porcentajes se deforman en óvalos y
+     la cúpula termina comiéndose las esquinas de la pantalla.
+
+     El radio llega casi a la mitad del ancho: así los cantos
+     de arriba y de abajo son cúpulas y el aparato se lee como
+     un huevo, no como una tarjeta con las puntas limadas.
+     ---------------------------------------------------------- */
+  /* Bien redonda, como una cápsula: el canto de arriba y el de
+     abajo son casi semicírculos. 235 es la mitad del ancho de
+     diseño menos un poco, que es lo que le da la silueta de
+     huevo en vez de tarjeta con las puntas limadas. */
+  border-radius: 260px;
+
+  /* El violeta oscuro del interior. Queda debajo de todas las
+     capas y es lo que se ve en las zonas donde el plástico es
+     más grueso y opaco. */
+  background: var(--lila-interior);
+
+  /* Nada de lo de adentro puede pasarse del contorno de la
+     carcasa: el plástico es el límite. Sin esto, un bisel o un
+     brillo que crezca se sale por la curva de las esquinas. */
+  overflow: hidden;
+
+  /* Sombras: profundidad afuera */
+  box-shadow:
+    0 26px 54px rgba(40, 24, 74, 0.42),
+    0 5px 14px rgba(40, 24, 74, 0.3);
+}
+
+/* ==========================================================
+   LA CARCASA, EN TRES CAPAS
+   ==========================================================
+   Un tamagotchi de plástico transparente son básicamente tres
+   cosas superpuestas, y así están armadas acá:
+
+     ::before  la placa de circuito impreso, bien al fondo
+     ::after   el plástico violeta translúcido y sus brillos
+     hijos     el contenido (marca, pantalla, botones)
+
+   Separarlas en capas permite que el violeta sea semitrans-
+   parente y deje ver el verde de la placa por debajo, que es
+   justamente el efecto buscado. Si estuviera todo en un solo
+   background no se podría, porque el tinte taparía el resto.
+
+   Está todo hecho con degradados: ni una sola imagen. Pesa
+   cero, se ve nítido en cualquier pantalla y se puede retocar
+   cambiando un número.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   CAPA 1 · LA PLACA DE CIRCUITO IMPRESO
+   ----------------------------------------------------------
+   Verde oscuro de máscara de soldadura, con pistas de cobre y
+   algunos componentes. Cada "chip" es una capa con su propio
+   background-size y background-position, que es la forma de
+   dibujar un rectángulo suelto con degradados.
+   ---------------------------------------------------------- */
+.device::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+
+  background-image:
+    /* pads de soldadura dorados, en los huecos que dejan los
+       marcadores y la botonera */
+    radial-gradient(circle, rgba(240, 208, 138, 0.85) 0 3.5px, transparent 4.5px),
+    radial-gradient(circle, rgba(240, 208, 138, 0.85) 0 3.5px, transparent 4.5px),
+    radial-gradient(circle, rgba(240, 208, 138, 0.7) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle, rgba(240, 208, 138, 0.7) 0 2.5px, transparent 3.5px),
+
+    /* chips negros: con una pata plateada a cada lado, que es
+       lo que los hace leer como chip y no como mancha */
+    linear-gradient(90deg,
+      #7d8c84 0 3px, #0d1c16 3px calc(100% - 3px), #7d8c84 calc(100% - 3px)),
+    linear-gradient(90deg,
+      #7d8c84 0 2px, #0d1c16 2px calc(100% - 2px), #7d8c84 calc(100% - 2px)),
+    linear-gradient(90deg,
+      #7d8c84 0 2px, #0d1c16 2px calc(100% - 2px), #7d8c84 calc(100% - 2px)),
+
+    /* conector plateado, con sus dientes */
+    repeating-linear-gradient(90deg, #8a9a92 0 2px, #22332b 2px 5px),
+
+    /* pistas de cobre gruesas: las de alimentación, que son las
+       que de verdad se ven a través del plástico */
+    repeating-linear-gradient(90deg,
+      rgba(214, 172, 100, 0.42) 0 2px, transparent 2px 47px),
+    repeating-linear-gradient(0deg,
+      rgba(214, 172, 100, 0.34) 0 2px, transparent 2px 39px),
+
+    /* pistas finas: la trama de fondo */
+    repeating-linear-gradient(90deg,
+      rgba(206, 168, 104, 0.20) 0 1px, transparent 1px 13px),
+    repeating-linear-gradient(0deg,
+      rgba(206, 168, 104, 0.14) 0 1px, transparent 1px 17px),
+
+    /* capacitores dorados */
+    radial-gradient(circle, #d9b258 0 6px, #8a6a24 6px 8px, transparent 9px),
+    radial-gradient(circle, #d9b258 0 5px, #8a6a24 5px 7px, transparent 8px),
+
+    /* la placa */
+    linear-gradient(165deg, #1f4634 0%, #17392b 55%, #102a20 100%);
+
+  background-size:
+    auto, auto, auto, auto,          /* los pads */
+    64px 30px,                       /* chip grande */
+    38px 22px,                       /* chip mediano */
+    30px 18px,                       /* chip chico */
+    52px 13px,                       /* conector */
+    auto, auto,                      /* pistas gruesas */
+    auto, auto,                      /* pistas finas */
+    auto, auto,                      /* capacitores */
+    auto;                            /* placa */
+
+  /* Todo se concentra abajo, que es la franja de carcasa que
+     queda a la vista alrededor de la botonera. */
+  background-position:
+    12% 78%, 88% 76%, 27% 95%, 73% 95%,
+    13% 88%,
+    87% 89%,
+    50% 99%,
+    50% 70%,
+    0 0, 0 0,
+    0 0, 0 0,
+    24% 71%, 76% 71%,
+    0 0;
+
+  background-repeat:
+    no-repeat, no-repeat, no-repeat, no-repeat,
+    no-repeat, no-repeat, no-repeat, no-repeat,
+    repeat, repeat,
+    repeat, repeat,
+    no-repeat, no-repeat,
+    no-repeat;
+
+  /* El plástico es esmerilado, no cristal: lo que hay adentro
+     se ve, pero desenfocado. El desenfoque va acá y no en la
+     capa de encima porque solo tiene que afectar a la placa.
+
+     Además se oscurece un poco con el violeta del interior,
+     para que el verde no compita con la carcasa. */
+  filter: blur(1.1px) saturate(0.95) brightness(0.95);
+}
+
+/* La bruma violeta del interior, entre la placa y el plástico.
+   Es lo que hace que la placa se lea "hundida" y no pegada a
+   la superficie.
+
+   El degradado está centrado abajo, sobre la botonera, y ahí
+   es casi transparente: esa es la "ventana" por donde se ve el
+   circuito, igual que en la referencia. Hacia los bordes se
+   cierra y el violeta tapa todo. */
+.device .bruma-interior {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 68% 32% at 50% 84%,
+    rgba(91, 58, 140, 0.08) 0%,
+    rgba(91, 58, 140, 0.30) 46%,
+    rgba(91, 58, 140, 0.72) 78%,
+    rgba(91, 58, 140, 0.90) 100%);
+}
+
+/* ----------------------------------------------------------
+   CAPA 2 · EL PLÁSTICO VIOLETA Y SUS BRILLOS
+   ----------------------------------------------------------
+   Va encima de la placa, con transparencia, para que el verde
+   se siga viendo a través. El borde es más claro que el centro
+   porque en una carcasa real el canto acumula más material y
+   dispersa más luz.
+   ---------------------------------------------------------- */
+.device::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+
+  background:
+    /* 1 · el reflejo especular: la luz de estudio que entra
+       desde arriba y resbala por el plástico pulido */
+    linear-gradient(158deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.14) 14%,
+      transparent 32%,
+      transparent 74%,
+      rgba(255, 255, 255, 0.10) 100%),
+
+    /* 2 · el brillo lechoso de arriba, donde el material se
+       engrosa en la curva de la carcasa */
+    radial-gradient(ellipse 66% 20% at 50% 0%,
+      rgba(255, 255, 255, 0.30) 0%,
+      transparent 100%),
+
+    /* 2b · el reflejo de los cantos laterales: la luz de
+       estudio rebota en la curva y deja una franja clara a
+       cada lado. Es lo que delata que el plástico es grueso y
+       pulido, y no una lámina pintada. */
+    radial-gradient(ellipse 16% 34% at 3% 30%,
+      rgba(255, 255, 255, 0.34) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 30% at 97% 34%,
+      rgba(255, 255, 255, 0.24) 0%, transparent 100%),
+
+    /* 3 · el tinte del plástico.
+       Es un degradado RADIAL, no lineal, y esa es la clave del
+       efecto: en el centro es bastante transparente, así que
+       ahí se ve la placa por debajo; hacia el borde se vuelve
+       saturado y opaco, porque en una carcasa real el canto
+       acumula material y ahí se concentra el color.
+
+       Subir la opacidad del primer valor tapa más la placa;
+       bajarla deja ver más circuito. */
+    radial-gradient(ellipse 72% 46% at 50% 82%,
+      rgba(150, 88, 222, 0.22) 0%,
+      rgba(150, 88, 222, 0.58) 48%,
+      rgba(157, 96, 224, 0.84) 76%,
+      rgba(180, 127, 232, 0.96) 100%);
+
+  box-shadow:
+    /* el filo exterior, lo más brillante de todo */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.75),
+    inset 0 0 0 7px rgba(201, 166, 240, 0.85),
+    inset 0 0 0 12px rgba(157, 96, 224, 0.75),
+    /* el grosor del canto: el halo lechoso hacia adentro.
+       Corto a propósito: si crece mucho, lava el violeta y la
+       carcasa se pone blancuzca. */
+    inset 0 0 32px 6px rgba(201, 166, 240, 0.34),
+    /* refracción: luz arriba, sombra coloreada abajo */
+    inset 0 16px 38px rgba(255, 255, 255, 0.26),
+    inset 0 -18px 38px rgba(91, 58, 140, 0.55);
+}
+
+/* CAPA 3 · el contenido, por encima del plástico */
+.device > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================
+   EL ZOOM INMERSIVO
+   ==========================================================
+   Al entrar a cualquier pestaña que no sea Hogar, la PANTALLA
+   crece y el resto del chasis se repliega. El aparato en sí
+   no cambia de tamaño nunca: siempre mide lo mismo y queda
+   quieto en el mismo lugar.
+
+   Antes el aparato entero crecía, y eso hacía que toda la
+   estructura pegara un salto cada vez que se pasaba de
+   pestaña. Ahora lo único que se mueve es lo de adentro:
+   marcadores, barra de progreso y botones A/B/C se pliegan, y
+   la pantalla ocupa el lugar que dejan libre. Se siente como
+   acercarse, sin que nada se sacuda.
+
+   El efecto lo produce .screen con flex: 1, que toma
+   automáticamente todo el alto que el chasis deja de usar.
+   No hace falta calcular nada.
+   ========================================================== */
+
+/* La ruedita de Ajustes, fuera del aparato: apoyada sobre el
+   cielo, en la esquina de la ventana. Dentro de la carcasa no
+   entra, porque la cúpula del plástico se come las esquinas. */
+.ajustes-boton {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  font-size: 19px;
+  line-height: 1;
+  color: var(--blanco);
+  background: rgba(40, 30, 66, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.35),
+    0 2px 8px rgba(10, 6, 26, 0.5);
+}
+
+.ajustes-boton:hover {
+  background: rgba(60, 45, 96, 0.8);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.ajustes-boton:focus-visible {
+  outline: 2px solid var(--blanco);
+  outline-offset: 2px;
+}
+
+/* Nombre grabado en la carcasa */
+.brand {
+  flex: 0 0 auto;
+  font-family: var(--pixel);
+  font-size: 12.5px;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  text-shadow:
+    0 1px 3px rgba(30, 20, 55, 0.9),
+    0 0 10px rgba(255, 255, 255, 0.25);
+  margin-bottom: 10.4px;
+
+  transition: margin-bottom var(--dur-zoom), opacity var(--dur-zoom);
+}
+
+/* En modo inmersivo la marca se apaga un poco y se acerca a la
+   pantalla, pero NO cambia de tamaño: si cambiara, el alto de
+   la línea se movería y el aparato entero daría un saltito. */
+/* ==========================================================
+   LA PANTALLA LCD
+   ========================================================== */
+.screen {
+  position: relative;        /* para poder poner cosas encima */
+  overflow: hidden;
+
+  /* La pantalla se queda con todo el espacio que le sobra al
+     chasis. min-height: 0 es necesario para que un hijo con
+     scroll propio (.app-pages) pueda achicarse dentro de un
+     contenedor flex; sin eso, desborda en vez de scrollear. */
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  /* ----------------------------------------------------------
+     LAS TINTAS SE VUELVEN A CALCULAR ACÁ
+     ----------------------------------------------------------
+     Las mismas líneas que en :root, repetidas a propósito.
+
+     Una variable que usa var() adentro se resuelve en el
+     elemento donde está DECLARADA, y los hijos heredan el
+     resultado ya cocinado. O sea que si el fondo de pantalla
+     pisa --lcd-tinta-rgb acá, las de :root ni se enteran:
+     siguen con el verde original.
+
+     Repitiéndolas en .screen, que es justo donde el fondo
+     escribe la tinta nueva, se recalculan todas con el color
+     que corresponda. Las de :root quedan igual como respaldo
+     para lo que se dibuja fuera de la pantalla.
+     ---------------------------------------------------------- */
+  --lcd-tinta:       rgb(var(--lcd-tinta-rgb));
+  --lcd-panel-hueco: rgba(var(--lcd-tinta-rgb), 0.07);
+  --lcd-borde:       rgba(var(--lcd-tinta-rgb), 0.30);
+  --lcd-borde-fuerte:rgba(var(--lcd-tinta-rgb), 0.55);
+  /* La tinta de las ayudas y los textos secundarios. Estaba en
+     0.62 y con el fondo "Noche" quedaba en 2.2 de contraste,
+     ilegible. A 0.80 el peor caso da 4.6 y se sigue notando
+     más suave que el texto principal. */
+  --lcd-tinta-suave: rgba(var(--lcd-tinta-rgb), 0.80);
+
+  background: linear-gradient(180deg, var(--lcd-claro) 0%, var(--lcd) 100%);
+
+  border-radius: 31.2px;
+
+  /* ----------------------------------------------------------
+     EL BISEL VA HACIA ADENTRO, NO HACIA AFUERA
+     ----------------------------------------------------------
+     Antes el marco eran anillos de box-shadow, que se dibujan
+     FUERA de la caja y no ocupan lugar en el layout. Por eso
+     en modo inmersivo el bisel se montaba sobre la marca y se
+     escapaba por la curva de las esquinas de la carcasa.
+
+     Ahora es un borde de verdad: con box-sizing: border-box
+     queda DENTRO de la caja, así que la pantalla nunca ocupa
+     un pixel más de lo que dice su tamaño y el aire que la
+     separa del plástico es exactamente su margen.
+     ---------------------------------------------------------- */
+  border: 12.5px solid rgba(201, 166, 240, 0.88);
+
+  /* El bisel es plástico moldeado, no una banda plana: el canto
+     de arriba recibe la luz y el de abajo queda en sombra. Se
+     hace con el color del borde y no con box-shadow porque las
+     sombras internas se dibujan sobre el LCD, no sobre el
+     marco. */
+  border-top-color: rgba(226, 202, 249, 0.92);
+  border-bottom-color: rgba(160, 118, 212, 0.9);
+
+  box-shadow:
+    /* el filo oscuro pegado al vidrio, ya del lado de adentro */
+    inset 0 0 0 2px rgba(122, 79, 184, 0.9),
+    /* la sombra que hunde la pantalla en la carcasa */
+    inset 0 3px 12px rgba(var(--lcd-tinta-rgb), 0.35),
+    /* el filo brillante del canto del bisel */
+    0 0 0 2px rgba(255, 255, 255, 0.45),
+    0 2px 4px -1px rgba(70, 45, 120, 0.65),
+    0 6px 18px rgba(60, 38, 104, 0.4),
+    /* el resplandor del LCD encendido, que acompaña al color
+       del fondo de pantalla que tengas puesto */
+    0 0 26px 2px var(--lcd-brillo);
+  /* El aire entre el bisel y el plástico. Con la carcasa bien
+     redonda hace falta más, o el borde de la pantalla toca la
+     curva del plástico. */
+  margin: 0 16px;
+}
+
+/* El bisel queda igual en los dos estados. La pantalla gana
+   superficie solo por lo alto, con lo que libera el chasis. */
+
+
+/* Rejilla de puntitos encima de la pantalla (efecto LCD viejo) */
+.screen-grid {
+  position: absolute;
+  inset: 0;                  /* ocupa toda la pantalla */
+  pointer-events: none;      /* no bloquea los clics */
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(var(--lcd-tinta-rgb), 0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--lcd-tinta-rgb), 0.6) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* Barra superior de la pantalla */
+.screen-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;                 /* si no, un nombre largo se pega a la etapa */
+
+  font-family: var(--pixel);
+  font-size: 7px;
+  color: var(--lcd-tinta);
+  opacity: 0.75;
+}
+
+.screen-top > span { white-space: nowrap; }
+
+.screen-top-nombre {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* El escenario donde vive la mascota */
+.pet-stage {
+  flex: 1;                   /* se estira para ocupar el espacio libre */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* La mascota: JS la llena de pixeles.
+   La animación la hace flotar suavemente. */
+.pet {
+  display: grid;             /* una grilla de pixelitos */
+  gap: 0;
+  animation: flotar 2.4s ease-in-out infinite;
+}
+
+/* Cada pixelito individual.
+   El tamaño lo pone JavaScript, porque la mascota grande
+   usa 7px y los dibujitos del menú usan 3px. */
+.px {
+  width: 7px;
+  height: 7px;
+}
+
+/* Sombrita en el piso */
+.pet-shadow {
+  width: 46px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(var(--lcd-tinta-rgb), 0.22);
+  animation: sombra 2.4s ease-in-out infinite;
+}
+
+/* Mensajito abajo */
+.screen-msg {
+  font-family: var(--pixel);
+  font-size: 6.5px;
+  line-height: 1.7;
+  color: var(--lcd-tinta);
+  text-align: center;
+}
+
+/* ==========================================================
+   ANIMACIONES
+   ========================================================== */
+
+/* La mascota sube y baja */
+@keyframes flotar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* La sombra se achica cuando la mascota sube */
+@keyframes sombra {
+  0%, 100% { transform: scale(1);    opacity: 0.22; }
+  50%      { transform: scale(0.75); opacity: 0.12; }
+}
+
+/* Respeta a quien prefiere menos movimiento (accesibilidad) */
+@media (prefers-reduced-motion: reduce) {
+  .pet, .pet-shadow { animation: none; }
+}
+
+/* ==========================================================
+   LOS BOTONES
+   ========================================================== */
+/* A/B/C, en el centro de la botonera. El margen superior lo
+   pone .botonera, así que acá no hace falta. */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18.2px;
+}
+
+/* Los botones son pastillas rosas metidas en un pozo violeta
+   del propio plástico. El pozo son los dos primeros anillos
+   del box-shadow, que no ocupan lugar en el layout. */
+.btn {
+  width: 49.4px;
+  height: 49.4px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Rosa chicle plano y mate, sin degradado marcado: es goma
+     soft-touch, no plástico brillante. El contraste total con
+     la carcasa translúcida es a propósito. */
+  background: var(--rosa-boton);
+
+  box-shadow:
+    /* el anillo violeta translúcido que hace de bisel: tres
+       aros que van del plástico oscuro del pozo al filo
+       iluminado de afuera */
+    0 0 0 5px rgba(122, 76, 186, 0.55),
+    0 0 0 8px rgba(226, 202, 249, 0.42),
+    0 0 0 10px rgba(122, 76, 186, 0.28),
+    /* la sombra corta debajo */
+    0 5px 9px rgba(52, 32, 92, 0.45),
+    /* brillo suave de goma, apenas insinuado */
+    inset 0 3px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -4px 8px var(--rosa-sombra);
+
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+/* Al apretarlo, se hunde de verdad */
+.btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 0 5px rgba(122, 76, 186, 0.55),
+    0 0 0 8px rgba(226, 202, 249, 0.42),
+    0 0 0 10px rgba(122, 76, 186, 0.28),
+    0 1px 2px rgba(52, 32, 92, 0.45),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 5px var(--rosa-sombra);
+}
+
+/* Marco visible al navegar con teclado (accesibilidad) */
+.btn:focus-visible {
+  outline: 3px solid var(--blanco);
+  outline-offset: 8px;
+}
+
+.btn-face {
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(160, 80, 120, 0.5);
+}
+
+/* Etiquetas debajo de los botones */
+.btn-labels {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 7px;
+}
+
+.btn-labels span {
+  width: 57.2px;
+  font-size: 10.9px;
+  font-weight: 600;
+  color: var(--blanco);
+  text-shadow: 0 1px 3px rgba(30, 20, 55, 0.85);
+}
+
+/* Nota temporal de la fase */
+.phase-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lila-oscuro);
+  opacity: 0.8;
+}
+
+/* ==========================================================
+   PANELES (las tarjetas blancas de abajo)
+   ========================================================== */
+/* Los paneles ya no son tarjetas blancas flotando: ahora son
+   zonas dibujadas DENTRO de la pantalla, con la misma tinta
+   verde oscura que todo lo demás. */
+.panel {
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto;
+  padding: 12px 13px 14px;
+
+  background: var(--lcd-panel);
+  border: 2px solid var(--lcd-borde);
+  border-radius: 12px;
+  color: var(--lcd-tinta);
+}
+
+.panel-title {
+  font-family: var(--pixel);
+  font-size: 9px;
+  line-height: 1.6;
+  color: var(--lcd-tinta);
+  margin-bottom: 11px;
+  text-align: center;
+}
+
+.panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+  margin: 4px 0 6px;
+}
+
+/* Texto de ayuda: mismo verde, más apagado */
+.ayuda-chica {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--lcd-tinta-suave);
+  text-align: center;
+}
+
+.ayuda-chica b { color: var(--lcd-tinta); }
+
+/* ==========================================================
+   EL MENÚ DE MASCOTAS
+   ========================================================== */
+.pet-picker {
+  display: flex;
+  flex-wrap: wrap;          /* en pantalla angosta pasan a dos filas */
+  justify-content: center;
+  gap: 8px;
+}
+
+.pet-option {
+  /* Tres por fila. Con la pantalla más angosta que trajo la
+     carcasa redonda, seis en una sola fila cortaban los
+     nombres. */
+  flex: 1 1 28%;
+  min-width: 0;
+  padding: 9px 4px 7px;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  background: var(--lcd-claro);
+  border: 3px solid var(--lila-oscuro);
+  border-radius: 12px;
+
+  transition: transform 0.1s, background 0.1s;
+}
+
+.pet-option:hover { transform: translateY(-2px); }
+
+/* La elegida se resalta. El velo es de la propia tinta, para
+   que el nombre siga leyéndose con cualquier fondo. */
+.pet-option.is-selected {
+  background: rgba(var(--lcd-tinta-rgb), 0.22);
+  box-shadow: inset 0 0 0 2px var(--lcd-borde-fuerte);
+}
+
+.pet-option:focus-visible {
+  outline: 3px solid var(--lila-oscuro);
+  outline-offset: 2px;
+}
+
+/* El dibujito chiquito del menú */
+.pet-mini {
+  display: grid;
+  gap: 0;
+}
+
+.pet-name {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--lila-sombra);
+}
+
+/* ==========================================================
+   LA LISTA DE HÁBITOS
+   ========================================================== */
+.habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.habit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.habit-info {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.habit-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+}
+
+.habit-value {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--lcd-tinta-suave);
+}
+
+/* La pista y el relleno de la barra de progreso */
+.habit-bar-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--lcd-panel-hueco);
+  box-shadow: inset 0 2px 4px rgba(var(--lcd-tinta-rgb), 0.25);
+}
+
+/* Nota: la barra del chasis (.progreso-etapa) tiene su propio
+   estilo más abajo, junto a los marcadores, porque va sobre el
+   plástico violeta y no sobre la pantalla. */
+
+.habit-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 8px;
+  transition: width 0.25s ease;
+}
+
+.habit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Botones de acción dentro de la pantalla: tinta llena, con
+   el verde del LCD como color de letra. Invertidos así se leen
+   claramente sobre el fondo verde. */
+.habit-btn {
+  padding: 5px 11px;
+  cursor: pointer;
+
+  font-family: var(--texto);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lcd-contratinta);
+
+  background: var(--lcd-tinta);
+  border: 2px solid var(--lcd-tinta);
+  border-radius: 20px;
+
+  transition: transform 0.08s, opacity 0.1s;
+}
+
+.habit-btn:hover   { opacity: 0.82; }
+.habit-btn:active  { transform: translateY(2px); }
+
+.habit-btn:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+/* El lápiz para editar la meta */
+.habit-edit {
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+
+  font-size: 11px;
+  color: var(--lcd-tinta);
+
+  background: transparent;
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 50%;
+
+  transition: background 0.1s;
+}
+
+.habit-edit:hover { background: var(--lcd-panel); }
+
+.habit-edit:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   LA TIRA DE HISTORIAL (últimos 7 días)
+   ========================================================== */
+.history-strip {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.day-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: default;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--pixel);
+  font-size: 8px;
+
+  border: 2px solid var(--lila-medio);
+}
+
+/* Buen día: relleno lleno de tinta, con la letra del color
+   del fondo. Es el más marcado de los tres. */
+.day-dot--bueno {
+  background: var(--lcd-tinta);
+  color: var(--lcd-contratinta);
+  border-color: var(--lcd-tinta);
+}
+
+/* Mal día: un velo rosa, translúcido a propósito. Si fuera un
+   rosa opaco, con los fondos de tinta clara quedaría la letra
+   clara sobre un pastel claro y no se leería. Translúcido, el
+   fondo de la pantalla sigue mandando y la letra siempre
+   contrasta. */
+.day-dot--malo {
+  background: rgba(246, 168, 205, 0.28);
+  color: var(--lcd-tinta);
+  border-color: rgba(246, 168, 205, 0.75);
+}
+
+/* Todavía no abierto: vacío */
+.day-dot--vacio {
+  background: transparent;
+  color: var(--lila-medio);
+  border-style: dashed;
+}
+
+/* El día de hoy se distingue con un anillo extra */
+.day-dot--hoy {
+  box-shadow: 0 0 0 3px rgba(111, 90, 168, 0.3);
+}
+
+/* ==========================================================
+   LA TUMBA (cuando la mascota falleció)
+   ========================================================== */
+/* Dibujada con la tinta de la pantalla, no con lilas fijos:
+   así el "R.I.P." se lee con cualquier fondo puesto. */
+.pet-tumba {
+  width: 60px;
+  height: 54px;
+  background: rgba(var(--lcd-tinta-rgb), 0.16);
+  border: 3px solid var(--lcd-borde-fuerte);
+  border-radius: 30px 30px 6px 6px;
+  position: relative;
+}
+
+.pet-tumba::after {
+  content: "R.I.P.";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 6px;
+  color: var(--lcd-tinta);
+}
+
+
+/* ==========================================================
+   LA DESPEDIDA
+   ==========================================================
+   La secuencia de cuando se muere: la mascota se cae de
+   costado, sube un fantasmita y brota la tumba. Los tiempos
+   los maneja app.js; acá está solo el movimiento.
+   ========================================================== */
+
+/* 1 · se cae. Sobreescribe la animación de flotar, que es la
+   que tiene la mascota mientras está viva. */
+.pet--cayendo {
+  animation: caerse 1.1s ease-in forwards;
+}
+
+@keyframes caerse {
+  0%   { transform: translateY(0) rotate(0deg);      opacity: 1; }
+  40%  { transform: translateY(2px) rotate(-14deg);  opacity: 1; }
+  100% { transform: translateY(12px) rotate(-88deg); opacity: 0; }
+}
+
+/* 2 · el fantasmita sube y se va apagando */
+.pet-fantasma {
+  display: grid;
+  gap: 0;
+  animation: irse 2.2s ease-out forwards;
+}
+
+@keyframes irse {
+  0%   { transform: translateY(6px) scale(0.85); opacity: 0; }
+  18%  { transform: translateY(0) scale(1);      opacity: 0.95; }
+  100% { transform: translateY(-52px) scale(1);  opacity: 0; }
+}
+
+/* 3 · la tumba aparece desde abajo, como si la plantaran */
+.pet-tumba--brotando {
+  animation: brotar 0.55s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+@keyframes brotar {
+  0%   { transform: translateY(16px) scaleY(0.4); opacity: 0; }
+  100% { transform: translateY(0) scaleY(1);      opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet--cayendo,
+  .pet-fantasma,
+  .pet-tumba--brotando { animation: none; }
+}
+
+
+/* ==========================================================
+   PÁGINAS DESLIZABLES
+   ========================================================== */
+/* ==========================================================
+   LAS PESTAÑAS, ADENTRO DE LA PANTALLA
+   ==========================================================
+   Todas las páginas viven en fila dentro del LCD, y se pasa de
+   una a otra con las flechas ‹ › del aparato.
+
+   ---------- NO SE DESLIZA CON EL DEDO, A PROPÓSITO ----------
+   overflow-x: hidden (en vez de auto) le saca al usuario la
+   posibilidad de arrastrar de costado, pero NO impide mover el
+   scroll por código: las flechas siguen funcionando igual,
+   porque usan scrollTo.
+
+   Es a propósito: es un tamagotchi, se maneja con los botones
+   del aparato. Además, sin esto el deslizado se peleaba con el
+   scroll vertical de cada página y con el arrastre de Pong.
+   ========================================================== */
+.app-pages {
+  position: relative;
+  z-index: 1;               /* por encima de la rejilla de puntitos */
+
+  display: flex;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  /* La ventanita: lo que se sale de acá no se ve, y no se
+     puede arrastrar con el dedo. Se cambia de pestaña con las
+     flechas del chasis, como en un aparato de verdad. */
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------
+   EL CARRIL
+   ----------------------------------------------------------
+   Mide lo mismo que la ventanita aunque le cuelguen nueve
+   páginas al costado (cada una es flex: 0 0 100% del carril).
+   Gracias a eso, correrlo un -100% es correr exactamente una
+   pestaña, sin que el CSS tenga que saber cuántas hay.
+   ---------------------------------------------------------- */
+.app-track {
+  display: flex;
+  flex: 0 0 100%;
+  min-width: 100%;
+  height: 100%;
+  transition: transform 320ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-track { transition: none; }
+}
+
+/* ==========================================================
+   LA PALETA, TRADUCIDA AL LCD
+   ==========================================================
+   Todo lo que está adentro de la pantalla tiene que dibujarse
+   con tinta verde oscura, no con los lilas de la carcasa.
+
+   En vez de reescribir cada componente uno por uno, acá
+   redefinimos las variables de color para este subárbol: como
+   las variables CSS se heredan, cualquier regla que use
+   --lila-* adentro de las pestañas recibe automáticamente el
+   equivalente en verde. El chasis queda afuera de este
+   contenedor, así que conserva los lilas de verdad.
+
+   Nota: estas redefiniciones van en .app-pages y no en
+   .screen a propósito. Si estuvieran en .screen afectarían
+   también al fondo de la propia pantalla, que se dibuja con
+   --lcd-claro.
+   ========================================================== */
+.app-pages {
+  --lila-claro:  rgba(var(--lcd-tinta-rgb), 0.16);
+  --lila:        rgba(var(--lcd-tinta-rgb), 0.26);
+  --lila-medio:  rgba(var(--lcd-tinta-rgb), 0.44);
+  --lila-oscuro: rgba(var(--lcd-tinta-rgb), 0.70);
+  --lila-sombra: rgb(var(--lcd-tinta-rgb));
+  --blanco:      rgba(255, 255, 255, 0.42);
+  --rosa:        rgba(var(--lcd-tinta-rgb), 0.50);
+  --lcd-claro:   rgba(255, 255, 255, 0.26);
+}
+
+.page {
+  flex: 0 0 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lcd-borde) transparent;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px 26px;
+  color: var(--lcd-tinta);
+}
+
+.page::-webkit-scrollbar { width: 5px; }
+.page::-webkit-scrollbar-thumb {
+  background: var(--lcd-borde);
+  border-radius: 3px;
+}
+
+/* Hogar es distinta: la mascota va centrada y con aire, no
+   apilada arriba como el resto del contenido. */
+.page--hogar { justify-content: flex-start; }
+
+.page-heading {
+  font-family: var(--pixel);
+  font-size: 13px;
+  color: var(--lcd-tinta);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+/* ==========================================================
+   LA BOTONERA DEL CHASIS
+   ==========================================================
+   Una sola fila: flecha, A/B/C, flecha. Las flechas son la
+   navegación y se ven siempre; A/B/C son acciones de Hogar
+   (cementerio, hoy, semana) y se desvanecen al entrar a las
+   otras pestañas.
+   ========================================================== */
+.botonera {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  /* Las flechas son lo que más se acerca al canto de abajo, y
+     ahí la cúpula ya se metió bastante hacia adentro: por eso
+     el margen lateral es mayor que el del resto del chasis.
+     Descuenta además los anillos de box-shadow del pozo, que
+     no ocupan espacio de layout propio. */
+  /* Con la carcasa bien redonda, abajo la curva se mete mucho
+     hacia adentro: si las flechas quedan cerca del canto, se
+     salen del contorno del plástico. */
+  margin: 15.6px 24px 0;
+}
+
+.page-arrow {
+  flex: 0 0 auto;
+  width: 41.6px;
+  height: 41.6px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20.8px;
+  line-height: 1;
+  color: var(--blanco);
+  border: none;
+
+  /* Mismo plástico que la carcasa, un tono más claro */
+  background: radial-gradient(circle at 35% 28%,
+    rgba(226, 212, 248, 0.95) 0%,
+    rgba(176, 150, 220, 0.9) 50%,
+    rgba(130, 104, 184, 0.92) 100%);
+
+  box-shadow:
+    0 0 0 4px rgba(108, 84, 164, 0.8),
+    0 0 0 6px rgba(255, 255, 255, 0.24),
+    0 4px 8px rgba(46, 34, 78, 0.45),
+    inset 0 2px 5px rgba(255, 255, 255, 0.75),
+    inset 0 -3px 6px rgba(70, 52, 112, 0.4);
+
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.page-arrow:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 0 4px rgba(108, 84, 164, 0.8),
+    0 0 0 6px rgba(255, 255, 255, 0.24),
+    0 1px 3px rgba(46, 34, 78, 0.45),
+    inset 0 2px 4px rgba(255, 255, 255, 0.55);
+}
+
+.page-arrow:focus-visible {
+  outline: 3px solid var(--blanco);
+  outline-offset: 3px;
+}
+
+.page-dots {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+
+  transition: opacity 0.35s;
+}
+
+.page-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  background: var(--blanco);
+  border: none;
+  opacity: 0.35;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.page-dot.is-active {
+  opacity: 1;
+  background: var(--rosa);
+  transform: scale(1.3);
+}
+
+/* ==========================================================
+   EL CHASIS SE REPLIEGA EN MODO INMERSIVO
+   ==========================================================
+   Marcadores, barra de progreso, A/B/C y sus etiquetas se
+   colapsan a altura cero para dejarle todo el lugar a la
+   pantalla. Los puntitos y las flechas se quedan: son la
+   única forma de saber dónde estás y de moverte.
+   ========================================================== */
+.marcadores,
+.progreso-etapa,
+.btn-labels {
+  flex: 0 0 auto;
+  overflow: hidden;
+  transition:
+    max-height var(--dur-zoom) cubic-bezier(0.33, 0, 0.2, 1),
+    opacity 0.18s,
+    margin var(--dur-zoom);
+  max-height: 200px;
+}
+
+
+/* ==========================================================
+   FORMULARIOS CHIQUITOS (perfil, peso, ciclo, ejercicio...)
+   ========================================================== */
+.campo-fila {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.campo-fila label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+  text-align: left;
+}
+
+.input-rosa {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+
+  font-family: var(--texto);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--lcd-tinta);
+
+  background: rgba(255, 255, 255, 0.42);
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 10px;
+}
+
+/* ==========================================================
+   LOS DESPLEGABLES
+   ==========================================================
+   Mismo aspecto que los campos de texto. Sin esto se ven con
+   el estilo del sistema operativo, que en la pantallita del
+   tamagotchi desentona muchísimo.
+
+   appearance: none saca la flecha del navegador; la dibujamos
+   nosotras con un degradado, para que siga la tinta del fondo
+   de pantalla que tengas puesto.
+   ========================================================== */
+.select-rosa {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 26px 7px 9px;
+  cursor: pointer;
+
+  font-family: var(--texto);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--lcd-tinta);
+
+  background-color: rgba(255, 255, 255, 0.42);
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 10px;
+
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* La flechita: dos líneas en ángulo, hechas con degradados */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--lcd-tinta) 50%),
+    linear-gradient(135deg, var(--lcd-tinta) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.select-rosa:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   EL DESPLEGABLE
+   ==========================================================
+   La caja cerrada se sigue viendo igual que antes (reusa
+   .select-rosa), pero ahora es un botón y la lista la
+   dibujamos nosotras: ver Desplegable.tsx para el porqué.
+   ========================================================== */
+.desplegable {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Un botón trae cosas que un select no: centra el texto y lo
+   deja desbordar. Se lo sacamos para que no se note el
+   cambio. */
+.desplegable-boton {
+  width: 100%;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.desplegable-lista {
+  position: absolute;
+  z-index: 30;             /* por encima de los paneles vecinos */
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* que no arrastre la página de atrás */
+
+  /* Papel sólido, no translúcido: la lista tapa lo que hay
+     debajo. --lcd-contratinta es el color que cada fondo de
+     pantalla trae justo para eso. */
+  background: var(--lcd-contratinta);
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--lcd-borde) transparent;
+}
+
+/* Cuando abajo no entra (la pantalla mide menos de 400px de
+   alto), se abre para arriba. */
+.desplegable-lista.is-arriba {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.desplegable-lista::-webkit-scrollbar { width: 5px; }
+.desplegable-lista::-webkit-scrollbar-thumb {
+  background: var(--lcd-borde);
+  border-radius: 3px;
+}
+
+.desplegable-opcion {
+  padding: 7px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+
+  font-family: var(--texto);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--lcd-tinta);
+}
+
+/* La elegida se marca con un puntito, no solo con el
+   resaltado: al recorrer con las flechas el resaltado se
+   mueve, y si no quedaría sin saber cuál es la que está
+   puesta de verdad. */
+.desplegable-opcion.is-elegida::before {
+  content: "•";
+  margin-right: 5px;
+}
+
+/* Invertida, como la fila seleccionada de un LCD de verdad.
+   El par tinta/contratinta tiene el contraste verificado en
+   los cuatro fondos (tests/datos-fondos.test.ts). */
+.desplegable-opcion.is-resaltada {
+  background: var(--lcd-tinta);
+  color: var(--lcd-contratinta);
+}
+
+.desplegable-grupo {
+  padding: 6px 9px 2px;
+
+  font-family: var(--texto);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lcd-tinta-suave);
+}
+
+.input-rosa::placeholder { color: var(--lcd-tinta-suave); }
+
+.input-rosa:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 1px;
+}
+
+/* Los campos cortos (kcal, km, minutos) no tienen ancho fijo:
+   crecen si sobra lugar y se achican si falta, pero nunca por
+   debajo de lo que necesita el texto para no quedar cortado. */
+.input-chica {
+  flex: 1 1 68px;
+  min-width: 0;
+}
+
+.habit-btn--grande {
+  width: 100%;
+  padding: 9px;
+  border-radius: 14px;
+  font-size: 12px;
+}
+
+/* Acciones destructivas o de "restar": hueco en vez de lleno,
+   para que pesen menos que las acciones principales. */
+.habit-btn--restar {
+  background: transparent;
+  color: var(--lcd-tinta);
+  border-color: var(--lcd-borde-fuerte);
+}
+.habit-btn--restar:hover { background: var(--lcd-panel); opacity: 1; }
+
+
+/* ==========================================================
+   LISTAS SIMPLES (peso, ciclo, cementerio, hobbies...)
+   ========================================================== */
+.lista-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.fila-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+
+  font-size: 10.5px;
+  text-align: left;
+  color: var(--lcd-tinta);
+
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid var(--lcd-borde);
+  border-radius: 10px;
+}
+
+.fila-borrar {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  font-size: 11px;
+  line-height: 1;
+  color: var(--lcd-tinta);
+
+  background: transparent;
+  border: 1.5px solid var(--lcd-borde-fuerte);
+}
+.fila-borrar:hover { background: var(--lcd-panel-hueco); }
+
+
+/* ==========================================================
+   NOTA FLOTANTE (libro actual)
+   ========================================================== */
+/* Las notitas conservan la inclinación de papel pegado, pero
+   dibujadas con la tinta del LCD como todo lo demás. */
+.nota-flotante {
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto;
+  padding: 13px 14px;
+
+  background: rgba(255, 255, 255, 0.30);
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 4px 16px 16px 16px;
+  color: var(--lcd-tinta);
+  transform: rotate(-1.2deg);
+}
+
+.nota-flotante-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+  margin-bottom: 8px;
+}
+
+.nota-flotante .input-rosa { margin-bottom: 6px; }
+
+/* La notita del disco se inclina para el otro lado, para que
+   se distingan entre sí de un vistazo. */
+.nota-flotante--disco { transform: rotate(1deg); }
+
+
+/* ==========================================================
+   LAS TAPAS (libro y disco)
+   ========================================================== */
+.con-tapa {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.con-tapa-campos {
+  flex: 1;
+  min-width: 0;   /* deja que los inputs se achiquen en pantallas chicas */
+}
+
+.tapa {
+  flex: 0 0 auto;
+  width: 58px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.5);
+}
+
+/* El libro tiene forma de libro; el disco, cuadrado */
+.tapa--libro {
+  height: 86px;
+  border-radius: 3px 6px 6px 3px;
+  border: 2px solid var(--lcd-borde-fuerte);
+  box-shadow: 2px 3px 8px rgba(var(--lcd-tinta-rgb), 0.3);
+}
+
+.tapa--disco {
+  height: 58px;
+  border-radius: 6px;
+  border: 2px solid var(--lcd-borde-fuerte);
+  box-shadow: 2px 3px 8px rgba(var(--lcd-tinta-rgb), 0.3);
+}
+
+
+/* ==========================================================
+   CALENDARIO MENSUAL · formato Google Calendar
+   ==========================================================
+   Una grilla de 7 columnas por 6 filas. Siempre 6 filas, así
+   la altura no cambia al pasar de mes.
+   ========================================================== */
+
+/* La barra de arriba: ‹ agosto 2026 › */
+.mes-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mes-titulo {
+  flex: 1;
+  text-align: center;
+
+  font-family: var(--pixel);
+  font-size: 9px;
+  line-height: 1.5;
+  color: var(--lcd-tinta);
+  text-transform: capitalize;
+}
+
+.mes-flecha {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  color: var(--lcd-tinta);
+
+  background: rgba(255, 255, 255, 0.35);
+  border: 2px solid var(--lcd-borde-fuerte);
+}
+
+.mes-flecha:hover { background: rgba(255, 255, 255, 0.6); }
+
+.mes-flecha:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+.mes-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* Los encabezados L M X J V S D */
+.mes-encabezados {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 3px;
+}
+
+.mes-encabezado {
+  text-align: center;
+  font-family: var(--pixel);
+  font-size: 7px;
+  color: var(--lcd-tinta-suave);
+  padding: 3px 0;
+}
+
+/* La grilla de días */
+.mes-grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mes-dia {
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 34px;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+  background: rgba(255, 255, 255, 0.26);
+  border: 2px solid transparent;
+  border-radius: 8px;
+
+  transition: background 0.1s, transform 0.08s;
+}
+
+.mes-dia:hover { transform: translateY(-1px); }
+
+.mes-dia-numero {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+}
+
+/* Los días del mes anterior o siguiente, apagados */
+.mes-dia--otro { background: rgba(255, 255, 255, 0.08); }
+.mes-dia--otro .mes-dia-numero {
+  color: var(--lcd-tinta-suave);
+  opacity: 0.6;
+}
+
+/* Hoy: el círculo rosa, como en Google Calendar */
+.mes-dia--hoy .mes-dia-numero {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--rosa);
+  color: var(--blanco);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* El día que tocaste */
+.mes-dia--elegido {
+  border-color: var(--lcd-tinta);
+  background: rgba(var(--lcd-tinta-rgb), 0.20);
+}
+
+.mes-dia:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 1px;
+}
+
+/* Los puntitos que indican que ese día tiene cosas */
+.mes-dia-puntos {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+}
+
+.mes-punto {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--lcd-tinta);
+}
+
+/* Los de Google, huecos, para distinguirlos de los propios */
+.mes-punto--google {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--lcd-tinta);
+}
+
+
+/* ==========================================================
+   EL DETALLE DEL DÍA ELEGIDO
+   ========================================================== */
+.dia-detalle {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--lila-medio);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dia-detalle-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--lila-sombra);
+  text-transform: capitalize;
+}
+
+.dia-evento {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+
+  font-size: 11px;
+  color: var(--lila-sombra);
+
+  background: var(--lcd-claro);
+  border-left: 3px solid var(--lila-medio);
+  border-radius: 6px;
+}
+
+/* Los que vienen de Google, en azul. Velo translúcido, no
+   color plano, para que se lea con cualquier fondo. */
+.dia-evento--google {
+  border-left-color: #5aa9d6;
+  background: rgba(90, 169, 214, 0.20);
+}
+
+.dia-evento-hora {
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--lila-oscuro);
+  flex: 0 0 auto;
+}
+
+.dia-evento-texto {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* El panel del calendario necesita más ancho que el resto */
+.panel--ancho { max-width: 100%; }
+
+/* Pendientes, en Trabajo/Estudio: queda pegada arriba de la
+   página mientras el resto (calendario incluido) se desliza
+   por debajo, para que nunca quede escondida al final. */
+.panel--pendientes-fija {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-shadow: 0 6px 10px rgba(82, 64, 127, 0.12);
+}
+
+
+/* ==========================================================
+   GRÁFICOS (ejercicio, trabajo/estudio, peso)
+   ========================================================== */
+.grafico-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid var(--lcd-borde);
+  border-radius: 10px;
+  margin: 6px 0;
+}
+
+.grafico-leyenda {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--lcd-tinta);
+  margin-bottom: 4px;
+}
+
+.grafico-leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.grafico-punto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* Las dos series se distinguen por tono, no por color: es lo
+   que funciona sobre un fondo monocromo como el LCD. La
+   primera va con tinta llena, la segunda al 42%. */
+.grafico-punto--cardio,
+.grafico-punto--trabajo-a { background: rgb(var(--lcd-tinta-rgb)); }
+
+.grafico-punto--fuerza,
+.grafico-punto--trabajo-b { background: rgba(var(--lcd-tinta-rgb), 0.42); }
+
+
+/* ==========================================================
+   PENDIENTES (to-do)
+   ========================================================== */
+.todo-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  background: var(--lcd-claro);
+  border-radius: 10px;
+}
+
+.todo-fila input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--lila-oscuro);
+}
+
+.todo-texto { flex: 1; font-size: 11px; }
+
+.todo-texto--hecho {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+
+/* ==========================================================
+   EL CHEF (modal de fotos de comida)
+   ========================================================== */
+/* El botón del chef vive dentro de la pestaña de Alimentación.
+   Con position: sticky queda pegado abajo a la derecha mientras
+   se recorre esa pestaña, y desaparece solo al cambiar de
+   pestaña, sin necesidad de mostrarlo y esconderlo desde JS. */
+.chef-boton-flotante {
+  position: sticky;
+  bottom: 4px;
+  align-self: flex-end;
+  z-index: 6;
+  margin-top: auto;
+
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  background: rgba(var(--lcd-tinta-rgb), 0.88);
+  border: 3px solid var(--lcd-tinta);
+  box-shadow: 0 5px 12px rgba(var(--lcd-tinta-rgb), 0.4);
+}
+
+.chef-boton-flotante:active { transform: translateY(2px); }
+
+.chef-boton-flotante:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+/* La grilla de pixeles del chef, en sus dos tamaños */
+.chef-boton-dibujo,
+.chef-dibujo {
+  display: grid;
+  gap: 0;
+  line-height: 0;
+}
+
+.chef-boton-dibujo { transform: translateY(2px); }
+
+.chef-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  background: rgba(82, 64, 127, 0.45);
+}
+
+.chef-modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  max-height: 88dvh;
+  overflow-y: auto;
+
+  padding: 40px 18px 20px;
+
+  background: #fff6fb;
+  border: 3px solid var(--lila-oscuro);
+  border-radius: 20px;
+  box-shadow: 0 14px 30px rgba(82, 64, 127, 0.4);
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chef-cerrar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+
+  background: var(--blanco);
+  border: 2px solid var(--lila-medio);
+  color: var(--lila-oscuro);
+}
+
+/* El dibujito del chef, con la misma técnica pixel de las mascotas
+   pero armado directo en CSS (es un dibujo fijo, no cambia). */
+/* El dibujo grande del chef, centrado arriba del modal */
+.chef-dibujo {
+  justify-content: center;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 3px 5px rgba(82, 64, 127, 0.3));
+}
+
+.chef-ajustes {
+  font-size: 10px;
+  color: var(--lila-medio);
+}
+
+.chef-ajustes summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--lila-oscuro);
+  padding: 6px 0;
+}
+
+/* Los pasitos para sacar la clave gratis */
+.pasos-clave {
+  margin: 8px 0 10px 18px;
+  font-size: 10px;
+  color: var(--lila-sombra);
+  line-height: 1.7;
+}
+
+.pasos-clave a {
+  color: var(--lila-oscuro);
+  font-weight: 700;
+}
+
+.chef-vista-previa {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid var(--lila-medio);
+}
+
+.chef-estado {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--lila-oscuro);
+  text-align: center;
+  min-height: 12px;
+}
+
+.chef-mensajes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chef-mensaje {
+  font-size: 10.5px;
+  background: var(--lcd-claro);
+  padding: 6px 9px;
+  border-radius: 10px;
+}
+
+.chef-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chef-total {
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--lila-sombra);
+  margin: 4px 0;
+}
+
+
+/* ==========================================================
+   MARCADORES (puntos, racha, monedas)
+   ========================================================== */
+.marcadores {
+  display: flex;
+  justify-content: space-between;
+  gap: 7px;
+
+  margin: 14px 4px 0;
+}
+
+/* Cápsulas de plástico claro apoyadas sobre la placa */
+.marcador {
+  flex: 1;
+  padding: 7px 2px 6px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  /* Plástico translúcido, del mismo material que la carcasa:
+     dejan pasar apenas el circuito que tienen detrás. */
+  background: linear-gradient(180deg,
+    rgba(233, 219, 252, 0.78) 0%,
+    rgba(190, 160, 232, 0.62) 100%);
+  border-radius: 13px;
+
+  box-shadow:
+    0 2px 5px rgba(40, 28, 70, 0.32),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 5px rgba(110, 76, 168, 0.3);
+}
+
+.marcador-numero {
+  font-family: var(--pixel);
+  font-size: 13.5px;
+  color: #2e2444;
+}
+
+.marcador-etiqueta {
+  font-size: 9.9px;
+  font-weight: 700;
+  color: #4c4168;
+}
+
+.marcador--monedas .marcador-numero { color: #a8791a; }
+
+/* La barra hacia la próxima etapa */
+.progreso-etapa { margin: 12px 4px 0; }
+
+.progreso-etapa-texto {
+  font-size: 10.9px;
+  font-weight: 700;
+  color: var(--blanco);
+  text-shadow: 0 1px 3px rgba(30, 20, 55, 0.8);
+  margin-bottom: 6px;
+}
+
+/* La pista, hundida en la carcasa; el relleno, blanco */
+.progreso-etapa .habit-bar-track {
+  height: 13px;
+  border-radius: 10px;
+  background: rgba(40, 30, 66, 0.45);
+  box-shadow:
+    inset 0 2px 4px rgba(20, 12, 40, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+#progresoBarra {
+  background: linear-gradient(180deg, #ffffff 0%, #e2d8f2 100%);
+  box-shadow: inset 0 -2px 4px rgba(150, 130, 190, 0.35);
+}
+
+
+/* ==========================================================
+   LA TIENDA
+   ========================================================== */
+.monedas-grandes {
+  position: relative;
+  padding: 8px 18px;
+
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: #7a5f10;
+
+  background: linear-gradient(160deg, #ffe9a8 0%, #f5cf6a 100%);
+  border: 3px solid #b8912a;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(140, 110, 20, 0.3);
+}
+
+/* El cartelito que aparece al comprar */
+.monedas-grandes--aviso::after {
+  content: attr(data-aviso);
+  position: absolute;
+  top: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 5;
+
+  padding: 5px 10px;
+  font-family: var(--texto);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--blanco);
+
+  background: var(--lila-oscuro);
+  border-radius: 10px;
+
+  animation: avisoCompra 2.5s ease forwards;
+}
+
+@keyframes avisoCompra {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.tienda-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.tienda-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 5px;
+
+  background: var(--lcd-claro);
+  border: 2px solid var(--lila-medio);
+  border-radius: 12px;
+}
+
+/* Lo que ya tenés se ve distinto.
+
+   El resaltado es un velo de la propia tinta, no un verde
+   escrito a mano: así sigue funcionando con cualquier fondo de
+   pantalla. Con el verde fijo, al poner "Noche" el nombre
+   quedaba en letra clara sobre un cuadrado verde claro. */
+.tienda-item--tenes {
+  border-color: var(--lila-oscuro);
+  background: rgba(var(--lcd-tinta-rgb), 0.14);
+}
+
+.tienda-vista {
+  display: grid;
+  min-height: 34px;
+  align-content: center;
+  justify-content: center;
+}
+
+.tienda-fondo-muestra {
+  width: 40px;
+  height: 30px;
+  border-radius: 6px;
+  border: 2px solid var(--lila-oscuro);
+}
+
+.tienda-nombre {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--lila-sombra);
+  text-align: center;
+}
+
+.tienda-btn {
+  width: 100%;
+  padding: 4px 2px;
+  font-size: 10px;
+}
+
+.tienda-btn:disabled {
+  background: var(--lila-claro);
+  color: var(--lila-oscuro);
+  cursor: default;
+}
+
+/* El tilde de "ya la tenés": más grande y sin fondo, para que
+   se lea como una marca y no como un botón apagado. */
+.tienda-btn--tenes:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: var(--lcd-tinta);
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* La mascota bloqueada, en el selector */
+.pet-option.is-locked {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  position: relative;
+}
+
+.pet-option.is-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 10px;
+}
+
+
+/* ==========================================================
+   LOS LOGROS
+   ========================================================== */
+.logros-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.logro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+
+  background: rgba(157, 127, 208, 0.1);
+  border-radius: 10px;
+  opacity: 0.55;
+}
+
+.logro--conseguido {
+  background: var(--lcd-claro);
+  opacity: 1;
+}
+
+.logro-medalla {
+  font-size: 16px;
+  color: var(--lila-medio);
+}
+
+.logro--conseguido .logro-medalla { color: #e8c34a; }
+
+.logro-textos {
+  display: flex;
+  flex-direction: column;
+  font-size: 10.5px;
+  color: var(--lila-sombra);
+}
+
+.logro-descripcion {
+  font-size: 9px;
+  color: var(--lila-medio);
+}
+
+
+/* ==========================================================
+   LOS JUEGOS
+   ========================================================== */
+.juego-elegir {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.juego-opcion {
+  flex: 1;
+  padding: 7px 3px;
+  cursor: pointer;
+
+  font-family: var(--texto);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--lcd-tinta);
+
+  background: var(--lcd-panel);
+  border: 2px solid var(--lcd-borde-fuerte);
+  border-radius: 16px;
+}
+
+/* El juego elegido: pastilla de tinta llena con la letra del
+   color del fondo, igual que los botones de la pantalla. Antes
+   era tinta a medias con letra blanca translúcida y, en los
+   fondos de tinta clara, no se leía. */
+.juego-opcion.is-on {
+  background: var(--lcd-tinta);
+  color: var(--lcd-contratinta);
+  border-color: var(--lcd-tinta);
+}
+
+.juego-marcador {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lila-sombra);
+  margin-bottom: 8px;
+}
+
+#juegoCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+
+  /* El mismo color con el que juegos.js pinta el tablero, para
+     que no se vea un parche antes del primer dibujado */
+  background: var(--lcd-contratinta);
+  border: 3px solid var(--lila-oscuro);
+  border-radius: 10px;
+  box-shadow: inset 0 3px 10px rgba(var(--lcd-tinta-rgb), 0.35);
+
+  touch-action: none;   /* que arrastrar no scrollee la página */
+}
+
+.juego-mensaje {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lila-oscuro);
+  margin: 8px 0;
+  min-height: 14px;
+}
+
+/* La crucecita de flechas para la viborita */
+.juego-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  grid-template-rows: repeat(2, 34px);
+  justify-content: center;
+  gap: 4px;
+  margin: 10px 0;
+}
+
+.dpad-btn {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--lila-sombra);
+
+  background: linear-gradient(160deg, #ffd9ee 0%, var(--rosa) 100%);
+  border: 2px solid var(--lila-oscuro);
+  border-radius: 8px;
+}
+
+.dpad-btn:active { transform: translateY(2px); }
+
+.dpad-arriba     { grid-column: 2; grid-row: 1; }
+.dpad-izquierda  { grid-column: 1; grid-row: 2; }
+.dpad-abajo      { grid-column: 2; grid-row: 2; }
+.dpad-derecha    { grid-column: 3; grid-row: 2; }
+
+
+/* ==========================================================
+   CALIFICACIÓN CON ESTRELLAS (libros y discos)
+   ========================================================== */
+.estrellas {
+  display: flex;
+  gap: 2px;
+  margin: 4px 0 8px;
+}
+
+.estrella {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--lila-claro);
+}
+
+.estrella--llena { color: #e8b64a; }
+
+.control-volumen {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--lila-oscuro);
+}
+
+.estrella:focus-visible {
+  outline: 2px solid var(--lila-oscuro);
+  outline-offset: 2px;
+}
+
+
+/* ==========================================================
+   LISTAS COLAPSABLES ("ver todo")
+   ==========================================================
+   Los registros que pueden crecer mucho (libros terminados,
+   discos escuchados, notas de otros hobbies) muestran solo
+   las últimas entradas y un botón para ver el resto, en vez
+   de una lista que crece sin límite en la pantalla.
+   ========================================================== */
+.lista-ver-todo {
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+
+/* ==========================================================
+   ÁNIMO DIARIO
+   ========================================================== */
+.animo-botones {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.animo-btn {
+  flex: 1;
+  padding: 7px 2px;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+
+  background: var(--blanco);
+  border: 2px solid var(--lila-medio);
+  border-radius: 12px;
+
+  transition: transform 0.1s, background 0.1s;
+}
+
+.animo-btn:hover {
+  transform: translateY(-2px);
+  background: #f8f2ff;
+}
+
+.animo-btn:active { transform: translateY(0); }
+
+.animo-btn:focus-visible {
+  outline: 3px solid var(--lila-oscuro);
+  outline-offset: 2px;
+}
+
+.animo-carita {
+  display: grid;
+  width: 26px;
+  height: 17px;
+  gap: 1px;
+}
+
+.px-animo { border-radius: 1px; }
+
+/* La misma carita, más chica, para las filas del registro */
+.animo-carita--mini {
+  width: 18px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+/* En una fila con carita, el texto se queda con el resto */
+.fila-texto { flex: 1; }
+
+.animo-nombre {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--lila-sombra);
+  text-align: center;
+}
+
+
+/* ==========================================================
+   MEDICACIONES
+   ========================================================== */
+
+/* Una toma que se pasó de hora y no marcaste. Velo rosa
+   translúcido, por lo mismo que los puntitos de los días. */
+.todo-fila--atrasada {
+  background: rgba(246, 168, 205, 0.26);
+  box-shadow: inset 3px 0 0 var(--rosa);
+}
+
+
+/* ==========================================================
+   AJUSTES
+   ========================================================== */
+.ajuste-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 4px;
+  cursor: pointer;
+
+  font-size: 11px;
+  color: var(--lila-sombra);
+}
+
+.ajuste-fila input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--lila-oscuro);
+}
+
+.ajuste-fila span { flex: 1; }
+
+
+/* ==========================================================
+   LOS MODALES CONSERVAN LA PALETA CLARA
+   ==========================================================
+   El chef y Ajustes se abren por encima de todo, fuera de la
+   pantalla del aparato. Ahí tiene sentido volver al fondo
+   claro: son formularios largos, con mucho texto, y se leen
+   bastante mejor así que sobre el verde.
+
+   Como los componentes base (.panel, .input-rosa, .habit-btn)
+   están definidos para vivir dentro del LCD, acá les
+   devolvemos los colores originales.
+   ========================================================== */
+.chef-modal .panel {
+  background: rgba(253, 249, 255, 0.9);
+  border-color: var(--lila-medio);
+  color: var(--lila-sombra);
+}
+
+.chef-modal .panel-title  { color: var(--lila-sombra); }
+.chef-modal .panel-label  { color: var(--lila-oscuro); }
+.chef-modal .ayuda-chica  { color: var(--lila-medio); text-align: left; }
+.chef-modal .ayuda-chica b { color: var(--lila-sombra); }
+
+.chef-modal .campo-fila label { color: var(--lila-oscuro); }
+
+.chef-modal .input-rosa {
+  background: var(--blanco);
+  border-color: var(--lila-medio);
+  color: var(--lila-sombra);
+}
+.chef-modal .input-rosa::placeholder { color: var(--lila-medio); }
+
+.chef-modal .habit-btn {
+  background: var(--lila-medio);
+  border-color: var(--lila-oscuro);
+  color: var(--blanco);
+}
+.chef-modal .habit-btn:hover { background: var(--lila-oscuro); opacity: 1; }
+
+.chef-modal .habit-btn--restar {
+  background: var(--rosa);
+  border-color: #d97fa8;
+  color: var(--lila-sombra);
+}
+.chef-modal .habit-btn--restar:hover { background: #ef8fbd; }
+
+.chef-modal .fila-simple {
+  background: var(--lcd-claro);
+  border-color: transparent;
+  color: var(--lila-sombra);
+}
+
+.chef-modal .fila-borrar {
+  color: var(--lila-oscuro);
+  border-color: var(--lila-medio);
+}
+
+
+/* ==========================================================
+   PANTALLAS CHIQUITAS
+   ==========================================================
+   En el celular el aparato ocupa todo el ancho disponible y
+   se achican los espacios entre botones. El alto lo maneja
+   solo, porque .device usa la altura de la ventana.
+   ========================================================== */
+@media (max-width: 420px) {
+  .buttons     { gap: 12px; }
+  .btn-labels  { gap: 12px; }
+  .btn         { width: 36px; height: 36px; }
+  .btn-labels span { width: 44px; font-size: 8px; }
+  .page        { padding: 8px 8px 22px; }
+  .panel       { padding: 10px 10px 12px; }
+}
+
+/* ==========================================================
+   PANTALLAS BAJAS
+   ==========================================================
+   En un celular apaisado, o en una notebook de poca altura, el
+   chasis (marcadores, barra de progreso, botonera y etiquetas)
+   se come casi todo el alto y a la pantalla no le queda nada.
+   Acá se comprime todo eso para devolverle lugar.
+   ========================================================== */
+@media (max-height: 760px) {
+  .brand          { font-size: 9px; margin-bottom: 6px; }
+  .marcadores     { margin-top: 14px; }
+  .marcador       { padding: 4px 2px 3px; }
+  .marcador-numero   { font-size: 10px; }
+  .marcador-etiqueta { font-size: 8px; }
+  .progreso-etapa       { margin-top: 8px; }
+  .progreso-etapa-texto { font-size: 9px; margin-bottom: 4px; }
+  .progreso-etapa .habit-bar-track { height: 10px; }
+  .botonera       { margin-top: 10px; }
+  .btn            { width: 34px; height: 34px; }
+  .page-arrow     { width: 32px; height: 32px; font-size: 17px; }
+  .btn-labels     { margin-top: 4px; }
+  .btn-labels span { font-size: 8px; }
+  .page-dots      { margin-top: 6px; }
+}
+
+/* ==========================================================
+   LOS MARCADORES, AHORA ADENTRO DE LA PANTALLA
+   ==========================================================
+   Antes vivían sobre el plástico violeta del chasis, así que
+   eran cápsulas claras con brillo. Ahora están sobre el LCD:
+   tienen que dibujarse con la tinta de la pantalla, igual que
+   todo lo demás de adentro, o no se leen con los fondos
+   oscuros.
+
+   Van pegados arriba de las pestañas y no se deslizan con
+   ellas: se ven siempre, en las nueve.
+   ========================================================== */
+.page .marcadores {
+  flex: 0 0 auto;
+  margin: 0 0 6px;
+  gap: 6px;
+}
+
+.page .marcadores .marcador {
+  padding: 8px 4px 6px;
+  background: var(--lcd-panel);
+  border: 2px solid var(--lcd-borde);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.page .marcadores .marcador-numero {
+  font-size: 15px;
+  color: var(--lcd-tinta);
+}
+
+.page .marcadores .marcador-etiqueta {
+  font-size: 10px;
+  color: var(--lcd-tinta-suave);
+}
+
+/* La moneda sigue siendo dorada, pero un dorado que se lea
+   sobre cualquier fondo. */
+.page .marcadores .marcador--monedas .marcador-numero {
+  color: #b8860b;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+.page .progreso-etapa {
+  flex: 0 0 auto;
+  margin: 0 0 8px;
+}
+
+.page .progreso-etapa .progreso-etapa-texto {
+  font-size: 11px;
+  color: var(--lcd-tinta-suave);
+  text-shadow: none;
+  margin-bottom: 4px;
+}
+
+/* Los botones A/B/C se ven en todas las pestañas, así que ya
+   no hace falta el espacio que dejaba la barra de etapa fuera
+   de la pantalla. */
+
+
+/* ==========================================================
+   BOTÓN Y ETIQUETA, JUNTOS
+   ==========================================================
+   Antes las etiquetas iban en una fila aparte, con su propia
+   separación. Como los botones usan otra, "cementerio" y
+   "semana" quedaban corridos respecto de su botón. Ahora cada
+   etiqueta cuelga del suyo y no hay forma de que se
+   desalineen.
+   ========================================================== */
+.btn-columna {
+  /* Ancho igual para las tres. La etiqueta va posicionada
+     encima y NO cuenta para el ancho: "cementerio" es más
+     larga que el botón y, si contara, corría todo y B quedaba
+     pegada a C. */
+  position: relative;
+  width: 64px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-pie {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  font-size: 10.9px;
+  font-weight: 600;
+  color: var(--blanco);
+  text-shadow: 0 1px 3px rgba(30, 20, 55, 0.85);
+  white-space: nowrap;
+}
+
+/* Aire de más arriba, porque el pozo de box-shadow de los
+   botones no ocupa layout; y abajo, para dejarle lugar a las
+   etiquetas, que están posicionadas fuera del flujo. */
+.botonera { margin-top: 34px; padding-bottom: 22px; }
+
+/* ==========================================================
+   TAPAS DE LIBROS Y DISCOS
+   ==========================================================
+   Chiquita y al costado, no ocupando media pantalla. La tapa
+   es un dato de apoyo: lo que importa es el título.
+   ========================================================== */
+.tapa-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.tapa-chica {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid var(--lcd-borde-fuerte);
+}
+
+/* ==========================================================
+   LA NAVEGACIÓN DEL MES
+   ==========================================================
+   El nombre del mes tocaba las flechas de los costados. Con
+   flex y espacio a los lados, cada cosa queda en su lugar sin
+   importar si el mes se llama "mayo" o "septiembre".
+   ========================================================== */
+.mes-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.mes-nav .habit-btn {
+  flex: 0 0 auto;
+  min-width: 34px;
+}
+
+.mes-nav .mes-titulo {
+  flex: 1;
+  text-align: center;
+  padding: 0 6px;
+}
+
+/* ==========================================================
+   LOS GRÁFICOS
+   ========================================================== */
+.grafico { margin-top: 8px; }
+
+.grafico-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 8px 0 4px;
+}
+
+.grafico-leyenda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--lcd-tinta-suave);
+}
+
+.grafico-punto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.grafico-punto--a { background: var(--lcd-tinta); }
+.grafico-punto--b { background: rgba(var(--lcd-tinta-rgb), 0.42); }
+
+/* Las flechas quedan pegadas a cada canto y los A/B/C ocupan
+   todo el medio, centrados. Sin esto el reparto del espacio
+   sobrante caía distinto de cada lado y las flechas no
+   quedaban simétricas. */
+.botonera .buttons {
+  flex: 1;
+  justify-content: center;
+}
+
+.botonera .page-arrow { flex: 0 0 auto; }
+
+/* ==========================================================
+   EL D-PAD, USABLE CON EL DEDO
+   ==========================================================
+   34px era cómodo con el mouse pero chico para un pulgar. Las
+   guías de accesibilidad piden 44px como mínimo para un
+   objetivo táctil, así que van 48.
+   ========================================================== */
+.juego-dpad {
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 6px;
+  margin: 14px 0 6px;
+}
+
+.dpad-btn { font-size: 16px; }
