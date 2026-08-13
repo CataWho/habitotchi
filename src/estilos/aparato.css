@@ -1742,6 +1742,19 @@
   box-shadow: inset 0 0 0 1.5px var(--lcd-tinta);
 }
 
+/* ----------------------------------------------------------
+   LOS EVENTOS TRAÍDOS DE GOOGLE, EN LA LISTA DEL DÍA
+   ----------------------------------------------------------
+   Se distinguen de tus notas con el borde punteado y sin
+   crucecita: son de afuera y desde acá no se tocan. El
+   punteado hace el trabajo aunque no distingas colores.
+   ---------------------------------------------------------- */
+.fila-simple--google {
+  background: rgba(255, 255, 255, 0.14);
+  border-style: dashed;
+  border-color: var(--lcd-borde-fuerte);
+}
+
 
 /* ==========================================================
    EL DETALLE DEL DÍA ELEGIDO

@@ -324,11 +324,6 @@ function Pasos() {
 
   return (
     <Panel titulo="Pasos">
-      <Ayuda>
-        Una app web no puede leer los pasos que cuenta tu teléfono, así que se anotan a
-        mano.
-      </Ayuda>
-
       <div className="campo-fila">
         <input
           className="input-rosa"
