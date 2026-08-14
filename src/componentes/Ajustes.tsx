@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PRONOMBRES, cargarPerfil, guardarPerfil } from "@/lib/perfil";
 import { fechaDeHoy } from "@/lib/fechas";
+import {
+  alCambiarSesion, bajarDatosDeLaNubeYRecargar, cerrarSesion, crearCuenta,
+  hayDatosLocales, hayNubeConfigurada, iniciarSesion,
+  iniciarSincronizacionEnSegundoPlano, sesionActual, subirDatosLocales,
+} from "@/lib/nube";
 import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
 /* ==========================================================
@@ -35,6 +40,7 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
 
         <SobreVos />
         <QueMostrar />
+        <CuentaEnLaNube />
         <TusDatos />
       </div>
     </div>
@@ -144,6 +150,189 @@ function SobreVos() {
 
       <Ayuda>
         El peso se usa para estimar las calorías del ejercicio. No se manda a ningún lado.
+      </Ayuda>
+    </Panel>
+  );
+}
+
+/* ----------------------------------------------------------
+   CUENTA EN LA NUBE
+   ----------------------------------------------------------
+   Opcional: ver los mismos datos desde varios dispositivos.
+   Sin esto, la app sigue andando exactamente igual que
+   siempre, 100% local — ver el comentario largo en
+   src/lib/nube.ts.
+
+   Va antes de "Tus datos" porque conceptualmente es un
+   escalón más: primero tus datos locales de siempre, después
+   —si querés— que además vivan en una cuenta.
+   ---------------------------------------------------------- */
+function CuentaEnLaNube() {
+  const [sesion, setSesion] = useState<{ id: string; email: string } | null>(null);
+  const [cargandoSesion, setCargandoSesion] = useState(true);
+
+  const [modo, setModo] = useState<"entrar" | "crear">("entrar");
+  const [email, setEmail] = useState("");
+  const [contraseña, setContraseña] = useState("");
+  const [trabajando, setTrabajando] = useState(false);
+  const [aviso, setAviso] = useState("");
+
+  useEffect(() => {
+    sesionActual().then((s) => {
+      setSesion(s);
+      setCargandoSesion(false);
+      /* Si ya había sesión de una visita anterior, hay que
+         volver a enganchar el empuje de cambios: la
+         suscripción no sobrevive a un refresh de página. */
+      if (s) iniciarSincronizacionEnSegundoPlano();
+    });
+
+    return alCambiarSesion(() => {
+      sesionActual().then(setSesion);
+    });
+  }, []);
+
+  if (!hayNubeConfigurada() || cargandoSesion) return null;
+
+  const entrar = async () => {
+    setTrabajando(true);
+    setAviso("");
+
+    try {
+      await iniciarSesion(email, contraseña);
+
+      if (!hayDatosLocales()) {
+        await bajarDatosDeLaNubeYRecargar();
+        return;
+      }
+
+      /* Caso de riesgo: este aparato ya tenía sus propios
+         datos, de antes de tener cuenta. No se mezclan solos
+         —mezclar dos historiales de hábitos y calendarios es
+         un problema mucho más grande— así que se avisa y se
+         pide confirmar antes de reemplazarlos. */
+      const confirma = window.confirm(
+        "Este dispositivo ya tiene datos guardados. Si continuás, se van a reemplazar por " +
+          "los de tu cuenta. ¿Continuar?"
+      );
+
+      if (confirma) {
+        await bajarDatosDeLaNubeYRecargar();
+      } else {
+        /* Si no confirma, mejor cerrar la sesión ya mismo: si
+           quedara "adentro" sin bajar los datos de la cuenta,
+           cada cosa que anote en este aparato se subiría
+           igual y terminaría pisando, de a poco, los datos
+           reales de la cuenta. */
+        await cerrarSesion();
+        setTrabajando(false);
+      }
+    } catch (e: any) {
+      setAviso(e?.message ?? "No se pudo iniciar sesión.");
+      setTrabajando(false);
+    }
+  };
+
+  const crear = async () => {
+    setTrabajando(true);
+    setAviso("");
+
+    try {
+      await crearCuenta(email, contraseña);
+
+      if (hayDatosLocales()) {
+        const subir = window.confirm(
+          "¿Subir a tu cuenta nueva los datos que ya tenés guardados en este dispositivo?"
+        );
+        if (subir) await subirDatosLocales();
+      }
+
+      iniciarSincronizacionEnSegundoPlano();
+      setAviso("Cuenta creada. Ya podés usar Habitotchi desde otros dispositivos con este mail.");
+      setContraseña("");
+    } catch (e: any) {
+      setAviso(e?.message ?? "No se pudo crear la cuenta.");
+    } finally {
+      setTrabajando(false);
+    }
+  };
+
+  const salir = async () => {
+    setTrabajando(true);
+    await cerrarSesion();
+    setSesion(null);
+    setTrabajando(false);
+    setAviso("Sesión cerrada. Tus datos siguen en este dispositivo.");
+  };
+
+  if (sesion) {
+    return (
+      <Panel titulo="Tu cuenta">
+        <Ayuda>Conectada como {sesion.email}</Ayuda>
+
+        <div className="campo-fila">
+          <button type="button" className="habit-btn habit-btn--restar" onClick={salir} disabled={trabajando}>
+            Cerrar sesión
+          </button>
+        </div>
+
+        {aviso && <Ayuda>{aviso}</Ayuda>}
+      </Panel>
+    );
+  }
+
+  return (
+    <Panel titulo="Tu cuenta">
+      <div className="animo-botones">
+        <button
+          type="button"
+          className={modo === "entrar" ? "juego-opcion is-on" : "juego-opcion"}
+          onClick={() => setModo("entrar")}
+        >
+          Iniciar sesión
+        </button>
+        <button
+          type="button"
+          className={modo === "crear" ? "juego-opcion is-on" : "juego-opcion"}
+          onClick={() => setModo("crear")}
+        >
+          Crear cuenta
+        </button>
+      </div>
+
+      <div className="campo-fila">
+        <input
+          className="input-rosa"
+          type="email"
+          value={email}
+          placeholder="mail"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="campo-fila">
+        <input
+          className="input-rosa"
+          type="password"
+          value={contraseña}
+          placeholder="contraseña"
+          onChange={(e) => setContraseña(e.target.value)}
+        />
+        <button
+          type="button"
+          className="habit-btn"
+          disabled={trabajando || !email || !contraseña}
+          onClick={modo === "entrar" ? entrar : crear}
+        >
+          {modo === "entrar" ? "Entrar" : "Crear"}
+        </button>
+      </div>
+
+      {aviso && <Ayuda>{aviso}</Ayuda>}
+
+      <Ayuda>
+        Opcional: con una cuenta, tus datos se sincronizan entre los dispositivos donde
+        inicies sesión. Sin cuenta, Habitotchi sigue funcionando exactamente igual que
+        siempre, solo en este dispositivo.
       </Ayuda>
     </Panel>
   );

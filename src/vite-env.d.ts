@@ -17,6 +17,14 @@ interface ImportMetaEnv {
      conectar el calendario. No es una contraseña: ver el
      comentario largo en lib/google-calendar.ts. */
   readonly VITE_GOOGLE_CLIENT_ID?: string;
+
+  /* La dirección del proyecto de Supabase y su clave pública
+     ("anon key"). Tampoco son secretas — lo que protege los
+     datos de cada persona es la Row Level Security de la base,
+     no esconder esta clave. Ver el comentario largo en
+     lib/nube.ts. */
+  readonly VITE_SUPABASE_URL?: string;
+  readonly VITE_SUPABASE_ANON_KEY?: string;
 }
 
 interface ImportMeta {
