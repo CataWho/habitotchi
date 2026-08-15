@@ -2865,3 +2865,135 @@
 }
 
 .dpad-btn { font-size: 16px; }
+
+
+/* ==========================================================
+   EL PORTÓN DE INGRESO
+   ==========================================================
+   La pantalla de entrar / registrarse. Vive adentro de la
+   misma pantallita verde que el resto de la app, así que
+   hereda las tintas del fondo de pantalla que esté puesto y
+   reusa .input-rosa y .habit-btn tal cual.
+   ========================================================== */
+.porton {
+  justify-content: center;
+}
+
+/* ----------------------------------------------------------
+   EL HUECO DE ABAJO
+   ----------------------------------------------------------
+   Reserva el lugar que en la app ocupan los botones A/B/C y
+   los puntitos. No es decorativo: la carcasa termina en una
+   curva de 260px de radio, y si la pantalla verde se estira
+   hasta abajo, sus esquinas quedan FUERA de esa curva y se
+   ve el verde cortado contra el borde violeta.
+
+   Con 90px la esquina de la pantalla queda a unos 219px del
+   centro del arco, bien adentro de los 260 del radio.
+   ---------------------------------------------------------- */
+.porton-pie {
+  flex: 0 0 auto;
+  height: 90px;
+}
+
+.porton-caja {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  padding: 0 6px;
+}
+
+.porton-titulo {
+  font-family: var(--pixel);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--lcd-tinta);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.35);
+  margin: 0 0 4px;
+}
+
+/* Los checkboxes ("mantener la sesión", "acepto la política"):
+   el texto al lado del cuadradito, alineados arriba para que
+   una etiqueta de dos renglones no descentre el cuadrado. */
+.porton-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--lcd-tinta);
+  cursor: pointer;
+}
+
+.porton-check input {
+  /* Sin esto el navegador lo achica junto con el texto y queda
+     un cuadradito minúsculo, imposible de tocar en el celu. */
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  cursor: pointer;
+}
+
+.porton-check a {
+  color: var(--lcd-tinta);
+  text-underline-offset: 2px;
+}
+
+.porton-error {
+  font-size: 10.5px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--lcd-tinta);
+  background: rgba(var(--lcd-tinta-rgb), 0.14);
+  border: 1px dashed var(--lcd-borde-fuerte);
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin: 0;
+}
+
+/* "Crear una cuenta", "Olvidé mi contraseña": botones que se
+   ven como links, para que no compitan con el botón principal. */
+.porton-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.porton-link {
+  background: none;
+  border: none;
+  padding: 2px;
+  font-family: var(--texto);
+  font-size: 10.5px;
+  color: var(--lcd-tinta-suave);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.porton-link:hover { color: var(--lcd-tinta); }
+
+.porton-link:focus-visible {
+  outline: 2px solid var(--lcd-tinta);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* El cartelito de "Un segundo…" mientras se lee la sesión
+   guardada. Dura un parpadeo, pero sin esto la pantalla queda
+   negra y parece que la app no cargó. */
+.cargando-sesion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--lila-claro);
+}

@@ -26,6 +26,7 @@
    primera versión a propósito.
    ========================================================== */
 
+import { useEffect, useState } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { CLAVES, leer, escribir, alCambiar, type Clave } from "./almacenamiento";
 
@@ -64,8 +65,88 @@ export const CLAVES_QUE_SINCRONIZAN: readonly Clave[] = [
 const URL = import.meta.env.VITE_SUPABASE_URL;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+/* ----------------------------------------------------------
+   "RECORDARME", DE VERDAD
+   ----------------------------------------------------------
+   Supabase guarda la sesión en localStorage y listo. Para que
+   se pueda destildar hace falta darle un storage propio que
+   decida a dónde escribir:
+
+     tildado    → localStorage,   sobrevive cerrar el navegador
+     destildado → sessionStorage, muere al cerrar la pestaña
+
+   Lo segundo es lo que espera alguien que entra desde una
+   compu prestada. La preferencia en sí va aparte, en su
+   propia clave de localStorage, porque hay que saberla ANTES
+   de leer la sesión.
+   ---------------------------------------------------------- */
+const CLAVE_RECORDARME = "habitotchi_recordarme";
+
+export function quiereQueLoRecuerden(): boolean {
+  try {
+    /* Tildado por default: es lo que espera la mayoría, y lo
+       que la app ya venía haciendo. */
+    return localStorage.getItem(CLAVE_RECORDARME) !== "no";
+  } catch {
+    return true;
+  }
+}
+
+export function guardarSiQuiereQueLoRecuerden(recordar: boolean): void {
+  try {
+    localStorage.setItem(CLAVE_RECORDARME, recordar ? "si" : "no");
+  } catch {
+    /* Almacenamiento bloqueado: se queda con el default. */
+  }
+}
+
+function dondeGuardarLaSesion(): Storage {
+  return quiereQueLoRecuerden() ? localStorage : sessionStorage;
+}
+
+const almacenDeSesion = {
+  getItem: (clave: string) => {
+    try {
+      /* Se busca en los dos: si alguien cambia la preferencia
+         entre visitas, la sesión que ya existía tiene que
+         seguir encontrándose igual. */
+      return localStorage.getItem(clave) ?? sessionStorage.getItem(clave);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (clave: string, valor: string) => {
+    try {
+      dondeGuardarLaSesion().setItem(clave, valor);
+    } catch {
+      /* ídem */
+    }
+  },
+  removeItem: (clave: string) => {
+    try {
+      /* De los dos lados, para que cerrar sesión no deje un
+         resto olvidado en el otro. */
+      localStorage.removeItem(clave);
+      sessionStorage.removeItem(clave);
+    } catch {
+      /* ídem */
+    }
+  },
+};
+
 const cliente: SupabaseClient | null =
-  URL && ANON_KEY ? createClient(URL, ANON_KEY) : null;
+  URL && ANON_KEY
+    ? createClient(URL, ANON_KEY, {
+        auth: {
+          storage: almacenDeSesion,
+          persistSession: true,
+          autoRefreshToken: true,
+          /* Para agarrar el token del link de "recuperar
+             contraseña" cuando la persona vuelve del mail. */
+          detectSessionInUrl: true,
+        },
+      })
+    : null;
 
 export function hayNubeConfigurada(): boolean {
   return cliente !== null;
@@ -77,9 +158,54 @@ export function hayNubeConfigurada(): boolean {
 export async function crearCuenta(email: string, contraseña: string) {
   if (!cliente) throw new Error("La cuenta en la nube no está disponible.");
 
-  const { data, error } = await cliente.auth.signUp({ email, password: contraseña });
+  const { data, error } = await cliente.auth.signUp({
+    email,
+    password: contraseña,
+    options: {
+      /* Cuándo aceptó los términos, guardado junto a la cuenta.
+         Va en los metadatos del usuario y no en una tabla
+         aparte: es un dato por cuenta, que se escribe una sola
+         vez y casi nunca se lee. */
+      data: { terminos_aceptados_en: new Date().toISOString() },
+    },
+  });
+
   if (error) throw new Error(traducirError(error.message));
-  return data.user;
+
+  /* Si el proyecto tiene activada la confirmación de mail,
+     signUp crea la cuenta pero NO devuelve sesión: la persona
+     queda afuera hasta que toque el link que le llega. Hay que
+     avisarle, porque si no la pantalla no hace nada y parece
+     que el botón está roto. */
+  return { usuario: data.user, necesitaConfirmarMail: data.session === null };
+}
+
+/* ----------------------------------------------------------
+   RECUPERAR LA CONTRASEÑA
+   ----------------------------------------------------------
+   Funciona aunque la confirmación de mail esté desactivada:
+   son dos mecanismos separados, con tokens distintos
+   (verificado en la documentación de Supabase).
+
+   A propósito no distingue si el mail existe o no — Supabase
+   contesta igual en los dos casos, para que nadie pueda usar
+   esto para averiguar quién tiene cuenta.
+   ---------------------------------------------------------- */
+export async function pedirRecuperarContraseña(email: string): Promise<void> {
+  if (!cliente) throw new Error("La cuenta en la nube no está disponible.");
+
+  const { error } = await cliente.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin,
+  });
+
+  if (error) throw new Error(traducirError(error.message));
+}
+
+export async function cambiarContraseña(nueva: string): Promise<void> {
+  if (!cliente) throw new Error("La cuenta en la nube no está disponible.");
+
+  const { error } = await cliente.auth.updateUser({ password: nueva });
+  if (error) throw new Error(traducirError(error.message));
 }
 
 export async function iniciarSesion(email: string, contraseña: string) {
@@ -109,11 +235,79 @@ export async function sesionActual(): Promise<{ id: string; email: string } | nu
 
 /* Para que el panel de Ajustes se entere sola cuando cambia
    el estado de sesión (por ejemplo, si el token vence). */
-export function alCambiarSesion(oyente: () => void): () => void {
+export function alCambiarSesion(oyente: (evento: string) => void): () => void {
   if (!cliente) return () => {};
 
-  const { data } = cliente.auth.onAuthStateChange(() => oyente());
+  const { data } = cliente.auth.onAuthStateChange((evento) => oyente(evento));
   return () => data.subscription.unsubscribe();
+}
+
+/* ==========================================================
+   EL ESTADO DE SESIÓN, PARA REACT
+   ==========================================================
+   Un hook para que App.tsx (que decide si mostrar el portón o
+   la app) y Ajustes (que muestra con qué mail estás) miren
+   exactamente el mismo estado, sin duplicar la lógica ni
+   poder desincronizarse entre sí.
+
+   `cargando` importa: mientras se lee la sesión guardada no se
+   sabe todavía si hay que mostrar el portón. Sin este estado,
+   la app parpadearía el portón por un instante en cada
+   arranque, aunque estuvieras logueada.
+   ========================================================== */
+
+export interface EstadoDeSesion {
+  cargando: boolean;
+  sesion: { id: string; email: string } | null;
+  /* Cuando la persona vuelve del link del mail para poner una
+     contraseña nueva. Supabase avisa con este evento. */
+  recuperandoContraseña: boolean;
+}
+
+export function usarSesion(): EstadoDeSesion {
+  const [estado, setEstado] = useState<EstadoDeSesion>({
+    cargando: true,
+    sesion: null,
+    recuperandoContraseña: false,
+  });
+
+  useEffect(() => {
+    let vivo = true;
+
+    /* getSession lee de storage y NO pide red: por eso alguien
+       que ya entró antes puede abrir la app sin internet. */
+    sesionActual().then((sesion) => {
+      if (!vivo) return;
+      setEstado((previo) => ({ ...previo, cargando: false, sesion }));
+      if (sesion) iniciarSincronizacionEnSegundoPlano();
+    });
+
+    return alCambiarSesion((evento) => {
+      if (evento === "PASSWORD_RECOVERY") {
+        setEstado((previo) => ({ ...previo, recuperandoContraseña: true }));
+        return;
+      }
+
+      sesionActual().then((sesion) => {
+        if (!vivo) return;
+        setEstado((previo) => ({ ...previo, cargando: false, sesion }));
+        if (sesion) iniciarSincronizacionEnSegundoPlano();
+      });
+    });
+  }, []);
+
+  return estado;
+}
+
+/* Para salir del modo "poné una contraseña nueva" una vez que
+   se guardó. */
+export function terminarRecuperacion(): void {
+  /* Se limpia el token del link del mail de la barra de
+     direcciones: si quedara ahí, recargar la página volvería
+     a meterte en el flujo de recuperación. */
+  if (window.location.hash) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
 }
 
 /* Los mensajes de Supabase vienen en inglés y con jerga

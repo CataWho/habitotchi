@@ -12,6 +12,8 @@ import { Salud } from "@/pantallas/Salud";
 import { Juegos } from "@/pantallas/Juegos";
 import { Tienda } from "@/pantallas/Tienda";
 import { Ajustes } from "@/componentes/Ajustes";
+import { PortonDeIngreso } from "@/componentes/PortonDeIngreso";
+import { hayNubeConfigurada, usarSesion } from "@/lib/nube";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { MASCOTAS } from "@/datos/mascotas";
 import { HABITOS_POR_DEFECTO } from "@/datos/habitos";
@@ -33,7 +35,50 @@ const PANTALLAS = [
   { nombre: "Tienda", Componente: Tienda },
 ];
 
+/* ==========================================================
+   QUIÉN ENTRA
+   ==========================================================
+   Sin sesión no hay app: todo lo que anotás vive en tu cuenta,
+   así que cambiar de celular o que el navegador limpie los
+   datos del sitio ya no se lleva puesto nada.
+
+   ---------- SE PUEDE ABRIR SIN INTERNET ----------
+   La sesión guardada se lee del propio dispositivo, sin pedirle
+   nada a la red. O sea que si ya entraste alguna vez, la app
+   abre igual sin conexión. Internet hace falta para
+   registrarse, para entrar por primera vez en un aparato, o
+   cuando vence el permiso guardado.
+   ========================================================== */
 export function App() {
+  const { cargando, sesion, recuperandoContraseña } = usarSesion();
+
+  /* Si no hay Supabase configurado (por ejemplo, desarrollo
+     local sin las variables de entorno) no se puede pedir
+     cuenta a nadie: la app abre igual, como antes. */
+  const sinNube = !hayNubeConfigurada();
+
+  if (cargando && !sinNube) {
+    return (
+      <>
+        <Cielo />
+        <p className="cargando-sesion">Un segundo…</p>
+      </>
+    );
+  }
+
+  if (!sesion && !sinNube) {
+    return (
+      <>
+        <Cielo />
+        <PortonDeIngreso recuperandoContraseña={recuperandoContraseña} />
+      </>
+    );
+  }
+
+  return <Habitotchi />;
+}
+
+function Habitotchi() {
   const [cementerioAbierto, setCementerioAbierto] = useState(false);
   const [ajustesAbiertos, setAjustesAbiertos] = useState(false);
   const [hoyAbierto, setHoyAbierto] = useState(false);
