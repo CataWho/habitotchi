@@ -236,6 +236,14 @@ function Formulario() {
         </label>
       )}
 
+      {/* Solo una vez que ya completó mail y contraseña: no
+         tiene sentido recordarle los términos antes de que
+         empiece a llenar el formulario. Mismo criterio que ya
+         usa el aviso de "al menos 6 caracteres" más abajo. */}
+      {modo === "crear" && !aceptaTerminos && email.length > 0 && contraseña.length > 0 && (
+        <p className="ayuda-chica">Tenés que aceptar la política de privacidad para crear la cuenta.</p>
+      )}
+
       <button type="button" className="habit-btn" disabled={trabajando || !listoParaEnviar} onClick={enviar}>
         {modo === "entrar" && "Entrar"}
         {modo === "crear" && "Crear cuenta"}
