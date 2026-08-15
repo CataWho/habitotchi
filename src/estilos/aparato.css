@@ -2880,6 +2880,63 @@
 }
 
 /* ----------------------------------------------------------
+   EL CAMPO DE CONTRASEÑA, CON SU OJITO
+   ----------------------------------------------------------
+   El botón va ENCIMA del campo, no al lado: si fuera una
+   columna más de la fila, le robaría ancho al campo y en la
+   pantallita del tamagotchi eso se nota mucho.
+   ---------------------------------------------------------- */
+.campo-contraseña {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.campo-contraseña .input-rosa {
+  width: 100%;
+  /* Lugar para que el texto no se meta abajo del ojito */
+  padding-right: 34px;
+}
+
+.campo-contraseña-ojo {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* 28px es chico para el mínimo de accesibilidad (44px), pero
+     el campo entero mide 32 de alto: agrandarlo lo desbordaría.
+     Se compensa con el área de toque extendida de abajo. */
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  line-height: 1;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* El área que responde al dedo es más grande que el dibujo:
+   se estira 8px para todos lados sin ocupar espacio visual. */
+.campo-contraseña-ojo::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.campo-contraseña-ojo:focus-visible {
+  outline: 2px solid var(--lcd-tinta);
+  outline-offset: 1px;
+}
+
+/* ----------------------------------------------------------
    EL HUECO DE ABAJO
    ----------------------------------------------------------
    Reserva el lugar que en la app ocupan los botones A/B/C y

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PRONOMBRES, cargarPerfil, guardarPerfil } from "@/lib/perfil";
 import { fechaDeHoy } from "@/lib/fechas";
 import { cambiarContraseña, cerrarSesion, hayNubeConfigurada, usarSesion } from "@/lib/nube";
+import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
 import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
 /* ==========================================================
@@ -201,12 +202,12 @@ function CuentaEnLaNube() {
       {cambiando ? (
         <>
           <div className="campo-fila">
-            <input
-              className="input-rosa"
-              type="password"
-              value={contraseña}
-              placeholder="contraseña nueva"
-              onChange={(e) => setContraseña(e.target.value)}
+            <CampoDeContraseña
+              valor={contraseña}
+              alCambiar={setContraseña}
+              marcador="contraseña nueva"
+              autoComplete="new-password"
+              alApretarEnter={() => contraseña.length >= 6 && guardarContraseña()}
             />
             <button
               type="button"

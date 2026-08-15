@@ -5,6 +5,7 @@ import {
   subirDatosLocales, terminarRecuperacion,
 } from "@/lib/nube";
 import { Aparato, Pantalla } from "@/componentes/aparato/Aparato";
+import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
 
 /* ==========================================================
    EL PORTÓN DE INGRESO
@@ -80,12 +81,12 @@ function ContraseñaNueva() {
     <div className="porton-caja">
       <h2 className="porton-titulo">Elegí una contraseña nueva</h2>
 
-      <input
-        className="input-rosa"
-        type="password"
-        value={contraseña}
-        placeholder="contraseña nueva"
-        onChange={(e) => setContraseña(e.target.value)}
+      <CampoDeContraseña
+        valor={contraseña}
+        alCambiar={setContraseña}
+        marcador="contraseña nueva"
+        autoComplete="new-password"
+        alApretarEnter={() => contraseña.length >= 6 && guardar()}
       />
 
       <button
@@ -200,14 +201,11 @@ function Formulario() {
       />
 
       {modo !== "recuperar" && (
-        <input
-          className="input-rosa"
-          type="password"
-          value={contraseña}
-          placeholder="contraseña"
+        <CampoDeContraseña
+          valor={contraseña}
+          alCambiar={setContraseña}
           autoComplete={modo === "crear" ? "new-password" : "current-password"}
-          onChange={(e) => setContraseña(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && listoParaEnviar && enviar()}
+          alApretarEnter={() => listoParaEnviar && enviar()}
         />
       )}
 
