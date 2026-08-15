@@ -20,6 +20,39 @@ import { useState } from "react";
    que llevar esa cuenta.
    ========================================================== */
 
+/* ----------------------------------------------------------
+   EL OJITO
+   ----------------------------------------------------------
+   Dibujado a mano y no con un emoji: los emoji vienen con su
+   color propio y en la pantallita verde quedan como una
+   calcomanía pegada. Este usa currentColor, así que toma la
+   tinta del fondo de pantalla que tengas puesto, igual que
+   todo lo demás.
+
+   Abierto = la contraseña se está viendo.
+   Tachado = está oculta.
+   ---------------------------------------------------------- */
+function Ojo({ abierto }: { abierto: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M1 8s2.6-4.6 7-4.6S15 8 15 8s-2.6 4.6-7 4.6S1 8 1 8z" />
+      <circle cx="8" cy="8" r="2" />
+
+      {!abierto && <path d="M3 13 L13 3" />}
+    </svg>
+  );
+}
+
 export function CampoDeContraseña({
   valor,
   alCambiar,
@@ -57,7 +90,7 @@ export function CampoDeContraseña({
         aria-label={seVe ? "Ocultar la contraseña" : "Mostrar la contraseña"}
         aria-pressed={seVe}
       >
-        {seVe ? "🙈" : "👁"}
+        <Ojo abierto={seVe} />
       </button>
     </div>
   );

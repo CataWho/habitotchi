@@ -2896,27 +2896,28 @@
 .campo-contraseña .input-rosa {
   width: 100%;
   /* Lugar para que el texto no se meta abajo del ojito */
-  padding-right: 34px;
+  padding-right: 38px;
 }
 
 .campo-contraseña-ojo {
   position: absolute;
-  right: 4px;
+  right: 3px;
   top: 50%;
   transform: translateY(-50%);
 
-  /* 28px es chico para el mínimo de accesibilidad (44px), pero
-     el campo entero mide 32 de alto: agrandarlo lo desbordaría.
+  /* Más chico que el mínimo de accesibilidad (44px) porque el
+     campo entero mide 32 de alto y agrandarlo lo desbordaría.
      Se compensa con el área de toque extendida de abajo. */
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 13px;
-  line-height: 1;
+  /* El SVG del ojito hereda esto con currentColor */
+  color: var(--lcd-tinta);
+
   background: none;
   border: none;
   border-radius: 6px;
