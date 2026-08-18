@@ -9,6 +9,7 @@ import {
   cargarMetas,
   cargarRegistro,
   cargarVida,
+  fijarHabito as fijarHabitoEnDisco,
   guardarEquipado,
   guardarVida,
   sumarHabito as sumarHabitoEnDisco,
@@ -53,6 +54,7 @@ interface EstadoHabitotchi {
   despidiendose: boolean;
 
   sumarHabito: (habitoId: IdHabito, cantidad: number, fecha?: Fecha) => void;
+  fijarHabito: (habitoId: IdHabito, valor: number, fecha?: Fecha) => void;
   cambiarMeta: (habitoId: IdHabito, valor: number) => void;
   elegirMascota: (id: IdMascota) => void;
   ponerleNombre: (nombre: string) => void;
@@ -76,6 +78,29 @@ export const useHabitotchi = create<EstadoHabitotchi>((set, get) => ({
 
   sumarHabito: (habitoId, cantidad, fecha = fechaDeHoy()) => {
     set({ registro: sumarHabitoEnDisco(get().registro, fecha, habitoId, cantidad) });
+  },
+
+  /* ----------------------------------------------------------
+     DEJAR UN HÁBITO EN UN VALOR EXACTO
+     ----------------------------------------------------------
+     Para las pantallas que calculan el total por su cuenta:
+     Alimentación cuenta las comidas cargadas, Ejercicio suma
+     los minutos de sus sesiones, Trabajo las horas. Se fija en
+     vez de sumar porque si borrás una, el número tiene que
+     bajar.
+
+     Tiene que pasar por el store, no llamar a fijarHabito por
+     afuera. Las tres pantallas hacían eso y después un
+     sumarHabito(x, 0) "para forzar el redibujado": como
+     fijarHabito no actualiza el store, ese sumar recalculaba a
+     partir del registro viejo y volvía a escribir el valor
+     anterior, pisando lo que se acababa de guardar. El
+     resultado era que cargar una comida, una sesión o una hora
+     de trabajo no movía la barra ni contaba para el
+     crecimiento de la mascota.
+     ---------------------------------------------------------- */
+  fijarHabito: (habitoId, valor, fecha = fechaDeHoy()) => {
+    set({ registro: fijarHabitoEnDisco(get().registro, fecha, habitoId, valor) });
   },
 
   cambiarMeta: (habitoId, valor) => {

@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · ejercicio.js
+   HABITOTCHI · ejercicio
    EJERCICIO DETALLADO
    ==========================================================
    Acá vive el detalle de tus sesiones: cardio (con tipo y,
@@ -30,7 +30,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    dure la actividad.
 
    Cada sesión que cargás acá también suma minutos al hábito
-   "ejercicio" de habitos.js, así tu barra de progreso general
+   "ejercicio" de datos/habitos.ts, así tu barra general
    y tu día bueno/malo lo tienen en cuenta.
    ========================================================== */
 
@@ -232,7 +232,7 @@ export function totalCaloriasDelDia(sesiones: any, fecha: string) {
 /* ----------------------------------------------------------
    RESUMEN POR PERÍODO (para el gráfico de la sección)
    ----------------------------------------------------------
-   Recibe los "baldes" de fechas que arma fechas.js
+   Recibe los "baldes" de fechas que arma lib/fechas.ts
    (bucketsGrafico) y devuelve, para cada uno, cuántos
    minutos de cardio y de fuerza hubo, y el total de calorías.
    Como las fechas están en formato "AAAA-MM-DD", compararlas

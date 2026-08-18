@@ -10,11 +10,11 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · salud.js
+   HABITOTCHI · salud
    ÁNIMO Y MEDICACIONES
    ==========================================================
    Dos cosas que van juntas en la pestaña de Salud personal,
-   con el peso y el ciclo (que viven en perfil.js).
+   con el peso y el ciclo (que viven en lib/perfil.ts).
 
    ---------- UNA REGLA IMPORTANTE ----------
    Nada de lo que hay acá suma ni resta puntos, ni cambia el
@@ -54,7 +54,7 @@ export const ANIMOS = [
 
 /* Una carita pixel art por cada ánimo, para los botones de
    selección: mismo estilo de grilla que usan las mascotas de
-   mascotas.js (una letra por pixel; "O" pinta, "." queda
+   datos/mascotas.ts (una letra por pixel; "O" pinta, "." queda
    transparente), en vez de usar emojis del sistema operativo,
    que se ven distinto en cada dispositivo. */
 export const ANIMO_PIXELES = {
@@ -263,7 +263,7 @@ export function tomasDelDia(medicaciones: any, tomas: any, fecha: string, horaAc
 
 
 /* La hora de ahora como texto "HH:MM", con la hora local
-   (mismo cuidado que tenemos con las fechas en fechas.js) */
+   (mismo cuidado que tenemos con las fechas en lib/fechas.ts) */
 export function horaDeAhora() {
   const ahora = new Date();
   return String(ahora.getHours()).padStart(2, "0") + ":" +

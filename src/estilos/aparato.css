@@ -867,6 +867,15 @@
   height: 26px;
   cursor: pointer;
 
+  /* Centrado de verdad, no a ojo: el ✎ es más ancho que alto y
+     sin esto el botón lo recortaba (necesitaba 32px de los 22
+     que le quedaban adentro del borde). */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+
   font-size: 11px;
   color: var(--lcd-tinta);
 
@@ -972,7 +981,7 @@
    ==========================================================
    La secuencia de cuando se muere: la mascota se cae de
    costado, sube un fantasmita y brota la tumba. Los tiempos
-   los maneja app.js; acá está solo el movimiento.
+   los maneja Despedida.tsx; acá está solo el movimiento.
    ========================================================== */
 
 /* 1 · se cae. Sobreescribe la animación de flotar, que es la
@@ -1212,7 +1221,11 @@
   flex: 0 0 auto;
   display: flex;
   justify-content: center;
-  gap: 7px;
+  /* 16 y no 7: el área que responde al dedo se estira hacia
+     los costados (ver .page-dot::after), y con el gap viejo
+     cada puntito invadía al vecino y le robaba el toque. El
+     dibujo sigue midiendo 8px; lo que crece es el aire. */
+  gap: 16px;
   margin-top: 10px;
 
   transition: opacity 0.35s;
@@ -2367,7 +2380,7 @@
   width: 100%;
   height: auto;
 
-  /* El mismo color con el que juegos.js pinta el tablero, para
+  /* El mismo color con el que juegos/motor.ts pinta el tablero, para
      que no se vea un parche antes del primer dibujado */
   background: var(--lcd-contratinta);
   border: 3px solid var(--lila-oscuro);
@@ -2877,6 +2890,78 @@
    ========================================================== */
 .porton {
   justify-content: center;
+}
+
+/* ==========================================================
+   ACCESIBILIDAD DE LOS CONTROLES CHICOS
+   ==========================================================
+   Dos problemas que van juntos, porque afectan a los mismos
+   cinco controles.
+
+   ---------- 1. EL DEDO NECESITA MÁS QUE EL OJO ----------
+   Todo el aparato se achica con transform: scale() para entrar
+   en la pantalla (ver useEscala.ts). En un celular de 390px de
+   ancho la escala ronda 0.69, así que un puntito de 8px del
+   CSS termina midiendo 5,5px reales — contra los 24px que pide
+   la WCAG 2.5.8 como mínimo.
+
+   Agrandar el dibujo rompería el diseño, así que se agranda
+   solo el ÁREA QUE RESPONDE, con un pseudo-elemento invisible
+   que se estira para afuera. No ocupa lugar en el layout, no
+   se ve, y el dedo lo encuentra.
+
+   ---------- 2. QUIEN NAVEGA CON TECLADO NECESITA VER ----------
+   El proyecto ya tiene :focus-visible en quince clases, así
+   que la decisión estaba tomada; a estos cinco simplemente se
+   los saltearon. Sin eso, tabular por la app deja el foco
+   invisible justo en la navegación entre pestañas y en el
+   cierre de todos los modales.
+   ========================================================== */
+
+.page-dot,
+.fila-borrar,
+.habit-edit,
+.chef-cerrar,
+.juego-opcion,
+.dpad-btn {
+  position: relative;
+}
+
+.fila-borrar::after,
+.habit-edit::after,
+.chef-cerrar::after {
+  content: "";
+  position: absolute;
+  /* Lo justo para llegar a ~24px reales después del escalado */
+  inset: -10px;
+}
+
+/* Los puntitos van en fila y pegados, así que su área NO puede
+   estirarse igual para todos lados: hacia arriba y abajo hay
+   lugar de sobra, pero a los costados está el vecino. Con 16px
+   de gap, 7 por lado es lo máximo que entra sin pisarlo —
+   estirarlo más hace que un puntito se robe el toque del de al
+   lado, que es peor que el problema que se venía a resolver. */
+.page-dot::after {
+  content: "";
+  position: absolute;
+  inset: -10px -7px;
+}
+
+.page-dot:focus-visible,
+.fila-borrar:focus-visible,
+.habit-edit:focus-visible,
+.chef-cerrar:focus-visible,
+.juego-opcion:focus-visible,
+.dpad-btn:focus-visible {
+  outline: 3px solid var(--lcd-tinta);
+  outline-offset: 2px;
+}
+
+/* Los puntitos viven fuera de la pantalla, sobre el plástico
+   violeta: ahí la tinta verde no se vería. */
+.page-dot:focus-visible {
+  outline-color: var(--blanco-puro, #fff);
 }
 
 /* ----------------------------------------------------------

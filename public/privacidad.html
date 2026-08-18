@@ -87,11 +87,13 @@
       <p class="fecha">Última actualización: agosto de 2026</p>
 
       <div class="resumen">
-        <strong>Resumen:</strong> Habitotchi no posee servidores propios ni bases de
-        datos centralizadas. La información que cada usuario registra se almacena
-        exclusivamente en el dispositivo desde el que se utiliza la aplicación. La
-        única integración con un tercero es la conexión opcional con Google
-        Calendar, activada únicamente por decisión expresa del usuario.
+        <strong>Resumen:</strong> Habitotchi requiere una cuenta con dirección de correo
+        y contraseña. La información que el usuario registra —incluidos datos de salud
+        como peso, ciclo menstrual, estado de ánimo y medicación— se guarda en su
+        dispositivo y se sincroniza con una base de datos alojada por Supabase Inc.
+        (Estados Unidos), para poder consultarla desde cualquier dispositivo. Existen
+        además integraciones opcionales y automáticas con otros terceros, detalladas
+        en la sección 5.
       </div>
 
       <h2><span class="numero">1.</span>Responsable del tratamiento</h2>
@@ -115,29 +117,45 @@
       </p>
 
       <h2><span class="numero">2.</span>Qué datos procesa la aplicación</h2>
-      <p>
-        Toda la información que el usuario ingresa en Habitotchi —registro de
-        hábitos, estado de la mascota virtual, notas de bienestar personal,
-        eventos de calendario propios, puntuación y moneda interna del juego— se
-        almacena <strong>exclusivamente en el almacenamiento local del navegador
-        utilizado</strong> (mecanismo <code>localStorage</code>), en el dispositivo
-        del usuario.
-      </p>
-      <p>
-        Habitotchi no cuenta con servidor propio, base de datos, ni sistema de
-        cuentas de usuario. En consecuencia:
-      </p>
+
+      <p><strong>Datos de la cuenta.</strong> Para utilizar Habitotchi es necesario
+        registrarse. Se recolecta la dirección de correo electrónico —que funciona como
+        identificador de la cuenta— y una contraseña, que se almacena cifrada mediante
+        una función de hash irreversible y no es accesible ni para quien desarrolla la
+        aplicación. Se registra también la fecha en que el usuario aceptó esta política.</p>
+
+      <p><strong>Datos de uso.</strong> Todo lo que el usuario registra en la aplicación:
+        seguimiento de hábitos, estado de la mascota virtual, alimentación, ejercicio,
+        lecturas y música, notas de calendario propias, puntuación y moneda interna del
+        juego.</p>
+
+      <p><strong>Datos de salud.</strong> La aplicación permite registrar
+        <strong>peso corporal, ciclo menstrual, estado de ánimo diario y medicación con
+        sus tomas</strong>. Constituyen datos sensibles en los términos del art. 2 de la
+        Ley N.º 25.326. Su registro es enteramente voluntario —la aplicación funciona sin
+        completar ninguno de esos campos, y el panel de ciclo menstrual puede desactivarse
+        por completo desde Ajustes— pero, si se registran, se sincronizan igual que el
+        resto de los datos.</p>
+
+      <p><strong>Dónde se guardan.</strong> Esta información se almacena en el dispositivo
+        del usuario (mecanismo <code>localStorage</code>) y se sincroniza automáticamente
+        con una base de datos gestionada por <strong>Supabase Inc.</strong>, cuyos
+        servidores se encuentran en Estados Unidos. Cada registro queda asociado al
+        identificador de la cuenta que lo generó.</p>
+
+      <p>Sobre lo que la aplicación <strong>no</strong> hace:</p>
       <ul>
-        <li>No se transmite información a ningún servidor operado por Habitotchi, porque ninguno existe.</li>
         <li>No se realiza recolección de datos con fines analíticos, publicitarios ni estadísticos.</li>
         <li>No se emplean cookies de rastreo ni identificadores de seguimiento entre sitios.</li>
-        <li>Ninguna persona distinta del usuario, incluida quien desarrolla la aplicación, tiene acceso a esta información.</li>
+        <li>No se venden ni ceden datos a terceros con fines comerciales.</li>
+        <li>Las políticas de seguridad de la base de datos restringen cada registro a la cuenta que lo creó: ningún usuario puede acceder a los datos de otro.</li>
       </ul>
+
       <p>
-        Si el usuario borra los datos del navegador, desinstala la aplicación o
-        cambia de dispositivo sin exportar una copia, la información se pierde de
-        forma irrecuperable. La aplicación ofrece una función de exportación e
-        importación manual para quien desee conservar una copia de resguardo.
+        Al cerrar sesión, los datos se eliminan del dispositivo y permanecen únicamente en
+        la cuenta, desde donde vuelven a descargarse al iniciar sesión nuevamente. La
+        aplicación ofrece además una función de exportación manual para conservar una
+        copia fuera de ella.
       </p>
 
       <h2><span class="numero">3.</span>Conexión opcional con Google Calendar</h2>
@@ -188,42 +206,80 @@
 
       <h2><span class="numero">4.</span>Transferencia internacional de datos</h2>
       <p>
-        Dado que la conexión con Google Calendar se establece de manera directa
-        entre el navegador del usuario y los servidores de Google LLC (empresa
-        con sede en Estados Unidos), los eventos consultados durante esa sesión
-        son procesados por infraestructura de Google, conforme a sus propias
-        políticas de privacidad. Habitotchi no interviene en ese procesamiento ni
-        aloja, copia o reenvía esa información.
+        Los datos descriptos en la sección 2 —incluidos los datos de salud— se
+        almacenan en servidores de <strong>Supabase Inc.</strong> ubicados en
+        <strong>Estados Unidos</strong>, país que no cuenta con una declaración de
+        adecuación en materia de protección de datos personales por parte de la
+        Agencia de Acceso a la Información Pública de la República Argentina. Al
+        aceptar esta política y crear una cuenta, el usuario presta su consentimiento
+        expreso a esa transferencia internacional, en los términos del art. 12 de la
+        Ley N.º 25.326. La aplicación no puede utilizarse sin crear una cuenta; quien
+        no desee que sus datos se transfieran, no debe registrarse.
+      </p>
+      <p>
+        La aplicación se sirve además desde infraestructura de <strong>Netlify
+        Inc.</strong> (Estados Unidos). Si el usuario activa la conexión con Google
+        Calendar, esa consulta se establece de manera directa entre su navegador y los
+        servidores de <strong>Google LLC</strong>, y los eventos consultados durante la
+        sesión son procesados por infraestructura de Google conforme a sus propias
+        políticas; Habitotchi no aloja, copia ni reenvía esa información.
       </p>
 
       <h2><span class="numero">5.</span>Con quién se comparte la información</h2>
       <p>
-        Habitotchi no vende, alquila, cede ni comparte información personal con
-        terceros con fines comerciales. El único tercero involucrado es Google,
-        exclusivamente en el marco de la conexión optativa descripta en la
-        sección 3, y únicamente cuando el usuario la activa de forma voluntaria.
+        Habitotchi <strong>no vende, alquila ni cede información personal a terceros con
+        fines comerciales</strong>. Los siguientes terceros intervienen por razones
+        técnicas concretas:
+      </p>
+      <ul>
+        <li>
+          <strong>Supabase Inc.</strong> (Estados Unidos) — aloja la base de datos y el
+          sistema de cuentas. Recibe todo lo descripto en la sección 2, incluidos los
+          datos de salud. Es el único tercero que accede a información sensible.
+        </li>
+        <li>
+          <strong>Netlify Inc.</strong> (Estados Unidos) — aloja la aplicación. Como
+          cualquier servidor web, registra las solicitudes recibidas, incluida la
+          dirección IP.
+        </li>
+        <li>
+          <strong>Google LLC</strong> — únicamente si el usuario activa la conexión con
+          Google Calendar (sección 3). Adicionalmente, la aplicación carga sus tipografías
+          desde el servicio Google Fonts en cada visita, lo que transmite la dirección IP
+          del usuario a Google.
+        </li>
+        <li>
+          <strong>Internet Archive</strong> (Open Library) y <strong>Apple Inc.</strong>
+          (iTunes Search) — reciben el título y autor del libro, o el artista y álbum, que
+          el usuario busca al registrar una lectura o un disco, con el fin de recuperar la
+          imagen de portada. Solo se contactan al realizar esa búsqueda.
+        </li>
+      </ul>
+      <p>
+        Ningún tercero de esta lista recibe datos con fines publicitarios ni de
+        elaboración de perfiles por parte de Habitotchi.
       </p>
 
       <h2><span class="numero">6.</span>Menores de edad</h2>
       <p>
         Habitotchi no está dirigida específicamente a menores de 13 años ni
-        recolecta deliberadamente información de esa franja etaria. Al no existir
-        registro de cuentas ni recolección de datos identificatorios, la
-        aplicación no dispone de mecanismos para verificar la edad de quien la
-        utiliza; se recomienda la supervisión de madres, padres o tutores en el
-        uso por parte de menores.
+        recolecta deliberadamente información de esa franja etaria. El registro no
+        solicita la fecha de nacimiento, de modo que la aplicación no dispone de
+        mecanismos para verificar la edad de quien crea una cuenta; se recomienda la
+        supervisión de madres, padres o tutores en el uso por parte de menores. Ante
+        la constatación de que se creó una cuenta de un menor sin autorización, puede
+        solicitarse su eliminación al contacto de la sección 10.
       </p>
 
       <h2><span class="numero">7.</span>Derechos del usuario</h2>
       <p>
         En los términos de la Ley N.º 25.326, toda persona tiene derecho a
         acceder, rectificar, actualizar y solicitar la supresión de sus datos
-        personales. En el caso de Habitotchi, dado que la información reside
-        exclusivamente en el dispositivo del usuario:
+        personales. En el caso de Habitotchi:
       </p>
       <ul>
         <li><strong>Acceso y rectificación:</strong> el usuario visualiza y edita sus propios datos directamente dentro de la aplicación, en todo momento.</li>
-        <li><strong>Supresión:</strong> puede eliminar la totalidad de sus datos desde la sección Ajustes ("Borrar todo"), o borrando los datos del sitio desde la configuración de su navegador.</li>
+        <li><strong>Supresión:</strong> desde Ajustes, la opción "Borrar todo" elimina la totalidad de los datos, tanto del dispositivo como de la cuenta en la base de datos. Para eliminar además la cuenta misma (dirección de correo y credenciales), puede solicitarse al contacto de la sección 10.</li>
         <li><strong>Portabilidad:</strong> puede exportar una copia de sus datos en formato legible desde la misma sección de Ajustes.</li>
         <li><strong>Revocación del consentimiento:</strong> respecto de la conexión con Google Calendar, puede desconectarla en cualquier momento según lo descripto en la sección 3.</li>
       </ul>
@@ -239,8 +295,8 @@
       <p>
         La instalación de Habitotchi como acceso directo en el dispositivo del
         usuario (funcionalidad de aplicación web progresiva) no modifica ninguno
-        de los términos anteriores: los datos permanecen almacenados localmente,
-        sin sincronización remota.
+        de los términos anteriores: rigen las mismas condiciones de tratamiento y
+        sincronización descriptas en la sección 2.
       </p>
 
       <h2><span class="numero">9.</span>Modificaciones a esta política</h2>

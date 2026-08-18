@@ -118,8 +118,8 @@ export function BarraHabito({ id }: { id: IdHabito }) {
   );
 }
 
-/* Todos los hábitos de una página. Si no se le pasa una lista,
-   muestra los cinco de siempre. */
+/* Los hábitos que muestra una pantalla. Cada una pasa los
+   suyos: Hogar los cinco, Alimentación solo los de comida. */
 export function ListaDeHabitos({ ids }: { ids: IdHabito[] }) {
   return (
     <div className="habit-list">

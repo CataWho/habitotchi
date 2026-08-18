@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · trabajo.js
+   HABITOTCHI · trabajo
    TRABAJO / ESTUDIO
    ==========================================================
    Dos herramientas:
@@ -23,11 +23,11 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 
 
 /* Los dos tipos que se pueden registrar. El hábito "trabajo"
-   de habitos.js sigue siendo uno solo (mide horas totales,
+   de datos/habitos.ts sigue siendo uno solo (mide horas totales,
    sin importar el tipo), pero acá se guarda el detalle de
    cada sesión para poder graficar trabajo vs. estudio por
    separado — el mismo patrón que cardio/fuerza en
-   ejercicio.js. */
+   lib/ejercicio.ts. */
 export const TIPOS_TRABAJO: Record<string, { nombre: string; color?: string }> = {
   trabajo: { nombre: "Trabajo" },
   estudio: { nombre: "Estudio" },

@@ -1,7 +1,7 @@
 import { CLAVES, escribir, leerTexto } from "@/lib/almacenamiento";
 
 /* ==========================================================
-   HABITOTCHI · juegos.js
+   HABITOTCHI · juegos
    LOS JUEGUITOS
    ==========================================================
    Tres juegos, dibujados en un <canvas> con la misma estética
@@ -57,8 +57,8 @@ export function recordDe(juegoId: string) {
    "Noche" el tablero era un rectángulo verde lima en medio de
    una pantalla azul oscura).
 
-   Las dos variables las escribe dibujarFondoDePantalla() en
-   app.js cuando ponés un fondo. */
+   Las dos variables las escribe el componente Pantalla
+   (componentes/aparato/Aparato.tsx) cuando ponés un fondo. */
 export function colorDePantalla(variable: string, siNoHay: string) {
   const pantalla = document.querySelector(".screen");
   if (!pantalla) return siNoHay;

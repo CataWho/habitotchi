@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · hobbies.js
+   HABITOTCHI · hobbies
    HOBBIES
    ==========================================================
    Nada de esto suma puntos ni tiene meta: los hobbies son
@@ -39,7 +39,7 @@ export const CATEGORIAS_HOBBIES = [
 /* ----------------------------------------------------------
    LIBRO ACTUAL
    ---------------------------------------------------------- */
-/* Guardamos también la tapa (portadas.js la busca sola) para
+/* Guardamos también la tapa (lib/portadas.ts la busca sola) para
    no tener que pedirla de nuevo cada vez que abrís la app. */
 export function cargarLibroActual() {
   const guardado = __leerCrudo(CLAVES.libroActual);
@@ -59,7 +59,7 @@ export function guardarLibroActual(libro: any) {
    tus días buenos, y mezclarlos rompería esa cuenta. Las
    monedas son el premio, y terminar un libro claramente lo es.
 
-   Cuánto vale cada libro se define en tienda.js, que es donde
+   Cuánto vale cada libro se define en lib/tienda.ts, que es donde
    vive todo lo de monedas.
    ---------------------------------------------------------- */
 

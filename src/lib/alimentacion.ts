@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · alimentacion.js
+   HABITOTCHI · alimentacion
    REGISTRO DE COMIDAS
    ==========================================================
    Reemplaza el conteo genérico de "comida sana" por un
@@ -25,7 +25,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    que se puede derivar de los datos no se guarda por
    separado, para que nunca pueda quedar desincronizado.
 
-   El chef (ia.js + el modal de fotos) también guarda sus
+   El chef (lib/ia.ts + el modal de fotos) también guarda sus
    resultados acá, como una entrada más: así hay una sola
    fuente de verdad para "qué comiste hoy".
    ========================================================== */
@@ -59,7 +59,8 @@ export function comidasDelDia(comidas: any, fecha: string) {
 }
 
 /* Agrega una comida al día indicado. El hábito "comida" de
-   habitos.js se actualiza junto con esta lista (ver app.js),
+   la pantalla se actualiza junto con esta lista (lo hace
+   sincronizarHabito en pantallas/Alimentacion.tsx),
    para que la cantidad de comidas registradas siga contando
    igual que antes para el ánimo y el crecimiento de la
    mascota. */

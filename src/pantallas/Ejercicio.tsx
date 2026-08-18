@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
-import { fijarHabito } from "@/lib/registro";
 import { cargarPerfil, pesoParaCalculos } from "@/lib/perfil";
 import {
   INTENSIDAD_PESAS,
@@ -37,7 +36,7 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
    ========================================================== */
 
 export function Ejercicio() {
-  const { registro, sumarHabito } = useHabitotchi();
+  const { fijarHabito } = useHabitotchi();
   const [sesiones, setSesiones] = useState(() => cargarSesionesEjercicio());
   const [propios, setPropios] = useState(() => cargarEjerciciosPropios());
   const [perfil] = useState(() => cargarPerfil());
@@ -50,8 +49,7 @@ export function Ejercicio() {
 
   const sincronizar = (nuevas: any) => {
     setSesiones({ ...nuevas });
-    fijarHabito(registro, hoy, "ejercicio", totalMinutosDelDia(nuevas, hoy));
-    sumarHabito("ejercicio", 0);
+    fijarHabito("ejercicio", totalMinutosDelDia(nuevas, hoy));
   };
 
   return (

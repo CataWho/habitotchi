@@ -150,6 +150,26 @@ body {
   user-select: none;
 }
 
+/* ----------------------------------------------------------
+   LOS CONTROLES TAMBIÉN USAN LA TIPOGRAFÍA DE LA APP
+   ----------------------------------------------------------
+   Los botones y los campos NO heredan la tipografía: cada
+   navegador les mete la suya (acá, Arial). Las clases que la
+   declaraban a mano se veían bien, pero las que se olvidaban
+   quedaban en Arial sin que se notara — eran unos 70
+   controles, entre ellos los 42 días del calendario, las
+   caritas de ánimo, la crucecita del D-pad y las flechas de
+   cambiar de pestaña.
+
+   Una regla acá evita tener que acordarse en cada clase nueva.
+   ---------------------------------------------------------- */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 
 /* ==========================================================
    EL CIELO DE FONDO

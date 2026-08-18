@@ -28,7 +28,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { CLAVES, leer, escribir, alCambiar, type Clave } from "./almacenamiento";
+import { CLAVES, leer, escribir, borrar, alCambiar, type Clave } from "./almacenamiento";
 
 const TABLA = "datos_usuario";
 
@@ -36,10 +36,19 @@ const TABLA = "datos_usuario";
    QUÉ SE SINCRONIZA
    ----------------------------------------------------------
    No es "todo lo que hay en CLAVES": se dejan afuera a
-   propósito apiKey y googleClientId (código muerto, nada los
-   usa hoy) y sonido/notificaciones (son ajustes de ESTE
-   dispositivo, no datos de la persona — no tendría sentido
-   que se lleven puesto el volumen de otro aparato).
+   propósito.
+
+   · sonido y notificaciones son ajustes de ESTE aparato, no
+     datos de la persona: que el volumen elegido en la compu te
+     pise el del celular sería un bug, no una función.
+
+   · apiKey y googleClientId son credenciales de acceso a
+     servicios, no datos personales. La primera la leen ia.ts y
+     Chef.tsx, que hoy están desconectados del resto de la app
+     (ver el comentario de Ajustes.tsx); la segunda no la usa
+     nadie desde que el Client ID pasó a ser una variable de
+     entorno. En cualquier caso, una clave de acceso no tiene
+     por qué viajar a la nube ni seguirte entre dispositivos.
    ---------------------------------------------------------- */
 export const CLAVES_QUE_SINCRONIZAN: readonly Clave[] = [
   CLAVES.registro, CLAVES.metas, CLAVES.vida, CLAVES.cementerio,
@@ -217,9 +226,21 @@ export async function iniciarSesion(email: string, contraseña: string) {
 }
 
 export async function cerrarSesion(): Promise<void> {
-  /* Cerrar sesión NO borra los datos de este dispositivo:
-     siguen en localStorage hasta que alguien los borre a
-     mano, exactamente como si nunca hubiera habido cuenta. */
+  /* Cerrar sesión SÍ borra los datos de este dispositivo, y es
+     a propósito.
+
+     Antes no lo hacía, con el argumento de que "siguen acá como
+     si nunca hubiera habido cuenta". Eso era razonable cuando la
+     cuenta era opcional y los datos vivían solo en el aparato.
+     Con login obligatorio y sincronización, dejarlos es un
+     agujero: la próxima persona que entre en este navegador ve
+     el peso, el ánimo, las medicaciones y el ciclo de la
+     anterior, y encima lo que anote se sube a SU cuenta pisando
+     sus datos reales.
+
+     No se pierde nada: todo está en la nube y vuelve solo al
+     iniciar sesión de nuevo. */
+  limpiarDatosLocales();
   await cliente?.auth.signOut();
 }
 
@@ -274,13 +295,36 @@ export function usarSesion(): EstadoDeSesion {
   useEffect(() => {
     let vivo = true;
 
-    /* getSession lee de storage y NO pide red: por eso alguien
-       que ya entró antes puede abrir la app sin internet. */
-    sesionActual().then((sesion) => {
+    /* Sin sesión no hay nada que preparar; con sesión, hay que
+       dejar los datos en orden ANTES de decir "cargando: false",
+       porque en cuanto eso pase la app se dibuja y las pantallas
+       leen del disco. */
+    const revisar = async () => {
+      /* getSession lee de storage y NO pide red: por eso alguien
+         que ya entró antes puede abrir la app sin internet. */
+      const sesion = await sesionActual();
       if (!vivo) return;
+
+      if (sesion) {
+        try {
+          await prepararDatosDeLaSesion(sesion.id);
+        } catch {
+          /* Sin internet o Supabase caído. Se sigue adelante con
+             lo que haya en el disco en vez de dejar a la persona
+             mirando una pantalla de carga para siempre: si los
+             datos son suyos (el caso de todos los días) están
+             completos, y si no lo son, quedaron borrados y va a
+             ver la app vacía hasta que vuelva la conexión. Lo
+             que NO pasa es que se suba nada, porque la
+             sincronización solo se enciende en el camino feliz. */
+        }
+        if (!vivo) return;
+      }
+
       setEstado((previo) => ({ ...previo, cargando: false, sesion }));
-      if (sesion) iniciarSincronizacionEnSegundoPlano();
-    });
+    };
+
+    void revisar();
 
     return alCambiarSesion((evento) => {
       if (evento === "PASSWORD_RECOVERY") {
@@ -288,11 +332,7 @@ export function usarSesion(): EstadoDeSesion {
         return;
       }
 
-      sesionActual().then((sesion) => {
-        if (!vivo) return;
-        setEstado((previo) => ({ ...previo, cargando: false, sesion }));
-        if (sesion) iniciarSincronizacionEnSegundoPlano();
-      });
+      void revisar();
     });
   }, []);
 
@@ -341,6 +381,86 @@ export function hayDatosLocales(): boolean {
   });
 }
 
+/* ==========================================================
+   DE QUIÉN SON LOS DATOS QUE HAY EN ESTE DISPOSITIVO
+   ==========================================================
+   El dato más importante de todo este archivo.
+
+   localStorage no sabe de cuentas: es un cajón por navegador.
+   Sin esta marca, la app no tiene forma de distinguir "estos
+   datos son tuyos" de "estos datos quedaron de la sesión
+   anterior de otra persona", y las dos situaciones terminan
+   igual de mal: alguien ve el historial de salud de otra, o
+   —peor— empieza a anotar encima y esos cambios se suben y
+   pisan los datos buenos de la cuenta.
+
+   Se guarda con localStorage directo y no con escribir() a
+   propósito: escribir() avisa a los oyentes de sincronización,
+   y esta marca es contabilidad interna, no un dato de la
+   persona que haya que subir a ningún lado.
+   ========================================================== */
+
+const CLAVE_DUEÑO = "habitotchi_dueño_de_los_datos";
+
+function dueñoDeLosDatosLocales(): string | null {
+  try {
+    return localStorage.getItem(CLAVE_DUEÑO);
+  } catch {
+    return null;
+  }
+}
+
+function marcarDueño(usuarioId: string): void {
+  try {
+    localStorage.setItem(CLAVE_DUEÑO, usuarioId);
+  } catch {
+    /* Si no se puede escribir la marca, la próxima vez se va a
+       volver a bajar todo de la nube. Es lento, pero seguro. */
+  }
+}
+
+/* ----------------------------------------------------------
+   LA RESERVA, PARA GANARLE A UNA CARRERA
+   ----------------------------------------------------------
+   Al crear una cuenta desde un aparato que ya tenía datos, hay
+   dos cosas que salen corriendo a la vez: la migración de esos
+   datos a la cuenta nueva, y la preparación automática que se
+   dispara sola apenas nace la sesión. Si gana la segunda,
+   borra el disco para bajar una cuenta que todavía está vacía
+   — y los datos que la persona acababa de pedir conservar se
+   pierden.
+
+   No alcanza con marcar el dueño después de crear la cuenta:
+   Supabase avisa del cambio de sesión desde adentro de signUp,
+   así que el aviso puede llegar antes de que volvamos a tener
+   el control. Por eso esto se pide ANTES de crear la cuenta,
+   cuando todavía no hay ninguna sesión que pueda dispararla.
+   ---------------------------------------------------------- */
+let reservaPedida = false;
+
+export function reservarDatosLocalesParaLaCuentaNueva(): void {
+  reservaPedida = true;
+}
+
+export function soltarReserva(): void {
+  reservaPedida = false;
+}
+
+function hayReservaDeDatosLocales(): boolean {
+  return reservaPedida;
+}
+
+/* Deja el dispositivo como recién estrenado, sin tocar nada
+   que no sea de Habitotchi. */
+function limpiarDatosLocales(): void {
+  for (const clave of CLAVES_QUE_SINCRONIZAN) borrar(clave);
+  try {
+    localStorage.removeItem(CLAVE_DUEÑO);
+  } catch {
+    /* ídem */
+  }
+}
+
 /* ----------------------------------------------------------
    SUBIR: de este dispositivo hacia la cuenta
    ----------------------------------------------------------
@@ -361,29 +481,47 @@ export async function subirDatosLocales(): Promise<void> {
     actualizado_en: new Date().toISOString(),
   })).filter((fila) => fila.valor !== null);
 
-  if (filas.length === 0) return;
+  if (filas.length > 0) {
+    const { error } = await cliente.from(TABLA).upsert(filas, { onConflict: "usuario_id,clave" });
+    if (error) throw new Error("No se pudieron subir los datos: " + error.message);
+  }
 
-  const { error } = await cliente.from(TABLA).upsert(filas, { onConflict: "usuario_id,clave" });
-  if (error) throw new Error("No se pudieron subir los datos: " + error.message);
+  /* Recién ahora los datos de este dispositivo son de esta
+     cuenta: hasta que la subida no terminó bien, no lo son. */
+  marcarDueño(usuarioId);
+}
+
+/* ----------------------------------------------------------
+   BORRAR TODO, DE VERDAD
+   ----------------------------------------------------------
+   "Borrar todo" en Ajustes limpiaba solo el navegador mientras
+   le decía a la persona que no se podía recuperar. Los datos
+   seguían enteros en la nube y volvían solos al entrar desde
+   otro lado — y no había forma de sacarlos, porque no existía
+   ninguna operación de borrado contra la base.
+
+   Deja la cuenta viva (podés seguir usándola, vacía). Para
+   borrar también la cuenta hace falta una función del lado del
+   servidor con permisos de administración, que este proyecto
+   todavía no tiene: por eso la política remite a pedirlo por
+   mail.
+   ---------------------------------------------------------- */
+export async function borrarTodoDeLaNube(): Promise<void> {
+  if (!cliente) return;
+
+  const { data } = await cliente.auth.getSession();
+  const usuarioId = data.session?.user.id;
+  if (!usuarioId) return;
+
+  const { error } = await cliente.from(TABLA).delete().eq("usuario_id", usuarioId);
+  if (error) throw new Error("No se pudieron borrar los datos de la cuenta: " + error.message);
 }
 
 /* ----------------------------------------------------------
    BAJAR: de la cuenta hacia este dispositivo
-   ----------------------------------------------------------
-   Reemplaza lo que haya en localStorage por lo que está en la
-   nube, y recarga la página: las 9 pantallas ya están
-   montadas con su propio estado leído al arrancar, y
-   parchear en caliente cada una es mucho más frágil que
-   simplemente volver a arrancar la app con los datos
-   correctos ya en el disco. Es el mismo criterio que ya usa
-   "Restaurar una copia" en Ajustes hoy.
    ---------------------------------------------------------- */
-export async function bajarDatosDeLaNubeYRecargar(): Promise<void> {
+async function bajarDatosDeLaNube(usuarioId: string): Promise<void> {
   if (!cliente) return;
-
-  const { data: usuario } = await cliente.auth.getUser();
-  const usuarioId = usuario.user?.id;
-  if (!usuarioId) return;
 
   const { data, error } = await cliente
     .from(TABLA)
@@ -395,8 +533,62 @@ export async function bajarDatosDeLaNubeYRecargar(): Promise<void> {
   for (const fila of data ?? []) {
     escribir(fila.clave as Clave, fila.valor);
   }
+}
+
+/* ==========================================================
+   DEJAR EL DISPOSITIVO LISTO PARA UNA SESIÓN
+   ==========================================================
+   Esto corre ANTES de que la app se dibuje y ANTES de que se
+   active el empuje de cambios. El orden importa muchísimo:
+   si la subida arrancara primero, cualquier cosa que la
+   pantalla escribiera al montarse viajaría a la nube y
+   pisaría los datos buenos de la cuenta.
+
+   Dos caminos:
+
+   · Los datos de acá ya son de esta cuenta → no hay nada que
+     traer, se enciende la sincronización y listo. Es el caso
+     de todos los días, y no pide red: por eso la app sigue
+     abriendo sin internet.
+
+   · Los datos son de otra cuenta, o no tienen dueño → se
+     borran, se bajan los de la cuenta y se recarga la página.
+     Se recarga en vez de parchear las 9 pantallas en caliente
+     porque cada una lee su estado al montarse; volver a
+     arrancar con los datos correctos ya en el disco es mucho
+     más difícil de romper. Es el mismo criterio que usa
+     "Restaurar una copia" en Ajustes.
+   ========================================================== */
+export async function prepararDatosDeLaSesion(usuarioId: string): Promise<void> {
+  if (!cliente) return;
+
+  /* La reserva gana sobre todo lo demás: son datos que ya
+     existían acá y que la persona pidió conservar al crear su
+     cuenta. Todavía no tienen dueño marcado porque la subida
+     recién va a arrancar. */
+  if (hayReservaDeDatosLocales()) {
+    soltarReserva();
+    marcarDueño(usuarioId);
+    iniciarSincronizacionEnSegundoPlano();
+    return;
+  }
+
+  if (dueñoDeLosDatosLocales() === usuarioId) {
+    iniciarSincronizacionEnSegundoPlano();
+    return;
+  }
+
+  limpiarDatosLocales();
+  await bajarDatosDeLaNube(usuarioId);
+  marcarDueño(usuarioId);
 
   location.reload();
+
+  /* La recarga no es inmediata: el navegador la agenda y sigue
+     ejecutando. Esta promesa no se resuelve nunca a propósito,
+     para que quien esté esperando no siga adelante y dibuje la
+     app con datos a medio cambiar. */
+  await new Promise(() => {});
 }
 
 /* ----------------------------------------------------------

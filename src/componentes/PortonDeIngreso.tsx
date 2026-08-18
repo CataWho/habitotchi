@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   cambiarContraseña, crearCuenta, guardarSiQuiereQueLoRecuerden, hayDatosLocales,
   iniciarSesion, pedirRecuperarContraseña, quiereQueLoRecuerden,
+  reservarDatosLocalesParaLaCuentaNueva, soltarReserva,
   subirDatosLocales, terminarRecuperacion,
 } from "@/lib/nube";
 import { Aparato, Pantalla } from "@/componentes/aparato/Aparato";
@@ -126,24 +127,37 @@ function Formulario() {
   };
 
   const crear = async () => {
-    guardarSiQuiereQueLoRecuerden(recordarme);
-    const { necesitaConfirmarMail } = await crearCuenta(email, contraseña);
-
-    if (necesitaConfirmarMail) {
-      setAviso(
-        `Te mandamos un mail a ${email}. Tocá el link que trae y ya podés entrar.`
-      );
-      return;
-    }
-
-    /* Si este aparato ya tenía datos de antes (de cuando la
-       app se usaba sin cuenta), se ofrecen como punto de
-       partida en vez de perderlos. */
-    if (hayDatosLocales()) {
-      const subir = window.confirm(
+    /* La pregunta va ANTES de crear la cuenta, no después: en
+       cuanto la sesión existe, la preparación automática se
+       dispara sola y borraría el disco para bajar una cuenta
+       todavía vacía. Ver el comentario de la reserva en
+       lib/nube.ts. */
+    const subir =
+      hayDatosLocales() &&
+      window.confirm(
         "¿Querés que lo que ya tenías anotado en este dispositivo pase a tu cuenta nueva?"
       );
+
+    if (subir) reservarDatosLocalesParaLaCuentaNueva();
+
+    guardarSiQuiereQueLoRecuerden(recordarme);
+
+    try {
+      const { necesitaConfirmarMail } = await crearCuenta(email, contraseña);
+
+      if (necesitaConfirmarMail) {
+        /* Sin sesión todavía, así que la reserva no la va a usar
+           nadie: se suelta para que no quede pegada esperando a
+           un login futuro que quizás sea de otra persona. */
+        soltarReserva();
+        setAviso(`Te mandamos un mail a ${email}. Tocá el link que trae y ya podés entrar.`);
+        return;
+      }
+
       if (subir) await subirDatosLocales();
+    } catch (e) {
+      soltarReserva();
+      throw e;
     }
   };
 

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
-import { fijarHabito } from "@/lib/registro";
 import {
   TIPOS_TRABAJO,
   agregarSesionTrabajo,
@@ -41,7 +40,7 @@ export function Trabajo() {
 }
 
 function Horas() {
-  const { registro, sumarHabito } = useHabitotchi();
+  const { fijarHabito } = useHabitotchi();
   const [sesiones, setSesiones] = useState(() => cargarSesionesTrabajo());
   const [tipo, setTipo] = useState(Object.keys(TIPOS_TRABAJO)[0] ?? "trabajo");
   const [horas, setHoras] = useState("");
@@ -55,8 +54,7 @@ function Horas() {
     const total = sesionesTrabajoDelDia(nuevas, hoy).reduce(
       (suma: number, s: any) => suma + (s.horas || 0), 0
     );
-    fijarHabito(registro, hoy, "trabajo", total);
-    sumarHabito("trabajo", 0);
+    fijarHabito("trabajo", total);
   };
 
   const agregar = () => {

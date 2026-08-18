@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · ia.js
+   HABITOTCHI · ia
    EL CHEF (reconocimiento de comida por foto)
    ==========================================================
    Le sacás una foto a tu comida, y el "chef" trata de
@@ -37,16 +37,16 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 
 
 /* Las calorías de comida del día ya no se guardan acá: viven
-   como entradas del registro de alimentacion.js, y el total
+   como entradas del registro de lib/alimentacion.ts, y el total
    se calcula sumándolas (ver totalCaloriasDelDia). */
 
 
 /* ==========================================================
    EL DIBUJO DEL CHEF, EN PIXEL ART
    ==========================================================
-   Misma técnica que las mascotas de mascotas.js: una grilla
+   Misma técnica que las mascotas de datos/mascotas.ts: una grilla
    donde cada letra es un pixel de un color, y el punto "."
-   queda transparente. Se dibuja con dibujarChef() en app.js.
+   queda transparente. Lo dibuja el componente Chef.tsx.
 
      G = blanco del gorro
      P = piel

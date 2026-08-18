@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · portadas.js
+   HABITOTCHI · portadas
    LAS TAPAS DE LIBROS Y DISCOS
    ==========================================================
    Escribís título y autor, y aparece la tapa del libro.
@@ -102,8 +102,9 @@ export async function buscarPortadaDisco(album: string, artista: string) {
     imagen:  primero.artworkUrl100.replace("100x100", "600x600"),
     titulo:  primero.collectionName || album,
     artista: primero.artistName || artista || "",
-    /* El número del disco: lo guardamos para después poder
-       pedir su lista de temas (ver sonido.js) */
+    /* El número del disco. Quedó de cuando se pensaba pedir
+       la lista de temas; hoy no se usa para nada, pero cuesta
+       cero guardarlo y evita otra búsqueda si algún día vuelve. */
     idDisco: primero.collectionId || null,
   };
 }

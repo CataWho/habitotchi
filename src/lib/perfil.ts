@@ -10,7 +10,7 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 }
 
 /* ==========================================================
-   HABITOTCHI · perfil.js
+   HABITOTCHI · perfil
    PERFIL Y SALUD
    ==========================================================
    Datos personales que sirven para calcular calorías (peso,

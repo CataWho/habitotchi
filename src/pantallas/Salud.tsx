@@ -289,7 +289,11 @@ function Ciclo() {
   return (
     <Panel titulo="Ciclo menstrual">
       <div className="campo-fila">
+        {/* Un campo de fecha no admite placeholder, así que sin
+            aria-label un lector de pantalla solo dice "fecha"
+            sin decir de qué. */}
         <input className="input-rosa" type="date" value={fecha}
+          aria-label="Cuándo empezó"
           onChange={(e) => setFecha(e.target.value)} />
         <input className="input-rosa" type="number" value={duracion} placeholder="días"
           onChange={(e) => setDuracion(e.target.value)} />

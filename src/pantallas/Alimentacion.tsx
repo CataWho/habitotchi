@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
-import { fijarHabito } from "@/lib/registro";
 import {
   TIPOS_COMIDA,
   agregarComida,
@@ -48,7 +47,7 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
 const ESPERA_ANTES_DE_BUSCAR_MS = 500;
 
 export function Alimentacion() {
-  const { registro, sumarHabito } = useHabitotchi();
+  const { fijarHabito } = useHabitotchi();
   const [comidas, setComidas] = useState(() => cargarComidas());
   const [tipo, setTipo] = useState(TIPOS_COMIDA[0]?.id ?? "desayuno");
   const [descripcion, setDescripcion] = useState("");
@@ -63,8 +62,7 @@ export function Alimentacion() {
      la cantidad exacta de comidas cargadas. Se fija en vez de
      sumar: si borrás una, el número tiene que bajar. */
   const sincronizarHabito = (lista: unknown[]) => {
-    fijarHabito(registro, hoy, "comida", lista.length);
-    sumarHabito("comida", 0); // fuerza el redibujado con el valor nuevo
+    fijarHabito("comida", lista.length);
   };
 
   /* El reloj del debounce, y de qué texto es la búsqueda que

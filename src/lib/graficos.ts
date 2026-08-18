@@ -1,12 +1,12 @@
 /* ==========================================================
-   HABITOTCHI · graficos.js
+   HABITOTCHI · graficos
    GRÁFICOS SIMPLES CON CANVAS
    ==========================================================
    La app no usa ninguna librería externa de gráficos: son
    pocas figuras (barras, líneas y puntos), así que alcanza
    con dibujar directamente sobre un <canvas> usando su
    contexto 2D, el mismo mecanismo que ya usan los juegos de
-   juegos.js. Esto evita depender de una librería de terceros
+   juegos/motor.ts. Esto evita depender de una librería
    solo para dos tipos de gráfico chicos.
 
    Los colores por defecto son los de la pantalla LCD, porque
@@ -34,7 +34,7 @@ export const GRAFICO_TEXTO   = "rgba(22, 36, 10, 0.75)";
 /* ----------------------------------------------------------
    GRÁFICO DE BARRAS DOBLES
    ----------------------------------------------------------
-   buckets: [{etiqueta, ...}]  (ver fechas.js: bucketsGrafico)
+   buckets: [{etiqueta, ...}]  (ver lib/fechas.ts: bucketsGrafico)
    valoresA / valoresB: un número por bucket, mismo orden
    opciones: {colorA, colorB, colorTexto}
    ---------------------------------------------------------- */

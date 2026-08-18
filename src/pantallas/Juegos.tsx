@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { MASCOTAS } from "@/datos/mascotas";
 import {
-  crearPong, crearSaltador, crearViborita, guardarRecord, recordDe,
+  crearPong, crearSaltador, crearViborita, fondoLCD, guardarRecord, recordDe,
 } from "@/juegos/motor";
 import { Pagina } from "@/componentes/comunes/Pagina";
 import { Ayuda, Panel } from "@/componentes/comunes/Panel";
@@ -42,10 +42,39 @@ export function Juegos() {
     activo.current = null;
   };
 
-  useEffect(() => detener, []);
+  /* ----------------------------------------------------------
+     LA PANTALLITA SE LIMPIA SOLA
+     ----------------------------------------------------------
+     Cada juego dibuja encima del canvas, y nadie lo borraba al
+     terminar: el último cuadro quedaba congelado ahí. Se veía
+     de dos formas, las dos feas — perdías y quedaba la escena
+     de tu derrota clavada, y si después cambiabas de juego
+     seguías viendo el dibujo del juego anterior hasta tocar
+     Jugar.
+
+     Usa fondoLCD(), la MISMA función con la que los tres
+     juegos pintan su fondo. Al principio leía --lcd-claro y
+     eso estaba mal: los fondos de pantalla no pisan esa
+     variable, así que la pantallita quedaba verde aunque
+     tuvieras puesto Algodón o Noche. La que sí acompaña al
+     fondo es --lcd-contratinta, que es la que lee fondoLCD().
+     ---------------------------------------------------------- */
+  const limpiarPantalla = () => {
+    const nodo = canvas.current;
+    const ctx = nodo?.getContext("2d");
+    if (!nodo || !ctx) return;
+
+    ctx.fillStyle = fondoLCD();
+    ctx.fillRect(0, 0, nodo.width, nodo.height);
+  };
+
+  useEffect(() => {
+    return () => detener();
+  }, []);
 
   useEffect(() => {
     detener();
+    limpiarPantalla();
     setPuntos(0);
     setRecord(recordDe(elegido));
     setMensaje("Tocá Jugar para empezar.");
@@ -144,11 +173,19 @@ export function Juegos() {
     const alPerder = (puntaje: number) => {
       const esRecord = guardarRecord(elegido, puntaje);
       setRecord(recordDe(elegido));
+
+      /* Un récord de 0 no es un récord. Pasa la primera vez que
+         jugás y perdés enseguida, y festejarlo queda ridículo. */
       setMensaje(
-        esRecord
-          ? `¡Récord nuevo! ${puntaje} puntos.`
+        esRecord && puntaje > 0
+          ? `¡Récord nuevo! ${puntaje} ${puntaje === 1 ? "punto" : "puntos"}.`
           : `Perdiste con ${puntaje}. Tu récord es ${recordDe(elegido)}.`
       );
+
+      /* El motor ya paró su reloj, pero el último cuadro sigue
+         dibujado. Se deja un instante para que se vea dónde
+         perdiste, y después se limpia. */
+      window.setTimeout(limpiarPantalla, 900);
     };
 
     if (elegido === "viborita") activo.current = crearViborita(nodo, setPuntos, alPerder);

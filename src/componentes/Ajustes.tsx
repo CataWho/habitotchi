@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { PRONOMBRES, cargarPerfil, guardarPerfil } from "@/lib/perfil";
 import { fechaDeHoy } from "@/lib/fechas";
-import { cambiarContraseña, cerrarSesion, hayNubeConfigurada, usarSesion } from "@/lib/nube";
+import {
+  borrarTodoDeLaNube, cambiarContraseña, cerrarSesion, hayNubeConfigurada, usarSesion,
+} from "@/lib/nube";
+import { CLAVES } from "@/lib/almacenamiento";
+import { useGuardado } from "@/estado/useGuardado";
 import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
 import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
@@ -46,6 +50,29 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
 }
 
 /* ----------------------------------------------------------
+   EL PERFIL, UNA SOLA VERDAD PARA TODO EL MODAL
+   ----------------------------------------------------------
+   "Sobre vos" y "Qué mostrar" editan campos distintos del
+   MISMO objeto guardado, y están a diez píxeles uno del otro.
+
+   Antes cada uno hacía useState(() => cargarPerfil()): dos
+   fotos independientes del mismo objeto, sacadas en el mismo
+   momento. Escribías tu nombre arriba (que guardaba la foto de
+   arriba, ya con el nombre) y después tocabas el interruptor
+   del ciclo abajo — que guardaba SU foto, la de antes, sin el
+   nombre. El nombre recién escrito desaparecía sin ningún
+   aviso.
+
+   useGuardado resuelve exactamente esto: los dos leen la misma
+   clave y se enteran cuando el otro la escribe. Salud ya lo
+   usaba así para este mismo perfil; la inconsistencia estaba
+   adentro del propio proyecto.
+   ---------------------------------------------------------- */
+function usePerfil() {
+  return useGuardado(CLAVES.perfil, cargarPerfil);
+}
+
+/* ----------------------------------------------------------
    QUÉ MOSTRAR
    ----------------------------------------------------------
    Lo que cada persona elige ver o no. Vive acá y no en la
@@ -54,12 +81,10 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
    a día solo ocupaba lugar ahí.
    ---------------------------------------------------------- */
 function QueMostrar() {
-  const [perfil, setPerfil] = useState(() => cargarPerfil());
+  const perfil = usePerfil();
 
   const cambiar = (campo: string, valor: boolean) => {
-    const nuevo = { ...perfil, [campo]: valor };
-    guardarPerfil(nuevo);
-    setPerfil(nuevo);
+    guardarPerfil({ ...perfil, [campo]: valor });
   };
 
   return (
@@ -82,12 +107,10 @@ function QueMostrar() {
 }
 
 function SobreVos() {
-  const [perfil, setPerfil] = useState(() => cargarPerfil());
+  const perfil = usePerfil();
 
   const cambiar = (campo: string, valor: string | number) => {
-    const nuevo = { ...perfil, [campo]: valor };
-    guardarPerfil(nuevo);
-    setPerfil(nuevo);
+    guardarPerfil({ ...perfil, [campo]: valor });
   };
 
   return (
@@ -147,7 +170,8 @@ function SobreVos() {
       </div>
 
       <Ayuda>
-        El peso se usa para estimar las calorías del ejercicio. No se manda a ningún lado.
+        El peso se usa para estimar las calorías del ejercicio, y se guarda en tu cuenta
+        junto con el resto de tus datos.
       </Ayuda>
     </Panel>
   );
@@ -314,11 +338,25 @@ function TusDatos() {
     lector.readAsText(archivo);
   };
 
-  const borrarTodo = () => {
+  const borrarTodo = async () => {
     /* Doble confirmación: esto no se puede deshacer y se lleva
        puesto todo el historial. */
     if (!window.confirm("¿Seguro? Se borra todo lo que anotaste y no se puede recuperar.")) return;
     if (!window.confirm("De verdad, no hay vuelta atrás. ¿Borro todo?")) return;
+
+    setAviso("Borrando…");
+
+    /* La nube PRIMERO. Si se borrara el disco antes y después
+       fallara la conexión, quedaría lo peor de los dos mundos:
+       la persona ve todo vacío y cree que se borró, pero los
+       datos siguen en la cuenta y vuelven al entrar de nuevo.
+       Al revés, si falla, no se borra nada y se avisa. */
+    try {
+      await borrarTodoDeLaNube();
+    } catch (e: any) {
+      setAviso(e?.message ?? "No se pudo borrar de tu cuenta. No se borró nada.");
+      return;
+    }
 
     const claves: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -327,7 +365,7 @@ function TusDatos() {
     }
     claves.forEach((c) => localStorage.removeItem(c));
 
-    setAviso("Borrado. Recargá la página.");
+    location.reload();
   };
 
   return (
@@ -362,8 +400,8 @@ function TusDatos() {
       {aviso && <Ayuda>{aviso}</Ayuda>}
 
       <Ayuda>
-        Todo se guarda <b>solo en este dispositivo</b>. Si limpiás el historial del navegador,
-        se pierde: por eso conviene bajar una copia cada tanto.
+        Todo se guarda <b>en tu cuenta</b>, así lo encontrás igual desde otro dispositivo.
+        La copia descargada sirve para tenerlo también fuera de la app.
       </Ayuda>
     </Panel>
   );

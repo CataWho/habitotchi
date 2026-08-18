@@ -1,6 +1,13 @@
 # Dependencias
 node_modules/
 
+# Las claves de los servicios. *.local ya cubría .env.local, pero
+# .env a secas es el nombre más habitual y quedaba afuera: sin
+# esta línea, crear uno lo subía al repo público sin ningún aviso.
+.env
+.env.*
+!.env.example
+
 # Lo que genera el build
 dist/
 dist-ssr/
