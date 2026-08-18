@@ -25,55 +25,55 @@ import type { Habitos } from "@/tipos";
 
 export const HABITOS_POR_DEFECTO: Habitos = {
   agua: {
-    nombre: "Agua",
+    clave: "habitoAgua",
     tipo: "meta",
     meta: 8,
-    unidad: "vasos",
+    unidad: "unidadVasos",
     paso: 1, // cuánto suma cada toque
     color: "#5aa9d6",
   },
 
   comida: {
-    nombre: "Comidas registradas",
+    clave: "habitoComida",
     tipo: "meta",
     meta: 3, // desayuno, almuerzo y cena
-    unidad: "comidas",
+    unidad: "unidadComidas",
     paso: 1, // el registro de alimentacion es quien realmente lo mueve
     color: "#7ac07a",
   },
 
   ejercicio: {
-    nombre: "Ejercicio",
+    clave: "habitoEjercicio",
     tipo: "meta",
     meta: 30,
-    unidad: "min",
+    unidad: "unidadMin",
     paso: 10,
     color: "#e8945a",
   },
 
   lectura: {
-    nombre: "Lectura",
+    clave: "habitoLectura",
     tipo: "meta",
     meta: 20,
-    unidad: "min",
+    unidad: "unidadMin",
     paso: 10,
     color: "#a97ad6",
   },
 
   trabajo: {
-    nombre: "Trabajo / estudio",
+    clave: "habitoTrabajo",
     tipo: "meta",
     meta: 4, // horas combinadas: da igual si son de trabajo o de estudio
-    unidad: "horas",
+    unidad: "unidadHoras",
     paso: 1,
     color: "#d67a9e",
   },
 
   dulces: {
-    nombre: "Dulces",
+    clave: "habitoDulces",
     tipo: "registro", // sin meta, sin barra, sin juicio
     meta: 0,
-    unidad: "veces",
+    unidad: "unidadVeces",
     paso: 1,
     color: "#e0a3c8",
   },

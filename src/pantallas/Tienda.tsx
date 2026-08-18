@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import type { TipoDeArticulo } from "@/tipos";
 import { MASCOTAS } from "@/datos/mascotas";
 import { ACCESORIOS } from "@/datos/accesorios";
@@ -33,21 +34,18 @@ export function Tienda() {
   };
 
   return (
-    <Pagina nombre="Tienda">
+    <Pagina clave="pantallaTienda">
       <Panel>
-        <div className="monedas-grandes">{monedas} monedas</div>
-        <Ayuda>
-          Ganás 10 monedas por cada día bueno, y 50 extra cada 7 días seguidos. Los juegos no
-          dan monedas: solo los hábitos.
-        </Ayuda>
+        <div className="monedas-grandes">{tr("monedasTotal", { n: monedas })}</div>
+        <Ayuda>{tr("comoGanarDetalle")}</Ayuda>
         {mensaje && <p className="tienda-mensaje">{mensaje}</p>}
       </Panel>
 
-      <Seccion titulo="Mascotas" tipo="mascota" onComprar={alComprar} />
-      <Seccion titulo="Accesorios" tipo="accesorio" onComprar={alComprar} />
-      <Seccion titulo="Fondos de pantalla" tipo="fondo" onComprar={alComprar} />
+      <Seccion titulo={tr("mascotas")} tipo="mascota" onComprar={alComprar} />
+      <Seccion titulo={tr("accesorios")} tipo="accesorio" onComprar={alComprar} />
+      <Seccion titulo={tr("fondosDePantalla")} tipo="fondo" onComprar={alComprar} />
 
-      <Panel titulo="Logros">
+      <Panel titulo={tr("logros")}>
         <ul className="lista-simple">
           {logros.map((logro) => (
             <li
@@ -56,9 +54,9 @@ export function Tienda() {
             >
               <span className="logro-estrella">{logro.conseguido ? "★" : "☆"}</span>
               <span>
-                <b>{logro.nombre}</b>
+                <b>{tr(logro.clave)}</b>
                 <br />
-                <span className="ayuda-chica">{logro.descripcion}</span>
+                <span className="ayuda-chica">{tr(logro.claveDescripcion)}</span>
               </span>
             </li>
           ))}
@@ -100,7 +98,7 @@ function Seccion({ titulo, tipo, onComprar }: PropsSeccion) {
                 <Vista tipo={tipo} id={id} sobreQuien={vida?.mascota ?? "dragoncito"} />
               </div>
 
-              <span className="tienda-nombre">{articulo.nombre}</span>
+              <span className="tienda-nombre">{tr(articulo.clave)}</span>
 
               <BotonDelArticulo
                 tipo={tipo}
@@ -175,7 +173,7 @@ function BotonDelArticulo({
         className={puesto ? "habit-btn tienda-btn habit-btn--restar" : "habit-btn tienda-btn"}
         onClick={() => onEquipar({ accesorio: puesto ? null : id })}
       >
-        {puesto ? "Sacar" : "Poner"}
+        {puesto ? tr("sacar") : tr("poner")}
       </button>
     );
   }
@@ -189,7 +187,7 @@ function BotonDelArticulo({
         disabled={puesto}
         onClick={() => onEquipar({ fondo: id })}
       >
-        {puesto ? "Puesto" : "Poner"}
+        {puesto ? tr("puesto") : tr("poner")}
       </button>
     );
   }
@@ -201,7 +199,7 @@ function BotonDelArticulo({
       type="button"
       className="habit-btn tienda-btn tienda-btn--tenes"
       disabled
-      aria-label={`${MASCOTAS[id]?.nombre}, ya desbloqueada`}
+      aria-label={tr("yaDesbloqueada", { nombre: tr(MASCOTAS[id]?.clave ?? "") })}
     >
       ✓
     </button>

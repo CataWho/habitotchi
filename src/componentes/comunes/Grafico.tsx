@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tr } from "@/lib/idioma";
 import type { Balde, RangoDeGrafico } from "@/lib/fechas";
 import { bucketsGrafico } from "@/lib/fechas";
 import { dibujarGraficoBarras, dibujarGraficoLineas } from "@/lib/graficos";
@@ -27,10 +28,10 @@ function coloresDeLaPantalla() {
   return { colorA: `rgb(${tinta})`, colorB: `rgba(${tinta}, 0.42)` };
 }
 
-const RANGOS: { id: RangoDeGrafico; nombre: string }[] = [
-  { id: "semana", nombre: "Semana" },
-  { id: "mes", nombre: "Mes" },
-  { id: "anio", nombre: "Año" },
+const RANGOS: { id: RangoDeGrafico; clave: string }[] = [
+  { id: "semana", clave: "semana" },
+  { id: "mes", clave: "mes" },
+  { id: "anio", clave: "anio" },
 ];
 
 interface Props {
@@ -66,7 +67,7 @@ export function GraficoDeBarras({ calcular, etiquetaA, etiquetaB }: Props) {
             className={rango === r.id ? "juego-opcion is-on" : "juego-opcion"}
             onClick={() => setRango(r.id)}
           >
-            {r.nombre}
+            {tr(r.clave)}
           </button>
         ))}
       </div>
@@ -159,7 +160,7 @@ export function GraficoDeLineas({
             className={rango === r.id ? "juego-opcion is-on" : "juego-opcion"}
             onClick={() => setRango(r.id)}
           >
-            {r.nombre}
+            {tr(r.clave)}
           </button>
         ))}
       </div>

@@ -1,3 +1,4 @@
+import { tr } from "@/lib/idioma";
 import type {
   Compras,
   Etapa,
@@ -230,7 +231,7 @@ export function comprar(
   listaDeCompras(nuevas, tipo).push(id);
   guardarCompras(nuevas);
 
-  return { ok: true, mensaje: "¡" + articulo.nombre + " desbloqueado!", compras: nuevas };
+  return { ok: true, mensaje: "¡" + tr(articulo.clave) + " desbloqueado!", compras: nuevas };
 }
 
 /* ==========================================================
@@ -241,18 +242,18 @@ export function comprar(
    ========================================================== */
 
 export const LOGROS: Logro[] = [
-  { id: "primerDia", nombre: "El primer paso", descripcion: "Tu primer día bueno" },
-  { id: "semana", nombre: "Una semana", descripcion: "7 días buenos en total" },
-  { id: "mes", nombre: "Un mes entero", descripcion: "30 días buenos en total" },
-  { id: "racha7", nombre: "Imparable", descripcion: "7 días buenos seguidos" },
-  { id: "racha30", nombre: "Costumbre", descripcion: "30 días buenos seguidos" },
-  { id: "joven", nombre: "Creciendo", descripcion: "Tu mascota llegó a joven" },
-  { id: "adulto", nombre: "Ya es grande", descripcion: "Tu mascota llegó a adulta" },
-  { id: "agua100", nombre: "Bien hidratada", descripcion: "100 vasos de agua en total" },
-  { id: "ejercicio500", nombre: "En movimiento", descripcion: "500 minutos de ejercicio" },
-  { id: "coleccion", nombre: "Coleccionista", descripcion: "Desbloqueaste todas las mascotas" },
-  { id: "primerLibro", nombre: "Primera lectura", descripcion: "Terminaste tu primer libro" },
-  { id: "cincoLibros", nombre: "Ratona de biblioteca", descripcion: "Terminaste 5 libros" },
+  { id: "primerDia", clave: "logroPrimerDia", claveDescripcion: "logroPrimerDiaDesc" },
+  { id: "semana", clave: "logroSemana", claveDescripcion: "logroSemanaDesc" },
+  { id: "mes", clave: "logroMes", claveDescripcion: "logroMesDesc" },
+  { id: "racha7", clave: "logroRacha7", claveDescripcion: "logroRacha7Desc" },
+  { id: "racha30", clave: "logroRacha30", claveDescripcion: "logroRacha30Desc" },
+  { id: "joven", clave: "logroJoven", claveDescripcion: "logroJovenDesc" },
+  { id: "adulto", clave: "logroAdulto", claveDescripcion: "logroAdultoDesc" },
+  { id: "agua100", clave: "logroAgua100", claveDescripcion: "logroAgua100Desc" },
+  { id: "ejercicio500", clave: "logroEjercicio500", claveDescripcion: "logroEjercicio500Desc" },
+  { id: "coleccion", clave: "logroColeccion", claveDescripcion: "logroColeccionDesc" },
+  { id: "primerLibro", clave: "logroPrimerLibro", claveDescripcion: "logroPrimerLibroDesc" },
+  { id: "cincoLibros", clave: "logroCincoLibros", claveDescripcion: "logroCincoLibrosDesc" },
 ];
 
 /* Cuánto sumaste de un hábito en toda tu historia */

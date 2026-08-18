@@ -98,37 +98,78 @@ export function guardarApiKey(clave: string) {
 /* ----------------------------------------------------------
    UN DICCIONARIO CHIQUITO, PARA CUANDO CARGÁS A MANO
    ----------------------------------------------------------
-   Sirve de ayuda en el chat: si escribís "banana", el chef
-   te tira una caloría aproximada sin necesitar la IA.
+   Si escribís "banana", te tira una caloría aproximada sin
+   necesitar internet ni ninguna clave.
+
+   ---------- LOS DOS IDIOMAS VIVEN JUNTOS ----------
+   No hay un diccionario en español y otro en inglés: hay uno
+   solo con los dos, y no mira en qué idioma está la app.
+
+   Es a propósito. La comida no respeta los idiomas: alguien
+   con la app en inglés viviendo acá va a escribir "milanesa"
+   igual, y alguien con la app en español escribe "pizza" o
+   "muffin" todo el tiempo. Separarlos obligaría a que el
+   idioma de la app coincida con el idioma en que escribís la
+   comida, que es una condición que nadie cumple.
+
+   ---------- CUIDADO CON LAS PALABRAS CORTAS ----------
+   El buscador se queda con la coincidencia más larga, pero
+   igual conviene no meter palabras de tres o cuatro letras
+   que signifiquen cosas distintas en cada idioma. El caso
+   testigo es "pan": en español se come, en inglés es una
+   sartén. Ya está en la lista de antes y se queda, pero no
+   se suman más como esa.
    ---------------------------------------------------------- */
 export const CALORIAS_COMUNES: Record<string, number> = {
   // Frutas y verduras
   "manzana": 95, "banana": 105, "naranja": 62, "pera": 100,
   "frutilla": 50, "uva": 90, "mandarina": 47, "verdura": 60,
   "ensalada": 150, "palta": 240, "tomate": 22, "zanahoria": 25,
+  "apple": 95, "orange": 62, "pear": 100, "strawberry": 50,
+  "grapes": 90, "avocado": 240, "tomato": 22, "carrot": 25,
+  "salad": 150, "broccoli": 55, "spinach": 25, "blueberries": 85,
+  "watermelon": 85, "pineapple": 82, "mango": 200, "peach": 60,
 
   // Carbohidratos
   "arroz": 200, "fideos": 220, "pan": 80, "tostada": 75,
   "papa": 160, "batata": 180, "polenta": 145, "avena": 150,
+  "rice": 200, "pasta": 220, "noodles": 220, "toast": 75,
+  "potato": 160, "sweet potato": 180, "oatmeal": 150, "oats": 150,
+  "bread": 80, "bagel": 250, "tortilla": 150, "quinoa": 220,
+  "fries": 320, "french fries": 320, "cereal": 150, "granola": 200,
 
   // Proteínas
   "pollo": 165, "carne": 250, "pescado": 180, "huevo": 78,
   "atun": 130, "lentejas": 230, "milanesa": 300, "bife": 280,
+  "chicken": 165, "beef": 250, "steak": 280, "fish": 180,
+  "salmon": 210, "tuna": 130, "egg": 78, "eggs": 156,
+  "pork": 240, "turkey": 150, "shrimp": 100, "lentils": 230,
+  "beans": 220, "tofu": 145, "chickpeas": 210,
 
   // Comida argentina y platos
   "empanada": 230, "asado": 400, "choripan": 480, "pizza": 285,
   "hamburguesa": 350, "sandwich": 250, "tarta": 300, "guiso": 350,
   "ravioles": 380, "ñoquis": 350, "locro": 420, "provoleta": 320,
+  "burger": 350, "hamburger": 350, "hot dog": 290, "burrito": 420,
+  "taco": 220, "sushi": 300, "stew": 350, "curry": 400,
+  "lasagna": 380, "risotto": 350, "omelette": 220, "wrap": 300,
 
   // Lácteos
   "yogur": 100, "queso": 110, "leche": 120, "dulce de leche": 130,
+  "yogurt": 100, "cheese": 110, "milk": 120, "butter": 100,
+  "smoothie": 200, "milkshake": 350,
 
   // Dulces y snacks
   "helado": 210, "chocolate": 150, "galletitas": 140, "torta": 350,
   "alfajor": 220, "factura": 250, "medialuna": 180, "flan": 150,
+  "ice cream": 210, "cookies": 140, "cookie": 70, "cake": 350,
+  "brownie": 250, "donut": 250, "muffin": 300, "croissant": 230,
+  "candy": 150, "chips": 160, "popcorn": 90, "peanuts": 170,
 
   // Otros
   "sopa": 120, "mate": 0, "cafe": 5, "gaseosa": 140,
+  "soup": 120, "coffee": 5, "tea": 2, "soda": 140,
+  "beer": 150, "wine": 125, "juice": 110, "water": 0,
 };
 
 /* Busca por coincidencia parcial (así "banana con miel"

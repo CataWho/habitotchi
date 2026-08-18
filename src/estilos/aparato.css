@@ -656,8 +656,14 @@
   margin-top: 7px;
 }
 
+/* Los pies de A/B/C: ancho fijo para que las tres columnas
+   queden alineadas, pero con permiso para partirse en dos
+   líneas en vez de desbordar cuando el texto es más largo. */
 .btn-labels span {
   width: 57.2px;
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: break-word;
   font-size: 10.9px;
   font-weight: 600;
   color: var(--blanco);
@@ -2248,10 +2254,16 @@
   text-align: center;
 }
 
+/* Las tarjetas de la tienda miden 80px: el botón tiene que
+   poder achicar la letra y partir la palabra antes que
+   desbordar. "Poner" entra cómodo, pero "Unequip" no. */
 .tienda-btn {
   width: 100%;
   padding: 4px 2px;
   font-size: 10px;
+  line-height: 1.1;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .tienda-btn:disabled {
@@ -2764,7 +2776,20 @@
   font-weight: 600;
   color: var(--blanco);
   text-shadow: 0 1px 3px rgba(30, 20, 55, 0.85);
-  white-space: nowrap;
+
+  /* Antes esto era white-space: nowrap, y con un texto más
+     largo el pie no se cortaba: se ESTIRABA por encima del
+     botón de al lado, porque está en position:absolute y no
+     empuja a nadie. Se veía como dos palabras encimadas.
+
+     Ahora se parte en dos líneas dentro de un ancho fijo. Es
+     lo que hace falta para que la app aguante otro idioma:
+     "estadísticas" ya venía justo, y en inglés hay palabras
+     bastante más largas. */
+  width: 74px;
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: break-word;
 }
 
 /* Aire de más arriba, porque el pozo de box-shadow de los

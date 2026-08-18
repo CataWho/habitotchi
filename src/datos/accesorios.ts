@@ -17,7 +17,7 @@ import type { Accesorio } from "@/tipos";
 
 export const ACCESORIOS: Record<string, Accesorio> = {
   monio: {
-    nombre: "Moño",
+    clave: "accesorioMonio",
     precio: 40,
     colores: { R: "#e0559b", S: "#a83570" },
     desdeCara: { x: 0, y: -2 },
@@ -27,7 +27,7 @@ export const ACCESORIOS: Record<string, Accesorio> = {
     ],
   },
   sombrero: {
-    nombre: "Sombrerito",
+    clave: "accesorioSombrero",
     precio: 60,
     colores: { R: "#4a4a7a", S: "#2c2c52" },
     desdeCara: { x: 0, y: -2 },
@@ -37,7 +37,7 @@ export const ACCESORIOS: Record<string, Accesorio> = {
     ],
   },
   lentes: {
-    nombre: "Lentes",
+    clave: "accesorioLentes",
     precio: 50,
     colores: { R: "#1c2b12", S: "#8fc0d6" },
     desdeCara: { x: 0, y: 0 },
@@ -47,7 +47,7 @@ export const ACCESORIOS: Record<string, Accesorio> = {
     ],
   },
   corona: {
-    nombre: "Corona",
+    clave: "accesorioCorona",
     precio: 120,
     colores: { R: "#e8c34a", S: "#b8912a" },
     desdeCara: { x: 0, y: -2 },

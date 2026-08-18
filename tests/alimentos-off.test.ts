@@ -183,15 +183,19 @@ describe("el diccionario con respaldo (estimarCaloriasConRespaldo)", () => {
         ok: true,
         json: async () => ({
           count: 1,
-          products: [{ product_name: "Quinoa", nutriments: { "energy-kcal_100g": 368 } }],
+          products: [{ product_name: "Kimchi", nutriments: { "energy-kcal_100g": 15 } }],
         }),
       }))
     );
 
-    // "quinoa" no está en el diccionario local de ~50 palabras
-    const resultado = await estimarCaloriasConRespaldo("quinoa");
+    /* "kimchi" no está en el diccionario local. Antes acá
+       decía "quinoa", pero al sumar los nombres en inglés
+       quinoa pasó a estar y el test dejó de probar lo que
+       decía probar: encontraba local y nunca llegaba al
+       respaldo. */
+    const resultado = await estimarCaloriasConRespaldo("kimchi");
 
-    expect(resultado?.nombre).toBe("Quinoa");
-    expect(resultado?.calorias).toBe(368);
+    expect(resultado?.nombre).toBe("Kimchi");
+    expect(resultado?.calorias).toBe(15);
   });
 });

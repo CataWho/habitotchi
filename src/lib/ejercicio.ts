@@ -39,15 +39,15 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    Compendium of Physical Activities, simplificadas). Los que
    están en TIPOS_CARDIO_CON_DISTANCIA además permiten cargar
    los kilómetros recorridos. */
-export const TIPOS_CARDIO: Record<string, { nombre: string; met: number }> = {
-  cinta:     { nombre: "Cinta / caminadora", met: 6.0 },
-  running:   { nombre: "Running",            met: 9.8 },
-  soga:      { nombre: "Soga",               met: 12.0 },
-  bici:      { nombre: "Bicicleta",          met: 7.5 },
-  natacion:  { nombre: "Natación",           met: 8.0 },
-  eliptica:  { nombre: "Elíptica",           met: 5.0 },
-  baile:     { nombre: "Baile",              met: 6.5 },
-  otro:      { nombre: "Otro cardio",        met: 6.0 },
+export const TIPOS_CARDIO: Record<string, { clave: string; met: number }> = {
+  cinta:     { clave: "cardioCinta", met: 6.0 },
+  running:   { clave: "cardioRunning", met: 9.8 },
+  soga:      { clave: "cardioSoga", met: 12.0 },
+  bici:      { clave: "cardioBici", met: 7.5 },
+  natacion:  { clave: "cardioNatacion", met: 8.0 },
+  eliptica:  { clave: "cardioEliptica", met: 5.0 },
+  baile:     { clave: "cardioBaile", met: 6.5 },
+  otro:      { clave: "cardioOtro", met: 6.0 },
 };
 
 export const TIPOS_CARDIO_CON_DISTANCIA = ["cinta", "running", "bici"];
@@ -60,42 +60,42 @@ export const TIPOS_CARDIO_CON_DISTANCIA = ["cinta", "running", "bici"];
    Si falta alguno, se puede agregar desde la app y queda
    guardado para las próximas veces (ver más abajo, ejercicios
    personalizados). */
-export const TIPOS_FUERZA: Record<string, { nombre: string; grupo: string; met?: number }> = {
+export const TIPOS_FUERZA: Record<string, { clave: string; claveGrupo: string; met?: number }> = {
   /* --- Piernas --- */
-  sentadilla:      { nombre: "Sentadilla",          grupo: "Piernas" },
-  prensa:          { nombre: "Prensa",              grupo: "Piernas" },
-  estocadas:       { nombre: "Estocadas",           grupo: "Piernas" },
-  peso_muerto:     { nombre: "Peso muerto",         grupo: "Piernas" },
-  curl_femoral:    { nombre: "Curl femoral",        grupo: "Piernas" },
-  extension_cuad:  { nombre: "Extensión de cuádriceps", grupo: "Piernas" },
-  gemelos:         { nombre: "Gemelos",             grupo: "Piernas" },
-  hip_thrust:      { nombre: "Hip thrust",          grupo: "Piernas" },
+  sentadilla:      { clave: "fuerzaSentadilla", claveGrupo: "grupoPiernas" },
+  prensa:          { clave: "fuerzaPrensa", claveGrupo: "grupoPiernas" },
+  estocadas:       { clave: "fuerzaEstocadas", claveGrupo: "grupoPiernas" },
+  peso_muerto:     { clave: "fuerzaPesoMuerto", claveGrupo: "grupoPiernas" },
+  curl_femoral:    { clave: "fuerzaCurlFemoral", claveGrupo: "grupoPiernas" },
+  extension_cuad:  { clave: "fuerzaExtensionCuad", claveGrupo: "grupoPiernas" },
+  gemelos:         { clave: "fuerzaGemelos", claveGrupo: "grupoPiernas" },
+  hip_thrust:      { clave: "fuerzaHipThrust", claveGrupo: "grupoPiernas" },
 
   /* --- Espalda --- */
-  dominadas:       { nombre: "Dominadas",           grupo: "Espalda" },
-  remo:            { nombre: "Remo",                grupo: "Espalda" },
-  jalon_pecho:     { nombre: "Jalón al pecho",      grupo: "Espalda" },
-  remo_mancuerna:  { nombre: "Remo con mancuerna",  grupo: "Espalda" },
+  dominadas:       { clave: "fuerzaDominadas", claveGrupo: "grupoEspalda" },
+  remo:            { clave: "fuerzaRemo", claveGrupo: "grupoEspalda" },
+  jalon_pecho:     { clave: "fuerzaJalonPecho", claveGrupo: "grupoEspalda" },
+  remo_mancuerna:  { clave: "fuerzaRemoMancuerna", claveGrupo: "grupoEspalda" },
 
   /* --- Pecho y hombros --- */
-  press_banca:     { nombre: "Press de banca",      grupo: "Pecho y hombros" },
-  press_inclinado: { nombre: "Press inclinado",     grupo: "Pecho y hombros" },
-  aperturas:       { nombre: "Aperturas",           grupo: "Pecho y hombros" },
-  flexiones:       { nombre: "Flexiones",           grupo: "Pecho y hombros" },
-  press_militar:   { nombre: "Press militar",       grupo: "Pecho y hombros" },
-  elevaciones_lat: { nombre: "Elevaciones laterales", grupo: "Pecho y hombros" },
+  press_banca:     { clave: "fuerzaPressBanca", claveGrupo: "grupoPecho" },
+  press_inclinado: { clave: "fuerzaPressInclinado", claveGrupo: "grupoPecho" },
+  aperturas:       { clave: "fuerzaAperturas", claveGrupo: "grupoPecho" },
+  flexiones:       { clave: "fuerzaFlexiones", claveGrupo: "grupoPecho" },
+  press_militar:   { clave: "fuerzaPressMilitar", claveGrupo: "grupoPecho" },
+  elevaciones_lat: { clave: "fuerzaElevacionesLat", claveGrupo: "grupoPecho" },
 
   /* --- Brazos --- */
-  curl_biceps:     { nombre: "Curl de bíceps",      grupo: "Brazos" },
-  triceps_polea:   { nombre: "Tríceps en polea",    grupo: "Brazos" },
-  fondos:          { nombre: "Fondos",              grupo: "Brazos" },
+  curl_biceps:     { clave: "fuerzaCurlBiceps", claveGrupo: "grupoBrazos" },
+  triceps_polea:   { clave: "fuerzaTricepsPolea", claveGrupo: "grupoBrazos" },
+  fondos:          { clave: "fuerzaFondos", claveGrupo: "grupoBrazos" },
 
   /* --- Core --- */
-  plancha:         { nombre: "Plancha",             grupo: "Core" },
-  abdominales:     { nombre: "Abdominales",         grupo: "Core" },
-  elevacion_pierna:{ nombre: "Elevación de piernas", grupo: "Core" },
+  plancha:         { clave: "fuerzaPlancha", claveGrupo: "grupoCore" },
+  abdominales:     { clave: "fuerzaAbdominales", claveGrupo: "grupoCore" },
+  elevacion_pierna:{ clave: "fuerzaElevacionPierna", claveGrupo: "grupoCore" },
 
-  otro:            { nombre: "Otro ejercicio",      grupo: "Otros" },
+  otro:            { clave: "fuerzaOtro", claveGrupo: "grupoOtros" },
 };
 
 
@@ -125,7 +125,7 @@ export function agregarEjercicioPropio(propios: any, nombre: string) {
 
   const id = "propio_" + limpio.toLowerCase().replace(/\s+/g, "_");
 
-  propios[id] = { nombre: limpio, grupo: "Mis ejercicios" };
+  propios[id] = { nombre: limpio, claveGrupo: "grupoMisEjercicios" };
   guardarEjerciciosPropios(propios);
 
   return { propios, id };
@@ -149,10 +149,10 @@ export function catalogoFuerza(propios: any) {
    etiquetas sueltas, usamos el criterio del "test del habla"
    que usan los profesionales de educación física: es un
    criterio concreto, no una sensación difícil de calibrar. */
-export const INTENSIDAD_PESAS: Record<string, { nombre: string; met: number }> = {
-  leve:     { nombre: "Leve (podés hablar sin esfuerzo)",        met: 3.5 },
-  moderada: { nombre: "Moderada (te cuesta mantener charla)",    met: 5.0 },
-  intensa:  { nombre: "Intensa (no podés hablar mientras lo hacés)", met: 6.0 },
+export const INTENSIDAD_PESAS: Record<string, { clave: string; met: number }> = {
+  leve:     { clave: "intensidadLeve", met: 3.5 },
+  moderada: { clave: "intensidadModerada", met: 5.0 },
+  intensa:  { clave: "intensidadIntensa", met: 6.0 },
 };
 
 

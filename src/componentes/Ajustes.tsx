@@ -6,6 +6,7 @@ import {
 } from "@/lib/nube";
 import { CLAVES } from "@/lib/almacenamiento";
 import { useGuardado } from "@/estado/useGuardado";
+import { tr, usarIdioma } from "@/lib/idioma";
 import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
 import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
@@ -33,15 +34,16 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
   return (
     <div className="chef-overlay" onClick={onCerrar}>
       <div className="chef-modal" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label="Cerrar">
+        <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label={tr("cerrar")}>
           ✕
         </button>
 
-        <h2 className="panel-title">Ajustes</h2>
+        <h2 className="panel-title">{tr("ajustes")}</h2>
 
         <SobreVos />
         <QueMostrar />
         <CuentaEnLaNube />
+        <Idioma />
         <TusDatos />
         <Privacidad />
       </div>
@@ -88,14 +90,14 @@ function QueMostrar() {
   };
 
   return (
-    <Panel titulo="Qué mostrar">
+    <Panel titulo={tr("queMostrar")}>
       <label className="campo-fila">
         <input
           type="checkbox"
           checked={perfil.cicloActivado !== false}
           onChange={(e) => cambiar("cicloActivado", e.target.checked)}
         />
-        <span>Registro de ciclo menstrual, en Salud</span>
+        <span>{tr("mostrarCiclo")}</span>
       </label>
 
       <Ayuda>
@@ -114,12 +116,12 @@ function SobreVos() {
   };
 
   return (
-    <Panel titulo="Sobre vos">
+    <Panel titulo={tr("sobreVos")}>
       <div className="campo-fila">
         <input
           className="input-rosa"
           value={perfil.nombre ?? ""}
-          placeholder="¿Cómo te llamás?"
+          placeholder={tr("comoTeLlamas")}
           maxLength={30}
           onChange={(e) => cambiar("nombre", e.target.value)}
         />
@@ -132,7 +134,7 @@ function SobreVos() {
           min={1}
           max={120}
           value={perfil.edad ?? ""}
-          placeholder="años"
+          placeholder={tr("anios")}
           onChange={(e) => cambiar("edad", Number(e.target.value))}
         />
 
@@ -141,10 +143,10 @@ function SobreVos() {
         <Select
           valor={perfil.pronombre ?? ""}
           alCambiar={(v) => cambiar("pronombre", v)}
-          etiqueta="Pronombre"
+          etiqueta={tr("pronombre")}
           opciones={[
             { id: "", nombre: "—" },
-            ...PRONOMBRES.map((p: any) => ({ id: p.id, nombre: p.nombre })),
+            ...PRONOMBRES.map((p: any) => ({ id: p.id, nombre: tr(p.clave) })),
           ]}
         />
       </div>
@@ -156,7 +158,7 @@ function SobreVos() {
           min={1}
           step={0.1}
           value={perfil.pesoKg ?? ""}
-          placeholder="peso (kg)"
+          placeholder={tr("pesoKg")}
           onChange={(e) => cambiar("pesoKg", Number(e.target.value))}
         />
         <input
@@ -164,7 +166,7 @@ function SobreVos() {
           type="number"
           min={1}
           value={perfil.alturaCm ?? ""}
-          placeholder="altura (cm)"
+          placeholder={tr("alturaCm")}
           onChange={(e) => cambiar("alturaCm", Number(e.target.value))}
         />
       </div>
@@ -201,11 +203,11 @@ function CuentaEnLaNube() {
 
     try {
       await cambiarContraseña(contraseña);
-      setAviso("Listo, contraseña cambiada.");
+      setAviso(tr("contrasenaCambiada"));
       setContraseña("");
       setCambiando(false);
     } catch (e: any) {
-      setAviso(e?.message ?? "No se pudo cambiar la contraseña.");
+      setAviso(e?.message ?? tr("noSePudoCambiarContrasena"));
     } finally {
       setTrabajando(false);
     }
@@ -220,8 +222,8 @@ function CuentaEnLaNube() {
   };
 
   return (
-    <Panel titulo="Tu cuenta">
-      <Ayuda>Tu cuenta: {sesion.email}</Ayuda>
+    <Panel titulo={tr("tuCuenta")}>
+      <Ayuda>{tr("conectadaComo", { email: sesion.email })}</Ayuda>
 
       {cambiando ? (
         <>
@@ -229,7 +231,7 @@ function CuentaEnLaNube() {
             <CampoDeContraseña
               valor={contraseña}
               alCambiar={setContraseña}
-              marcador="contraseña nueva"
+              marcador={tr("contrasenaNueva")}
               autoComplete="new-password"
               alApretarEnter={() => contraseña.length >= 6 && guardarContraseña()}
             />
@@ -243,20 +245,20 @@ function CuentaEnLaNube() {
             </button>
           </div>
           {contraseña.length > 0 && contraseña.length < 6 && (
-            <Ayuda>Tiene que tener al menos 6 caracteres.</Ayuda>
+            <Ayuda>{tr("minimoSeisCaracteres")}</Ayuda>
           )}
         </>
       ) : (
         <div className="campo-fila">
           <button type="button" className="habit-btn" onClick={() => setCambiando(true)}>
-            Cambiar contraseña
+            {tr("cambiarContrasena")}
           </button>
         </div>
       )}
 
       <div className="campo-fila">
         <button type="button" className="habit-btn habit-btn--restar" onClick={salir}>
-          Cerrar sesión
+          {tr("cerrarSesion")}
         </button>
       </div>
 
@@ -279,12 +281,49 @@ function CuentaEnLaNube() {
    sería bastante inútil.
    ---------------------------------------------------------- */
 function Privacidad() {
+  const { t } = usarIdioma();
+
   return (
-    <Panel titulo="Privacidad">
+    <Panel titulo={t("privacidad")}>
       <div className="campo-fila">
         <a className="habit-btn" href="/privacidad.html" target="_blank" rel="noopener">
-          Ver la política de privacidad
+          {t("verPolitica")}
         </a>
+      </div>
+
+      {/* La política queda en español aunque la app esté en
+          inglés, y conviene avisarlo para que no parezca un
+          olvido: es un documento legal que cita la ley
+          argentina, y traducirlo mal sería peor. */}
+      <Ayuda>{t("notaPolitica")}</Ayuda>
+    </Panel>
+  );
+}
+
+/* ----------------------------------------------------------
+   EL IDIOMA
+   ----------------------------------------------------------
+   Arranca según el idioma del dispositivo; acá se puede
+   cambiar a mano. La preferencia NO se sincroniza con la
+   cuenta a propósito: es de este aparato, como el sonido.
+   Que el idioma elegido en la compu te cambie el del celular
+   sería un bug, no una función.
+   ---------------------------------------------------------- */
+function Idioma() {
+  const { idioma, cambiarIdioma, t } = usarIdioma();
+
+  return (
+    <Panel titulo={t("idioma")}>
+      <div className="campo-fila">
+        <Select
+          valor={idioma}
+          alCambiar={(v) => cambiarIdioma(v as "es" | "en")}
+          etiqueta={t("idioma")}
+          opciones={[
+            { id: "es", nombre: "Español" },
+            { id: "en", nombre: "English" },
+          ]}
+        />
       </div>
     </Panel>
   );
@@ -317,7 +356,7 @@ function TusDatos() {
     enlace.click();
     URL.revokeObjectURL(enlace.href);
 
-    setAviso("Listo, se descargó tu copia.");
+    setAviso(tr("copiaDescargada"));
   };
 
   const importar = (archivo: File) => {
@@ -329,9 +368,9 @@ function TusDatos() {
         for (const [clave, valor] of Object.entries(datos)) {
           if (clave.startsWith("habitotchi_")) localStorage.setItem(clave, String(valor));
         }
-        setAviso("Datos restaurados. Recargá la página para verlos.");
+        setAviso(tr("datosRestaurados"));
       } catch {
-        setAviso("Ese archivo no parece una copia de Habitotchi.");
+        setAviso(tr("archivoInvalido"));
       }
     };
 
@@ -341,10 +380,10 @@ function TusDatos() {
   const borrarTodo = async () => {
     /* Doble confirmación: esto no se puede deshacer y se lleva
        puesto todo el historial. */
-    if (!window.confirm("¿Seguro? Se borra todo lo que anotaste y no se puede recuperar.")) return;
-    if (!window.confirm("De verdad, no hay vuelta atrás. ¿Borro todo?")) return;
+    if (!window.confirm(tr("confirmarBorrar1"))) return;
+    if (!window.confirm(tr("confirmarBorrar2"))) return;
 
-    setAviso("Borrando…");
+    setAviso(tr("borrando"));
 
     /* La nube PRIMERO. Si se borrara el disco antes y después
        fallara la conexión, quedaría lo peor de los dos mundos:
@@ -354,7 +393,7 @@ function TusDatos() {
     try {
       await borrarTodoDeLaNube();
     } catch (e: any) {
-      setAviso(e?.message ?? "No se pudo borrar de tu cuenta. No se borró nada.");
+      setAviso(e?.message ?? tr("noSePudoBorrarNube"));
       return;
     }
 
@@ -369,16 +408,16 @@ function TusDatos() {
   };
 
   return (
-    <Panel titulo="Tus datos">
+    <Panel titulo={tr("tusDatos")}>
       <div className="campo-fila">
         <button type="button" className="habit-btn" onClick={exportar}>
-          Descargar mis datos
+          {tr("descargarMisDatos")}
         </button>
       </div>
 
       <div className="campo-fila">
         <label className="habit-btn" style={{ cursor: "pointer" }}>
-          Restaurar una copia
+          {tr("restaurarCopia")}
           <input
             type="file"
             accept="application/json"
@@ -393,7 +432,7 @@ function TusDatos() {
 
       <div className="campo-fila">
         <button type="button" className="habit-btn habit-btn--restar" onClick={borrarTodo}>
-          Borrar todo
+          {tr("borrarTodo")}
         </button>
       </div>
 

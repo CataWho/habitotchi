@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
 import { cargarPerfil, pesoParaCalculos } from "@/lib/perfil";
@@ -53,11 +54,11 @@ export function Ejercicio() {
   };
 
   return (
-    <Pagina nombre="Ejercicio">
+    <Pagina clave="pantallaEjercicio">
       <Panel titulo="Tu meta de hoy">
         <ListaDeHabitos ids={["ejercicio"]} />
         <Ayuda>
-          Calorías quemadas hoy (aproximado): <b>{calorias} kcal</b> en {minutos} minutos.
+          {tr("caloriasQuemadas", { kcal: calorias, min: minutos })}
         </Ayuda>
       </Panel>
 
@@ -70,7 +71,7 @@ export function Ejercicio() {
         alGuardar={sincronizar}
         alAgregarPropio={(nombre) => setPropios({ ...agregarEjercicioPropio(propios, nombre).propios })}
       />
-      <Panel titulo="Cómo venís">
+      <Panel titulo={tr("comoVenis")}>
         <GraficoDeBarras
           calcular={(baldes) => {
             const resumen = resumenEjercicioPorBuckets(sesiones, baldes);
@@ -86,23 +87,23 @@ export function Ejercicio() {
 
       <Pasos />
 
-      <Panel titulo="Lo de hoy">
+      <Panel titulo={tr("loDeHoy")}>
         {delDia.length === 0 ? (
-          <Ayuda>Todavía no cargaste ninguna sesión hoy.</Ayuda>
+          <Ayuda>{tr("sinSesionesHoy")}</Ayuda>
         ) : (
           <ul className="lista-simple">
             {delDia.map((sesion: any, i: number) => (
               <Fila key={i} alBorrar={() => sincronizar(eliminarSesion(sesiones, hoy, i))}>
                 {sesion.tipo === "cardio" ? (
                   <>
-                    <b>{TIPOS_CARDIO[sesion.subtipo]?.nombre ?? sesion.subtipo}</b> ·{" "}
+                    <b>{tr(TIPOS_CARDIO[sesion.subtipo]?.clave ?? "") || sesion.subtipo}</b> ·{" "}
                     {sesion.minutos} min
                     {sesion.distanciaKm ? ` · ${sesion.distanciaKm} km` : ""} ·{" "}
                     {sesion.calorias} kcal
                   </>
                 ) : (
                   <>
-                    <b>{catalogoFuerza(propios)[sesion.ejercicio]?.nombre ?? sesion.ejercicio}</b>{" "}
+                    <b>{tr(catalogoFuerza(propios)[sesion.ejercicio]?.clave ?? "") || sesion.ejercicio}</b>{" "}
                     · {sesion.series}x{sesion.repeticiones} · {sesion.minutos} min ·{" "}
                     {sesion.calorias} kcal
                   </>
@@ -146,12 +147,12 @@ function FormularioCardio({
   };
 
   return (
-    <Panel titulo="Cardio">
+    <Panel titulo={tr("cardio")}>
       <div className="campo-fila">
         <Select
           valor={subtipo}
           alCambiar={setSubtipo}
-          opciones={Object.entries(TIPOS_CARDIO).map(([id, t]) => ({ id, nombre: t.nombre }))}
+          opciones={Object.entries(TIPOS_CARDIO).map(([id, t]) => ({ id, nombre: tr(t.clave) }))}
         />
       </div>
 
@@ -160,7 +161,7 @@ function FormularioCardio({
           className="input-rosa"
           type="number"
           value={minutos}
-          placeholder="minutos"
+          placeholder={tr("minutos")}
           onChange={(e) => setMinutos(e.target.value)}
         />
         {pideDistancia && (
@@ -168,7 +169,7 @@ function FormularioCardio({
             className="input-rosa"
             type="number"
             value={km}
-            placeholder="km"
+            placeholder={tr("km")}
             onChange={(e) => setKm(e.target.value)}
           />
         )}
@@ -191,7 +192,7 @@ function FormularioFuerza({
   pesoKg: number;
   sesiones: any;
   hoy: string;
-  catalogo: Record<string, { nombre: string; grupo: string }>;
+  catalogo: Record<string, { clave: string; claveGrupo: string }>;
   alGuardar: (s: any) => void;
   alAgregarPropio: (nombre: string) => void;
 }) {
@@ -218,13 +219,13 @@ function FormularioFuerza({
   };
 
   return (
-    <Panel titulo="Pesas">
+    <Panel titulo={tr("pesas")}>
       <div className="campo-fila">
         <Select
           valor={ejercicio}
           alCambiar={setEjercicio}
           opciones={Object.entries(catalogo).map(([id, e]) => ({
-            id, nombre: e.nombre, grupo: e.grupo,
+            id, nombre: tr(e.clave), grupo: tr(e.claveGrupo),
           }))}
         />
         {/* Si el ejercicio que hacés no está en la lista, lo
@@ -233,7 +234,7 @@ function FormularioFuerza({
           type="button"
           className="habit-btn"
           onClick={() => setAgregandoPropio((v) => !v)}
-          aria-label="Agregar un ejercicio que no está en la lista"
+          aria-label={tr("agregarEjercicioPropio")}
         >
           +
         </button>
@@ -244,7 +245,7 @@ function FormularioFuerza({
           <input
             className="input-rosa"
             value={nombrePropio}
-            placeholder="nombre del ejercicio"
+            placeholder={tr("nombreDelEjercicio")}
             autoFocus
             onChange={(e) => setNombrePropio(e.target.value)}
           />
@@ -267,12 +268,12 @@ function FormularioFuerza({
         <Select
           valor={intensidad}
           alCambiar={setIntensidad}
-          opciones={Object.entries(INTENSIDAD_PESAS).map(([id, i]) => ({ id, nombre: i.nombre }))}
+          opciones={Object.entries(INTENSIDAD_PESAS).map(([id, i]) => ({ id, nombre: tr(i.clave) }))}
         />
       </div>
 
       <div className="campo-fila">
-        <input className="input-rosa" type="number" value={series} placeholder="series"
+        <input className="input-rosa" type="number" value={series} placeholder={tr("series")}
           onChange={(e) => setSeries(e.target.value)} />
         <input className="input-rosa" type="number" value={repeticiones} placeholder="reps"
           onChange={(e) => setRepeticiones(e.target.value)} />
@@ -321,14 +322,14 @@ function Pasos() {
   };
 
   return (
-    <Panel titulo="Pasos">
+    <Panel titulo={tr("pasos")}>
       <div className="campo-fila">
         <input
           className="input-rosa"
           type="number"
           min={0}
           value={cantidad}
-          placeholder="pasos de hoy"
+          placeholder={tr("pasosDeHoy")}
           onChange={(e) => setCantidad(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && guardar()}
         />

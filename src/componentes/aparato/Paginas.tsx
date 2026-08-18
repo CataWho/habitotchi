@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type ReactNode, type RefObject } from "react";
+import { tr } from "@/lib/idioma";
 
 /* ==========================================================
    LAS PÁGINAS
@@ -108,14 +109,14 @@ export function Paginas({
 /* Los puntitos de abajo: en qué pestaña estás */
 export function Puntitos({ navegacion, nombres }: { navegacion: Navegacion; nombres: string[] }) {
   return (
-    <nav className="page-dots" aria-label="Navegación entre pestañas">
+    <nav className="page-dots" aria-label={tr("aparatoNavegacion")}>
       {nombres.map((nombre, i) => (
         <button
           key={nombre}
           type="button"
           className={i === navegacion.actual ? "page-dot is-active" : "page-dot"}
           onClick={() => navegacion.irA(i)}
-          aria-label={`Ir a ${nombre}`}
+          aria-label={tr("aparatoIrA", { nombre })}
           aria-current={i === navegacion.actual}
         />
       ))}

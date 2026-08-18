@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { tr } from "@/lib/idioma";
 import { useEscala } from "./useEscala";
 import { FONDOS } from "@/datos/fondos";
 import { useHabitotchi } from "@/estado/useHabitotchi";
@@ -73,7 +74,7 @@ export function Pantalla({ children }: { children: ReactNode }) {
   return (
     <section
       className="screen"
-      aria-label="Pantalla del aparato"
+      aria-label={tr("aparatoPantalla")}
       style={
         {
           background: fondo.degradado,

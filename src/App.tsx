@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import { Aparato, Pantalla } from "@/componentes/aparato/Aparato";
 import { Botonera } from "@/componentes/aparato/Chasis";
 import { Paginas, Puntitos, usePaginas } from "@/componentes/aparato/Paginas";
@@ -24,15 +25,15 @@ import { mejorRacha, rachaActual, totalDiasBuenos } from "@/lib/tienda";
 
 /* Las 9 pestañas, en el orden en que se deslizan */
 const PANTALLAS = [
-  { nombre: "Hogar", Componente: Hogar },
-  { nombre: "Alimentación", Componente: Alimentacion },
-  { nombre: "Ejercicio", Componente: Ejercicio },
-  { nombre: "Hobbies", Componente: Hobbies },
-  { nombre: "Trabajo", Componente: Trabajo },
-  { nombre: "Calendario", Componente: Calendario },
-  { nombre: "Salud", Componente: Salud },
-  { nombre: "Juegos", Componente: Juegos },
-  { nombre: "Tienda", Componente: Tienda },
+  { clave: "pantallaHogar", Componente: Hogar },
+  { clave: "pantallaAlimentacion", Componente: Alimentacion },
+  { clave: "pantallaEjercicio", Componente: Ejercicio },
+  { clave: "pantallaHobbies", Componente: Hobbies },
+  { clave: "pantallaTrabajo", Componente: Trabajo },
+  { clave: "pantallaCalendario", Componente: Calendario },
+  { clave: "pantallaSalud", Componente: Salud },
+  { clave: "pantallaJuegos", Componente: Juegos },
+  { clave: "pantallaTienda", Componente: Tienda },
 ];
 
 /* ==========================================================
@@ -61,7 +62,7 @@ export function App() {
     return (
       <>
         <Cielo />
-        <p className="cargando-sesion">Un segundo…</p>
+        <p className="cargando-sesion">{tr("unSegundo")}</p>
       </>
     );
   }
@@ -94,7 +95,7 @@ function Habitotchi() {
         type="button"
         className="ajustes-boton"
         onClick={() => setAjustesAbiertos(true)}
-        aria-label="Abrir ajustes"
+        aria-label={tr("aparatoAbrirAjustes")}
       >
         ⚙
       </button>
@@ -104,8 +105,8 @@ function Habitotchi() {
 
         <Pantalla>
           <Paginas navegacion={navegacion}>
-            {PANTALLAS.map(({ nombre, Componente }) => (
-              <Componente key={nombre} />
+            {PANTALLAS.map(({ clave, Componente }) => (
+              <Componente key={clave} />
             ))}
           </Paginas>
         </Pantalla>
@@ -117,7 +118,7 @@ function Habitotchi() {
           onAnterior={navegacion.anterior}
           onSiguiente={navegacion.siguiente}
         />
-        <Puntitos navegacion={navegacion} nombres={PANTALLAS.map((p) => p.nombre)} />
+        <Puntitos navegacion={navegacion} nombres={PANTALLAS.map((p) => tr(p.clave))} />
       </Aparato>
 
       {cementerioAbierto && <Cementerio onCerrar={() => setCementerioAbierto(false)} />}
@@ -150,16 +151,16 @@ function Cementerio({ onCerrar }: { onCerrar: () => void }) {
           ×
         </button>
 
-        <h2 className="panel-title">Cementerio</h2>
+        <h2 className="panel-title">{tr("cementerio")}</h2>
 
         {cementerio.length === 0 ? (
-          <p className="ayuda-chica">Todavía no perdiste ninguna mascota.</p>
+          <p className="ayuda-chica">{tr("sinCementerio")}</p>
         ) : (
           <ul className="lista-simple">
             {cementerio.map((entrada, i) => (
               <li key={`${entrada.nombre}-${i}`} className="fila-simple">
-                <b>{entrada.nombre}</b> · {MASCOTAS[entrada.mascota]?.nombre ?? entrada.mascota} ·
-                llegó a {entrada.etapaAlcanzada}
+                <b>{entrada.nombre}</b> · {tr(MASCOTAS[entrada.mascota]?.clave ?? "") || entrada.mascota} ·
+                {tr("llegoA", { etapa: tr("etapa" + entrada.etapaAlcanzada.charAt(0).toUpperCase() + entrada.etapaAlcanzada.slice(1)) })}
                 <br />
                 <span className="ayuda-chica">
                   {entrada.desde} — {entrada.hasta}
@@ -196,13 +197,13 @@ function PanelDeHoy({ onCerrar }: { onCerrar: () => void }) {
           ×
         </button>
 
-        <h2 className="panel-title">Hoy</h2>
+        <h2 className="panel-title">{tr("detalleDeHoy")}</h2>
 
         {buenDia === null ? (
           <p className="ayuda-chica">Todavía no anotaste nada hoy.</p>
         ) : (
           <p className="ayuda-chica">
-            {buenDia ? "¡Llegaste a todas tus metas!" : "Todavía te falta alguna meta."}
+            {buenDia ? tr("llegasteATodas") : tr("faltaAlgunaMeta")}
           </p>
         )}
 
@@ -213,7 +214,7 @@ function PanelDeHoy({ onCerrar }: { onCerrar: () => void }) {
             if (habito.tipo !== "meta") {
               return (
                 <li key={id} className="fila-simple">
-                  <span>{habito.nombre} · {valor} {habito.unidad}</span>
+                  <span>{tr(habito.clave)} · {valor} {tr(habito.unidad)}</span>
                 </li>
               );
             }
@@ -223,7 +224,7 @@ function PanelDeHoy({ onCerrar }: { onCerrar: () => void }) {
 
             return (
               <li key={id} className="fila-simple" style={{ flexDirection: "column", alignItems: "stretch", gap: "4px" }}>
-                <span>{habito.nombre} · {valor} / {meta} {habito.unidad}</span>
+                <span>{tr(habito.clave)} · {valor} / {meta} {tr(habito.unidad)}</span>
                 <div className="habit-bar-track">
                   <div className="habit-bar-fill" style={{ width: `${porcentaje}%`, background: habito.color }} />
                 </div>
@@ -264,13 +265,13 @@ function PanelDeEstadisticas({ onCerrar }: { onCerrar: () => void }) {
           ×
         </button>
 
-        <h2 className="panel-title">Estadísticas</h2>
+        <h2 className="panel-title">{tr("estadisticas")}</h2>
 
         <ul className="lista-simple">
-          <li className="fila-simple"><span>Racha actual · <b>{actual}</b> {actual === 1 ? "día" : "días"}</span></li>
-          <li className="fila-simple"><span>Mejor racha · <b>{mejor}</b> {mejor === 1 ? "día" : "días"}</span></li>
-          <li className="fila-simple"><span>Esta semana · <b>{semana}</b> de 7 días buenos</span></li>
-          <li className="fila-simple"><span>Total de días buenos · <b>{totalBuenos}</b></span></li>
+          <li className="fila-simple"><span>{tr("rachaActual")} · <b>{actual}</b> {tr("dia", { n: actual }).replace(String(actual) + " ", "")}</span></li>
+          <li className="fila-simple"><span>{tr("mejorRacha")} · <b>{mejor}</b> {tr("dia", { n: mejor }).replace(String(mejor) + " ", "")}</span></li>
+          <li className="fila-simple"><span>{tr("estaSemanaBuenos", { n: semana })}</span></li>
+          <li className="fila-simple"><span>{tr("totalDiasBuenos")} · <b>{totalBuenos}</b></span></li>
         </ul>
       </div>
     </div>

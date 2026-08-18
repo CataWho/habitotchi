@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { tr } from "@/lib/idioma";
 import type { Etapa, IdMascota } from "@/tipos";
 import { FANTASMA } from "@/datos/fantasma";
 import { Mascota, TAM_PIXEL_MASCOTA } from "./Mascota";
@@ -49,7 +50,7 @@ export function Despedida({
 
     if (sinMovimiento) {
       setMomento("tumba");
-      onDecir(`${comoSeLlamaba} descansa. Podés elegir una mascota nueva.`);
+      onDecir(tr("descansa", { nombre: comoSeLlamaba }));
       onTerminar();
       return;
     }
@@ -60,7 +61,7 @@ export function Despedida({
       window.setTimeout(() => setMomento("cayendo"), CAE_A_LOS),
       window.setTimeout(() => {
         setMomento("fantasma");
-        onDecir(`Chau, ${comoSeLlamaba}.`);
+        onDecir(tr("chau", { nombre: comoSeLlamaba }));
       }, FANTASMA_A_LOS),
       window.setTimeout(() => {
         setMomento("tumba");
@@ -102,7 +103,7 @@ export function Fantasma({ tamPixel = TAM_PIXEL_MASCOTA }: { tamPixel?: number }
       className="pet-fantasma"
       style={{ gridTemplateColumns: `repeat(${columnas}, ${tamPixel}px)` }}
       role="img"
-      aria-label="Un fantasmita que sube"
+      aria-label={tr("unFantasmita")}
     >
       {FANTASMA.pixeles.flatMap((fila, y) =>
         [...fila].map((letra, x) => (
@@ -126,7 +127,7 @@ export function Tumba({ brotando = false }: { brotando?: boolean }) {
     <div
       className={brotando ? "pet-tumba pet-tumba--brotando" : "pet-tumba"}
       role="img"
-      aria-label="Una tumba que dice R.I.P."
+      aria-label={tr("unaTumba")}
     />
   );
 }

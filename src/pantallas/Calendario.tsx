@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { tr } from "@/lib/idioma";
 import {
-  INICIALES_DE_SEMANA, diasDelMes, fechaDeHoy, nombreDelMes,
+  diasDelMes, fechaDeHoy, inicialesDeSemana, nombreDelMes,
 } from "@/lib/fechas";
 import {
   agregarEvento, cargarCalendario, eliminarEvento, eventosDelDia,
@@ -56,7 +57,7 @@ export function Calendario() {
   };
 
   return (
-    <Pagina nombre="Calendario">
+    <Pagina clave="pantallaCalendario">
       <Panel>
         <div className="mes-nav">
           <button type="button" className="habit-btn" onClick={() => mover(-1)}>‹</button>
@@ -65,7 +66,7 @@ export function Calendario() {
         </div>
 
         <div className="mes-grilla">
-          {INICIALES_DE_SEMANA.map((inicial) => (
+          {inicialesDeSemana().map((inicial) => (
             <div key={inicial} className="mes-encabezado">{inicial}</div>
           ))}
 
@@ -106,14 +107,14 @@ export function Calendario() {
 
       <Panel titulo={seleccionado}>
         <div className="campo-fila">
-          <input className="input-rosa" value={texto} placeholder="anotar algo"
+          <input className="input-rosa" value={texto} placeholder={tr("anotarAlgo")}
             onChange={(e) => setTexto(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && agregar()} />
-          <button type="button" className="habit-btn" onClick={agregar}>Agregar</button>
+          <button type="button" className="habit-btn" onClick={agregar}>{tr("agregar")}</button>
         </div>
 
         {delDia.length === 0 && deGoogleEseDia.length === 0 ? (
-          <Ayuda>No hay nada anotado ese día.</Ayuda>
+          <Ayuda>{tr("nadaEseDia")}</Ayuda>
         ) : (
           <ul className="lista-simple">
             {delDia.map((evento: any, i: number) => (

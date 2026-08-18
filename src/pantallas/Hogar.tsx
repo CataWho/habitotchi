@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { tr } from "@/lib/idioma";
 import type { IdMascota } from "@/tipos";
 import { MASCOTAS } from "@/datos/mascotas";
 import { useHabitotchi, nombreDeLaMascota } from "@/estado/useHabitotchi";
@@ -40,7 +41,7 @@ export function Hogar() {
   const estadoVida = calcularEstadoVida(registro, metas, vida?.desde);
 
   return (
-    <Pagina nombre="Hogar" sinTitulo>
+    <Pagina clave="pantallaHogar" sinTitulo>
       <BarraSuperior />
 
       <div className="pet-stage">
@@ -54,7 +55,7 @@ export function Hogar() {
             onDecir={decir}
           />
         ) : !vida ? (
-          <p className="screen-msg">Elegí una mascota para empezar.</p>
+          <p className="screen-msg">{tr("elegiTuMascota")}</p>
         ) : vida.muerteRegistrada ? (
           <Tumba />
         ) : (
@@ -77,7 +78,7 @@ export function Hogar() {
         bloqueada={!!vida && !vida.muerteRegistrada}
         onElegir={(id) => {
           if (!yaLoTenes(compras, "mascota", id)) {
-            decir(`Todavía no desbloqueaste al ${MASCOTAS[id]?.nombre.toLowerCase()}. Está en la tienda.`);
+            decir(tr("noDesbloqueada", { mascota: tr(MASCOTAS[id]?.clave ?? "") }));
             return;
           }
           elegirMascota(id);
@@ -150,7 +151,7 @@ function SelectorDeMascota({ elegida, bloqueada, onElegir, tieneDesbloqueada }: 
               tamPixel={TAM_PIXEL_MINI}
               className="pet-mini"
             />
-            <span className="pet-name">{MASCOTAS[vida.mascota]?.nombre}</span>
+            <span className="pet-name">{tr(MASCOTAS[vida.mascota]?.clave ?? "")}</span>
           </div>
         </div>
 
@@ -158,7 +159,7 @@ function SelectorDeMascota({ elegida, bloqueada, onElegir, tieneDesbloqueada }: 
           <input
             className="input-rosa"
             value={borrador}
-            placeholder="ponele un nombre"
+            placeholder={tr("ponleNombre")}
             maxLength={20}
             autoFocus
             onChange={(e) => setBorrador(e.target.value)}
@@ -187,7 +188,7 @@ function SelectorDeMascota({ elegida, bloqueada, onElegir, tieneDesbloqueada }: 
 
   return (
     <section className="panel">
-      <h2 className="panel-title">Elegí tu mascota</h2>
+      <h2 className="panel-title">{tr("elegiTuMascota")}</h2>
 
       <div className="pet-picker">
         {Object.entries(MASCOTAS).map(([id, mascota]) => {
@@ -213,7 +214,7 @@ function SelectorDeMascota({ elegida, bloqueada, onElegir, tieneDesbloqueada }: 
                 tamPixel={TAM_PIXEL_MINI}
                 className="pet-mini"
               />
-              <span className="pet-name">{mascota.nombre}</span>
+              <span className="pet-name">{tr(mascota.clave)}</span>
             </button>
           );
         })}
@@ -235,7 +236,7 @@ function HistorialDeLaSemana() {
 
   return (
     <section className="panel">
-      <h2 className="panel-title">Últimos 7 días registrados</h2>
+      <h2 className="panel-title">{tr("ultimosSieteDias")}</h2>
 
       <div className="history-strip">
         {dias.map((dia) => {

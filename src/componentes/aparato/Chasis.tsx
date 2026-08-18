@@ -1,4 +1,5 @@
 import { useHabitotchi } from "@/estado/useHabitotchi";
+import { tr } from "@/lib/idioma";
 import { calcularEstadoVida, faltaParaLaProximaEtapa, UMBRAL_ADULTO, UMBRAL_JOVEN } from "@/lib/crecimiento";
 import { monedasDisponibles, rachaActual } from "@/lib/tienda";
 
@@ -26,9 +27,9 @@ export function Marcadores() {
 
   return (
     <div className="marcadores">
-      <Marcador valor={estadoVida.puntos} etiqueta="puntos" />
-      <Marcador valor={racha} etiqueta="racha" />
-      <Marcador valor={monedas} etiqueta="monedas" monedas />
+      <Marcador valor={estadoVida.puntos} etiqueta={tr("marcadorPuntos")} />
+      <Marcador valor={racha} etiqueta={tr("marcadorRacha")} />
+      <Marcador valor={monedas} etiqueta={tr("marcadorMonedas")} monedas />
     </div>
   );
 }
@@ -57,8 +58,8 @@ export function BarraDeEtapa() {
   const falta = faltaParaLaProximaEtapa(puntos);
 
   const texto = falta
-    ? `Faltan ${falta.faltan} ${falta.faltan === 1 ? "día bueno" : "días buenos"} para ${falta.proxima}`
-    : "¡Tu mascota ya es adulta!";
+    ? tr("faltanDiasBuenos", { n: falta.faltan, etapa: tr("etapa" + falta.proxima.charAt(0).toUpperCase() + falta.proxima.slice(1)) })
+    : tr("yaEsAdulta");
 
   /* Cuánto de la etapa actual llevás recorrido */
   const desde = puntos >= UMBRAL_JOVEN ? UMBRAL_JOVEN : 0;
@@ -108,18 +109,18 @@ export function Botonera({
      pestañas); A/B/C solo tienen sentido en Hogar y el CSS
      los desvanece al entrar a las otras. */
   return (
-    <nav className="botonera" aria-label="Botones del aparato">
-      <button type="button" className="page-arrow" onClick={onAnterior} aria-label="Pestaña anterior">
+    <nav className="botonera" aria-label={tr("aparatoBotones")}>
+      <button type="button" className="page-arrow" onClick={onAnterior} aria-label={tr("aparatoAnterior")}>
         ‹
       </button>
 
       <div className="buttons">
-        <Boton letra="A" pie="cementerio" onClick={onCementerio} />
-        <Boton letra="B" pie="hoy" onClick={onHoy} />
-        <Boton letra="C" pie="estadísticas" onClick={onEstadisticas} />
+        <Boton letra="A" pie={tr("pieCementerio")} onClick={onCementerio} />
+        <Boton letra="B" pie={tr("pieHoy")} onClick={onHoy} />
+        <Boton letra="C" pie={tr("pieEstadisticas")} onClick={onEstadisticas} />
       </div>
 
-      <button type="button" className="page-arrow" onClick={onSiguiente} aria-label="Pestaña siguiente">
+      <button type="button" className="page-arrow" onClick={onSiguiente} aria-label={tr("aparatoSiguiente")}>
         ›
       </button>
     </nav>

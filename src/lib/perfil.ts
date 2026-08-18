@@ -28,10 +28,10 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    ---------------------------------------------------------- */
 
 export const PRONOMBRES = [
-  { id: "ella", nombre: "ella" },
-  { id: "el",   nombre: "él" },
-  { id: "elle", nombre: "elle" },
-  { id: "otro", nombre: "prefiero no decir" },
+  { id: "ella", clave: "pronombreElla" },
+  { id: "el", clave: "pronombreEl" },
+  { id: "elle", clave: "pronombreElle" },
+  { id: "otro", clave: "pronombreOtro" },
 ];
 
 export function cargarPerfil() {

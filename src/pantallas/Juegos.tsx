@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tr } from "@/lib/idioma";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { MASCOTAS } from "@/datos/mascotas";
 import {
@@ -20,9 +21,9 @@ import { Ayuda, Panel } from "@/componentes/comunes/Panel";
    ========================================================== */
 
 const JUEGOS = [
-  { id: "viborita", nombre: "Viborita", ayuda: "Deslizá el dedo sobre la pantalla para girar (o usá las flechas)." },
-  { id: "pong", nombre: "Pong", ayuda: "Movés la paleta con el dedo o el mouse. Las primeras 5 jugadas van lentas." },
-  { id: "saltador", nombre: "Saltador", ayuda: "Tocá la pantalla para saltar los obstáculos." },
+  { id: "viborita", clave: "viborita", claveAyuda: "ayudaViborita" },
+  { id: "pong", clave: "pong", claveAyuda: "ayudaPong" },
+  { id: "saltador", clave: "saltador", claveAyuda: "ayudaSaltador" },
 ];
 
 export function Juegos() {
@@ -32,7 +33,7 @@ export function Juegos() {
 
   const [elegido, setElegido] = useState("viborita");
   const [puntos, setPuntos] = useState(0);
-  const [mensaje, setMensaje] = useState("Elegí un juego para empezar.");
+  const [mensaje, setMensaje] = useState(tr("elegiUnJuego"));
   const [record, setRecord] = useState(() => recordDe("viborita"));
 
   /* Apagar el juego al salir es importante: si no, sigue
@@ -77,7 +78,7 @@ export function Juegos() {
     limpiarPantalla();
     setPuntos(0);
     setRecord(recordDe(elegido));
-    setMensaje("Tocá Jugar para empezar.");
+    setMensaje(tr("tocaJugar"));
   }, [elegido]);
 
   /* ----------------------------------------------------------
@@ -178,8 +179,8 @@ export function Juegos() {
          jugás y perdés enseguida, y festejarlo queda ridículo. */
       setMensaje(
         esRecord && puntaje > 0
-          ? `¡Récord nuevo! ${puntaje} ${puntaje === 1 ? "punto" : "puntos"}.`
-          : `Perdiste con ${puntaje}. Tu récord es ${recordDe(elegido)}.`
+          ? tr("recordNuevo", { n: puntaje })
+          : tr("perdiste", { n: puntaje, record: recordDe(elegido) })
       );
 
       /* El motor ya paró su reloj, pero el último cuadro sigue
@@ -192,14 +193,14 @@ export function Juegos() {
     else if (elegido === "pong") activo.current = crearPong(nodo, setPuntos, alPerder);
     else activo.current = crearSaltador(nodo, setPuntos, alPerder, dibujarMascotaEnCanvas);
 
-    setMensaje("¡Dale!");
+    setMensaje(tr("dale"));
     activo.current.arrancar();
   };
 
-  const ayuda = JUEGOS.find((j) => j.id === elegido)?.ayuda ?? "";
+  const ayuda = tr(JUEGOS.find((j) => j.id === elegido)?.claveAyuda ?? "");
 
   return (
-    <Pagina nombre="Juegos">
+    <Pagina clave="pantallaJuegos">
       <Panel>
         <div className="juego-elegir">
           {JUEGOS.map((juego) => (
@@ -209,21 +210,21 @@ export function Juegos() {
               className={elegido === juego.id ? "juego-opcion is-on" : "juego-opcion"}
               onClick={() => setElegido(juego.id)}
             >
-              {juego.nombre}
+              {tr(juego.clave)}
             </button>
           ))}
         </div>
 
         <div className="juego-marcador">
-          <span>Puntos: {puntos}</span>
-          <span>Récord: {record}</span>
+          <span>{tr("puntos", { n: puntos })}</span>
+          <span>{tr("record", { n: record })}</span>
         </div>
 
         <canvas id="juegoCanvas" ref={canvas} width={300} height={230} />
 
         <p className="juego-mensaje">{mensaje}</p>
 
-        <button type="button" className="habit-btn" onClick={jugar}>Jugar</button>
+        <button type="button" className="habit-btn" onClick={jugar}>{tr("jugar")}</button>
 
         {elegido === "viborita" && <Dpad activo={activo} />}
 
@@ -244,10 +245,10 @@ function Dpad({ activo }: { activo: React.RefObject<any> }) {
      medio pasa a ocupar una sola celda. */
   return (
     <div className="juego-dpad">
-      <button type="button" className="dpad-btn dpad-arriba" onClick={() => girar("arriba")} aria-label="Arriba">▲</button>
-      <button type="button" className="dpad-btn dpad-izquierda" onClick={() => girar("izquierda")} aria-label="Izquierda">◀</button>
-      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label="Abajo">▼</button>
-      <button type="button" className="dpad-btn dpad-derecha" onClick={() => girar("derecha")} aria-label="Derecha">▶</button>
+      <button type="button" className="dpad-btn dpad-arriba" onClick={() => girar("arriba")} aria-label={tr("arriba")}>▲</button>
+      <button type="button" className="dpad-btn dpad-izquierda" onClick={() => girar("izquierda")} aria-label={tr("izquierda")}>◀</button>
+      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label={tr("abajo")}>▼</button>
+      <button type="button" className="dpad-btn dpad-derecha" onClick={() => girar("derecha")} aria-label={tr("derecha")}>▶</button>
     </div>
   );
 }

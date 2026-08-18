@@ -19,7 +19,7 @@ import type { Mascota, IdMascota } from "@/tipos";
 
 export const MASCOTAS: Record<IdMascota, Mascota> = {
   dragoncito: {
-    nombre: "Dragoncito",
+    clave: "mascotaDragoncito",
     colores: {
       N: "#16401f",
       C: "#3f8a45",
@@ -95,7 +95,7 @@ export const MASCOTAS: Record<IdMascota, Mascota> = {
     },
   },
   gatito: {
-    nombre: "Gatito",
+    clave: "mascotaGatito",
     colores: {
       N: "#5a3410",
       C: "#d9873c",
@@ -171,7 +171,7 @@ export const MASCOTAS: Record<IdMascota, Mascota> = {
     },
   },
   conejito: {
-    nombre: "Conejito",
+    clave: "mascotaConejito",
     colores: {
       N: "#4a4258",
       C: "#b9b0cf",
@@ -247,7 +247,7 @@ export const MASCOTAS: Record<IdMascota, Mascota> = {
     },
   },
   pollito: {
-    nombre: "Pollito",
+    clave: "mascotaPollito",
     precio: 150,
     colores: {
       N: "#6b4a0e",
@@ -324,7 +324,7 @@ export const MASCOTAS: Record<IdMascota, Mascota> = {
     },
   },
   osito: {
-    nombre: "Osito",
+    clave: "mascotaOsito",
     precio: 200,
     colores: {
       N: "#3a2712",
@@ -401,7 +401,7 @@ export const MASCOTAS: Record<IdMascota, Mascota> = {
     },
   },
   dinosaurio: {
-    nombre: "Dinosaurio",
+    clave: "mascotaDinosaurio",
     precio: 300,
     colores: {
       N: "#10403a",

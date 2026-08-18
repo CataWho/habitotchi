@@ -16,7 +16,16 @@ import { cargarPerfil } from "@/lib/perfil";
    ========================================================== */
 
 describe("Ajustes · el perfil compartido entre paneles", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+
+    /* El idioma se fija a mano a propósito. Sin esto el test
+       depende del idioma de la máquina donde corre: jsdom dice
+       "en-US", así que la app arrancaba en inglés y no
+       encontraba los textos en español. Un test que pasa o
+       falla según la computadora no sirve de nada. */
+    localStorage.setItem("habitotchi_idioma", "es");
+  });
 
   it("REGRESIÓN: tocar el interruptor del ciclo no borra el nombre recién escrito", () => {
     render(<Ajustes onCerrar={() => {}} />);

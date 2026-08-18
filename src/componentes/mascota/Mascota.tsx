@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { tr } from "@/lib/idioma";
 import type { Animo, Etapa, IdMascota } from "@/tipos";
 import { MASCOTAS } from "@/datos/mascotas";
 import { CARAS } from "@/datos/caras";
@@ -115,7 +116,7 @@ export function Mascota({
       className={className}
       style={{ gridTemplateColumns: `repeat(${columnas}, ${tamPixel}px)` }}
       role="img"
-      aria-label={`${MASCOTAS[mascota]?.nombre ?? "mascota"}, ${etapa}, ${animo}`}
+      aria-label={`${tr(MASCOTAS[mascota]?.clave ?? "") || "mascota"}, ${etapa}, ${animo}`}
     >
       {grilla.flatMap((fila, y) =>
         fila.map((letra, x) => (

@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import {
   bucketsGrafico, diasDeEstaSemana, diasDelMes, fechaComoTexto, fechaDeHoy,
   nombreCortoDelDia, nombreDelMes, rangoVisibleDelMes, ultimosSieteDias,
@@ -21,7 +21,16 @@ import {
    que a ojo es casi imposible de ver.
    ========================================================== */
 
-afterEach(() => vi.useRealTimers());
+/* Los nombres de mes salen del diccionario, así que el idioma
+   se fija a mano: si no, el test depende del idioma de la
+   máquina donde corre (jsdom dice "en-US") y falla en una
+   compu y pasa en otra. */
+beforeEach(() => localStorage.setItem("habitotchi_idioma", "es"));
+
+afterEach(() => {
+  vi.useRealTimers();
+  localStorage.clear();
+});
 
 describe("fechaComoTexto", () => {
   it("usa la fecha LOCAL, no la de Londres", () => {

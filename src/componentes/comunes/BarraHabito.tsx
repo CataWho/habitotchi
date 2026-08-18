@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import type { IdHabito } from "@/tipos";
 import { HABITOS_POR_DEFECTO } from "@/datos/habitos";
 import { useHabitotchi } from "@/estado/useHabitotchi";
@@ -40,10 +41,12 @@ export function BarraHabito({ id }: { id: IdHabito }) {
   return (
     <div className="habit-row" data-habit={id}>
       <div className="habit-info">
-        <span className="habit-name">{habito.nombre}</span>
+        <span className="habit-name">{tr(habito.clave)}</span>
 
         <span className="habit-value">
-          {esDeMeta ? `${valor} / ${meta} ${habito.unidad}` : `${valor} ${habito.unidad}`}
+          {esDeMeta
+            ? `${valor} / ${meta} ${tr(habito.unidad)}`
+            : `${valor} ${tr(habito.unidad)}`}
         </span>
       </div>
 
@@ -61,7 +64,7 @@ export function BarraHabito({ id }: { id: IdHabito }) {
             type="button"
             className="habit-btn habit-btn--restar"
             onClick={() => sumarHabito(id, -habito.paso)}
-            aria-label={`Restar ${habito.paso} de ${habito.nombre}`}
+            aria-label={`Restar ${habito.paso} de ${tr(habito.clave)}`}
           >
             −{habito.paso}
           </button>
@@ -70,7 +73,7 @@ export function BarraHabito({ id }: { id: IdHabito }) {
             type="button"
             className="habit-btn"
             onClick={() => sumarHabito(id, habito.paso)}
-            aria-label={`Sumar ${habito.paso} a ${habito.nombre}`}
+            aria-label={`Sumar ${habito.paso} a ${tr(habito.clave)}`}
           >
             +{habito.paso}
           </button>
@@ -83,7 +86,7 @@ export function BarraHabito({ id }: { id: IdHabito }) {
                 setBorrador(String(meta));
                 setEditando(true);
               }}
-              aria-label={`Cambiar la meta de ${habito.nombre}`}
+              aria-label={`Cambiar la meta de ${tr(habito.clave)}`}
             >
               ✎
             </button>

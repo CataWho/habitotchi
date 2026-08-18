@@ -1,4 +1,5 @@
 import { CLAVES, escribir, leerTexto } from "./almacenamiento";
+import { tr } from "@/lib/idioma";
 
 /* Los modulos portados leian con localStorage.getItem y
    parseaban a mano. Esto mantiene esa forma pero centraliza
@@ -33,11 +34,11 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
 
 /* Los momentos del día para clasificar cada entrada. */
 export const TIPOS_COMIDA = [
-  { id: "desayuno",  nombre: "Desayuno" },
-  { id: "almuerzo",  nombre: "Almuerzo" },
-  { id: "merienda",  nombre: "Merienda" },
-  { id: "cena",      nombre: "Cena" },
-  { id: "snack",     nombre: "Snack" },
+  { id: "desayuno", clave: "comidaDesayuno" },
+  { id: "almuerzo", clave: "comidaAlmuerzo" },
+  { id: "merienda", clave: "comidaMerienda" },
+  { id: "cena", clave: "comidaCena" },
+  { id: "snack", clave: "comidaSnack" },
 ];
 
 /* ----------------------------------------------------------
@@ -92,5 +93,5 @@ export function totalCaloriasDelDia(comidas: any, fecha: string) {
 
 export function nombreTipoComida(tipoId: string) {
   const encontrado = TIPOS_COMIDA.find((t: any) => t.id === tipoId);
-  return encontrado ? encontrado.nombre : tipoId;
+  return encontrado ? tr(encontrado.clave) : tipoId;
 }

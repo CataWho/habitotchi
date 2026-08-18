@@ -1,4 +1,5 @@
 import { CLAVES, escribir, leerTexto } from "./almacenamiento";
+import { tr } from "@/lib/idioma";
 
 /* Los modulos portados leian con localStorage.getItem y
    parseaban a mano. Esto mantiene esa forma pero centraliza
@@ -25,14 +26,14 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    propio registro (ver más abajo, "discos escuchados"), así
    que no está en esta lista. */
 export const CATEGORIAS_HOBBIES = [
-  { id: "amigos",      nombre: "Amigos" },
-  { id: "familia",     nombre: "Familia" },
-  { id: "pintura",     nombre: "Pintura" },
-  { id: "videojuegos", nombre: "Videojuegos" },
-  { id: "series",      nombre: "Series" },
-  { id: "paseos",      nombre: "Paseos" },
-  { id: "fotografia",  nombre: "Fotografía" },
-  { id: "otro",        nombre: "Otro" },
+  { id: "amigos", clave: "hobbyAmigos" },
+  { id: "familia", clave: "hobbyFamilia" },
+  { id: "pintura", clave: "hobbyPintura" },
+  { id: "videojuegos", clave: "hobbyVideojuegos" },
+  { id: "series", clave: "hobbySeries" },
+  { id: "paseos", clave: "hobbyPaseos" },
+  { id: "fotografia", clave: "hobbyFotografia" },
+  { id: "otro", clave: "hobbyOtro" },
 ];
 
 
@@ -167,5 +168,5 @@ export function eliminarActividadHobby(lista: any, indice: number) {
 
 export function nombreCategoriaHobby(categoriaId: string) {
   const encontrada = CATEGORIAS_HOBBIES.find(c => c.id === categoriaId);
-  return encontrada ? encontrada.nombre : categoriaId;
+  return encontrada ? tr(encontrada.clave) : categoriaId;
 }

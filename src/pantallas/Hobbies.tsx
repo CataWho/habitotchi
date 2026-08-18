@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import {
   CATEGORIAS_HOBBIES,
   agregarActividadHobby,
@@ -37,7 +38,7 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
 
 export function Hobbies() {
   return (
-    <Pagina nombre="Hobbies">
+    <Pagina clave="pantallaHobbies">
       <Panel titulo="Tu meta de hoy">
         <ListaDeHabitos ids={["lectura"]} />
       </Panel>
@@ -87,7 +88,7 @@ function LibroActual() {
   };
 
   return (
-    <Panel titulo="Qué estás leyendo">
+    <Panel titulo={tr("queEstasLeyendo")}>
       {libro.titulo ? (
         <div className="tapa-fila">
           {libro.imagen && <img src={libro.imagen} alt="" className="tapa-chica" />}
@@ -102,16 +103,16 @@ function LibroActual() {
           </div>
         </div>
       ) : (
-        <Ayuda>Todavía no cargaste ningún libro.</Ayuda>
+        <Ayuda>{tr("sinLibroActual")}</Ayuda>
       )}
 
       <div className="campo-fila">
-        <input className="input-rosa" value={titulo} placeholder="título"
+        <input className="input-rosa" value={titulo} placeholder={tr("titulo")}
           onChange={(e) => setTitulo(e.target.value)} />
-        <input className="input-rosa" value={autor} placeholder="autor"
+        <input className="input-rosa" value={autor} placeholder={tr("autor")}
           onChange={(e) => setAutor(e.target.value)} />
         <button type="button" className="habit-btn" onClick={guardar} disabled={buscando}>
-          {buscando ? "..." : "Guardar"}
+          {buscando ? "…" : tr("guardar")}
         </button>
       </div>
 
@@ -139,10 +140,10 @@ function LibrosTerminados() {
   };
 
   return (
-    <Panel titulo="Libros terminados">
+    <Panel titulo={tr("librosTerminados")}>
       {libro.titulo && (
         <>
-          <Ayuda>¿Qué te pareció?</Ayuda>
+          <Ayuda>{tr("queTeParecio")}</Ayuda>
           <Estrellas valor={puntaje} alElegir={setPuntaje} />
 
           <div className="campo-fila">
@@ -154,7 +155,7 @@ function LibrosTerminados() {
       )}
 
       {leidos.length === 0 ? (
-        <Ayuda>Todavía no terminaste ningún libro. Cada uno suma 30 monedas.</Ayuda>
+        <Ayuda>{tr("sinLibrosLeidos")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {leidos.map((entrada: any, i: number) => (
@@ -213,7 +214,7 @@ function DiscoActual() {
   };
 
   return (
-    <Panel titulo="Qué estás escuchando">
+    <Panel titulo={tr("queEstasEscuchando")}>
       {disco.titulo ? (
         <div className="tapa-fila">
           {disco.imagen && <img src={disco.imagen} alt="" className="tapa-chica" />}
@@ -228,16 +229,16 @@ function DiscoActual() {
           </div>
         </div>
       ) : (
-        <Ayuda>Todavía no cargaste ningún disco.</Ayuda>
+        <Ayuda>{tr("sinDiscoActual")}</Ayuda>
       )}
 
       <div className="campo-fila">
-        <input className="input-rosa" value={album} placeholder="disco"
+        <input className="input-rosa" value={album} placeholder={tr("album")}
           onChange={(e) => setAlbum(e.target.value)} />
-        <input className="input-rosa" value={artista} placeholder="artista"
+        <input className="input-rosa" value={artista} placeholder={tr("artista")}
           onChange={(e) => setArtista(e.target.value)} />
         <button type="button" className="habit-btn" onClick={guardar} disabled={buscando}>
-          {buscando ? "..." : "Guardar"}
+          {buscando ? "…" : tr("guardar")}
         </button>
       </div>
 
@@ -258,10 +259,10 @@ function DiscosEscuchados() {
   };
 
   return (
-    <Panel titulo="Discos que escuchaste">
+    <Panel titulo={tr("discosEscuchados")}>
       {disco.titulo && (
         <>
-          <Ayuda>¿Qué te pareció?</Ayuda>
+          <Ayuda>{tr("queTeParecio")}</Ayuda>
           <Estrellas valor={puntaje} alElegir={setPuntaje} />
 
           <div className="campo-fila">
@@ -273,7 +274,7 @@ function DiscosEscuchados() {
       )}
 
       {escuchados.length === 0 ? (
-        <Ayuda>Todavía no anotaste ningún disco.</Ayuda>
+        <Ayuda>{tr("sinDiscosEscuchados")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {escuchados.map((entrada: any, i: number) => (
@@ -303,7 +304,7 @@ function Actividades() {
   };
 
   return (
-    <Panel titulo="Otras actividades">
+    <Panel titulo={tr("otrasActividades")}>
       <div className="campo-fila">
         <Select
           valor={categoria}
@@ -319,7 +320,7 @@ function Actividades() {
       </div>
 
       {registro.length === 0 ? (
-        <Ayuda>Todavía no anotaste ninguna actividad.</Ayuda>
+        <Ayuda>{tr("sinActividades")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {registro.slice(0, 10).map((entrada: any, i: number) => (

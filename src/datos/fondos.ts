@@ -22,7 +22,7 @@ import type { Fondo } from "@/tipos";
 
 export const FONDOS: Record<string, Fondo> = {
   clasico: {
-    nombre: "Clásico",
+    clave: "fondoClasico",
     precio: 0,
     degradado: "linear-gradient(180deg, #d5e878 0%, #c3d94f 100%)",
     tinta: "22, 36, 10",
@@ -30,7 +30,7 @@ export const FONDOS: Record<string, Fondo> = {
     brillo: "rgba(185, 234, 61, 0.28)",
   },
   atardecer: {
-    nombre: "Atardecer",
+    clave: "fondoAtardecer",
     precio: 70,
     degradado: "linear-gradient(180deg, #ffd6a5 0%, #f5a3a3 100%)",
     /* Bordó bien oscuro. Estaba en "88, 30, 34" y los textos
@@ -42,7 +42,7 @@ export const FONDOS: Record<string, Fondo> = {
     brillo: "rgba(245, 163, 163, 0.32)",
   },
   noche: {
-    nombre: "Noche",
+    clave: "fondoNoche",
     precio: 90,
     degradado: "linear-gradient(180deg, #4a5488 0%, #232a4a 100%)",
     tinta: "232, 238, 255",
@@ -50,7 +50,7 @@ export const FONDOS: Record<string, Fondo> = {
     brillo: "rgba(90, 104, 168, 0.34)",
   },
   algodon: {
-    nombre: "Algodón",
+    clave: "fondoAlgodon",
     precio: 70,
     degradado: "linear-gradient(180deg, #ffd9f0 0%, #d5b8ee 100%)",
     tinta: "74, 30, 78",

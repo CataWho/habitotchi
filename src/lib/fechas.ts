@@ -1,4 +1,5 @@
 import type { Fecha } from "@/tipos";
+import { tr } from "./idioma";
 
 /* ==========================================================
    HABITOTCHI · el manejo de los días
@@ -109,15 +110,25 @@ export function ultimosSieteDias(): DiaCorto[] {
    Para que la grilla no cambie de alto al pasar de un mes a
    otro. Si no, el calendario "salta" y marea.
    ---------------------------------------------------------- */
-export const NOMBRES_DE_MES = [
-  "enero", "febrero", "marzo", "abril", "mayo", "junio",
-  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-] as const;
+/* Los meses y las iniciales salen del diccionario: cambian
+   con el idioma. Se guardan como una lista separada por comas
+   en vez de doce claves sueltas, porque siempre se usan
+   juntos y de a doce.
 
-export const INICIALES_DE_SEMANA = ["L", "M", "X", "J", "V", "S", "D"] as const;
+   Ojo con las iniciales: en español la X de miércoles evita
+   repetir la M de martes; en inglés el choque es otro
+   (Tuesday/Thursday, Saturday/Sunday) y se resuelve distinto.
+   Por eso cada idioma trae las suyas y no se derivan. */
+export function nombresDeMes(): string[] {
+  return tr("meses").split(",");
+}
+
+export function inicialesDeSemana(): string[] {
+  return tr("inicialesSemana").split(",");
+}
 
 export function nombreDelMes(mes: number): string {
-  return NOMBRES_DE_MES[mes] ?? "";
+  return nombresDeMes()[mes] ?? "";
 }
 
 export function diasDelMes(anio: number, mes: number): DiaDeGrilla[][] {
@@ -241,7 +252,7 @@ function bucketsPorSemana(cantidad: number): Balde[] {
     inicio.setDate(inicio.getDate() - 6);
 
     baldes.push({
-      etiqueta: "sem " + (cantidad - atras),
+      etiqueta: tr("abreviaturaSemana", { n: cantidad - atras }),
       desde: fechaComoTexto(inicio),
       hasta: fechaComoTexto(fin),
     });
@@ -259,7 +270,7 @@ function bucketsPorMes(cantidad: number): Balde[] {
     const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() - atras + 1, 0);
 
     baldes.push({
-      etiqueta: (NOMBRES_DE_MES[primerDia.getMonth()] ?? "").slice(0, 3),
+      etiqueta: (nombresDeMes()[primerDia.getMonth()] ?? "").slice(0, 3),
       desde: fechaComoTexto(primerDia),
       hasta: fechaComoTexto(ultimoDia),
     });

@@ -28,9 +28,9 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    cada sesión para poder graficar trabajo vs. estudio por
    separado — el mismo patrón que cardio/fuerza en
    lib/ejercicio.ts. */
-export const TIPOS_TRABAJO: Record<string, { nombre: string; color?: string }> = {
-  trabajo: { nombre: "Trabajo" },
-  estudio: { nombre: "Estudio" },
+export const TIPOS_TRABAJO: Record<string, { clave: string; color?: string }> = {
+  trabajo: { clave: "trabajoTrabajo" },
+  estudio: { clave: "trabajoEstudio" },
 };
 
 

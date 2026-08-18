@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import {
   cambiarContraseña, crearCuenta, guardarSiQuiereQueLoRecuerden, hayDatosLocales,
   iniciarSesion, pedirRecuperarContraseña, quiereQueLoRecuerden,
@@ -73,19 +74,19 @@ function ContraseñaNueva() {
       terminarRecuperacion();
       location.reload();
     } catch (e: any) {
-      setError(e?.message ?? "No se pudo cambiar la contraseña.");
+      setError(e?.message ?? tr("noSePudoCambiarContrasena"));
       setTrabajando(false);
     }
   };
 
   return (
     <div className="porton-caja">
-      <h2 className="porton-titulo">Elegí una contraseña nueva</h2>
+      <h2 className="porton-titulo">{tr("elegiContrasenaNueva")}</h2>
 
       <CampoDeContraseña
         valor={contraseña}
         alCambiar={setContraseña}
-        marcador="contraseña nueva"
+        marcador={tr("contrasenaNueva")}
         autoComplete="new-password"
         alApretarEnter={() => contraseña.length >= 6 && guardar()}
       />
@@ -96,11 +97,11 @@ function ContraseñaNueva() {
         disabled={trabajando || contraseña.length < 6}
         onClick={guardar}
       >
-        Guardar
+        {tr("guardar")}
       </button>
 
       {contraseña.length > 0 && contraseña.length < 6 && (
-        <p className="ayuda-chica">Tiene que tener al menos 6 caracteres.</p>
+        <p className="ayuda-chica">{tr("minimoSeisCaracteres")}</p>
       )}
 
       {error && <p className="porton-error">{error}</p>}
@@ -135,7 +136,7 @@ function Formulario() {
     const subir =
       hayDatosLocales() &&
       window.confirm(
-        "¿Querés que lo que ya tenías anotado en este dispositivo pase a tu cuenta nueva?"
+        tr("migrarDatos")
       );
 
     if (subir) reservarDatosLocalesParaLaCuentaNueva();
@@ -150,7 +151,7 @@ function Formulario() {
            nadie: se suelta para que no quede pegada esperando a
            un login futuro que quizás sea de otra persona. */
         soltarReserva();
-        setAviso(`Te mandamos un mail a ${email}. Tocá el link que trae y ya podés entrar.`);
+        setAviso(tr("revisaTuMail", { email }));
         return;
       }
 
@@ -164,7 +165,7 @@ function Formulario() {
   const recuperar = async () => {
     await pedirRecuperarContraseña(email);
     setAviso(
-      "Si hay una cuenta con ese mail, te va a llegar un link para poner una contraseña nueva."
+      tr("linkDeRecuperacion")
     );
   };
 
@@ -178,7 +179,7 @@ function Formulario() {
       else if (modo === "crear") await crear();
       else await recuperar();
     } catch (e: any) {
-      setError(e?.message ?? "Algo salió mal.");
+      setError(e?.message ?? tr("algoSalioMal"));
     } finally {
       setTrabajando(false);
     }
@@ -200,16 +201,16 @@ function Formulario() {
   return (
     <div className="porton-caja">
       <h2 className="porton-titulo">
-        {modo === "entrar" && "Entrá a tu cuenta"}
-        {modo === "crear" && "Creá tu cuenta"}
-        {modo === "recuperar" && "Recuperar contraseña"}
+        {modo === "entrar" && tr("entraATuCuenta")}
+        {modo === "crear" && tr("crearUnaCuenta")}
+        {modo === "recuperar" && tr("recuperarContrasena")}
       </h2>
 
       <input
         className="input-rosa"
         type="email"
         value={email}
-        placeholder="tu mail"
+        placeholder={tr("tuMail")}
         autoComplete="email"
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -230,7 +231,7 @@ function Formulario() {
             checked={recordarme}
             onChange={(e) => setRecordarme(e.target.checked)}
           />
-          <span>Mantener la sesión iniciada</span>
+          <span>{tr("mantenerSesion")}</span>
         </label>
       )}
 
@@ -242,9 +243,9 @@ function Formulario() {
             onChange={(e) => setAceptaTerminos(e.target.checked)}
           />
           <span>
-            Acepto la{" "}
+            {tr("aceptoPolitica")}{" "}
             <a href="/privacidad.html" target="_blank" rel="noopener">
-              política de privacidad
+              {tr("laPoliticaDePrivacidad")}
             </a>
           </span>
         </label>
@@ -255,13 +256,13 @@ function Formulario() {
          empiece a llenar el formulario. Mismo criterio que ya
          usa el aviso de "al menos 6 caracteres" más abajo. */}
       {modo === "crear" && !aceptaTerminos && email.length > 0 && contraseña.length > 0 && (
-        <p className="ayuda-chica">Tenés que aceptar la política de privacidad para crear la cuenta.</p>
+        <p className="ayuda-chica">{tr("debeAceptarPolitica")}</p>
       )}
 
       <button type="button" className="habit-btn" disabled={trabajando || !listoParaEnviar} onClick={enviar}>
-        {modo === "entrar" && "Entrar"}
-        {modo === "crear" && "Crear cuenta"}
-        {modo === "recuperar" && "Enviarme el link"}
+        {modo === "entrar" && tr("entrar")}
+        {modo === "crear" && tr("crearCuenta")}
+        {modo === "recuperar" && tr("enviarmeElLink")}
       </button>
 
       {error && <p className="porton-error">{error}</p>}
@@ -271,10 +272,10 @@ function Formulario() {
         {modo === "entrar" && (
           <>
             <button type="button" className="porton-link" onClick={() => cambiarModo("crear")}>
-              Crear una cuenta
+              {tr("crearUnaCuenta")}
             </button>
             <button type="button" className="porton-link" onClick={() => cambiarModo("recuperar")}>
-              Olvidé mi contraseña
+              {tr("olvideMiContrasena")}
             </button>
           </>
         )}

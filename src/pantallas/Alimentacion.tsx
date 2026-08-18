@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tr } from "@/lib/idioma";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
 import {
@@ -85,7 +86,7 @@ export function Alimentacion() {
     /* Local primero, sin esperar nada: es instantáneo. */
     const local = estimarCaloriasDeTexto(texto);
     if (local) {
-      setSugerencia(`${local.nombre}: unas ${local.calorias} kcal`);
+      setSugerencia(tr("sugerenciaKcal", { comida: local.nombre, n: local.calorias }));
       if (!calorias) setCalorias(String(local.calorias));
       return; // encontró algo específico, no hace falta la red
     }
@@ -103,7 +104,7 @@ export function Alimentacion() {
       if (textoEnVuelo.current !== texto) return;
 
       if (resultado) {
-        setSugerencia(`${resultado.nombre}: unas ${resultado.calorias} kcal`);
+        setSugerencia(tr("sugerenciaKcal", { comida: resultado.nombre, n: resultado.calorias }));
         if (!calorias) setCalorias(String(resultado.calorias));
       }
     }, ESPERA_ANTES_DE_BUSCAR_MS);
@@ -128,17 +129,17 @@ export function Alimentacion() {
   };
 
   return (
-    <Pagina nombre="Alimentación">
-      <Panel titulo="Tus metas de hoy">
+    <Pagina clave="pantallaAlimentacion">
+      <Panel titulo={tr("tusMetasDeHoy")}>
         <ListaDeHabitos ids={["agua", "comida", "dulces"]} />
       </Panel>
 
-      <Panel titulo="Qué comiste">
+      <Panel titulo={tr("queComiste")}>
         <div className="campo-fila">
           <Select
             valor={tipo}
             alCambiar={setTipo}
-            opciones={TIPOS_COMIDA.map((t) => ({ id: t.id, nombre: t.nombre }))}
+            opciones={TIPOS_COMIDA.map((t) => ({ id: t.id, nombre: tr(t.clave) }))}
           />
         </div>
 
@@ -146,7 +147,7 @@ export function Alimentacion() {
           <input
             className="input-rosa"
             value={descripcion}
-            placeholder="milanesa con puré"
+            placeholder={tr("ejemploComida")}
             onChange={(e) => alEscribir(e.target.value)}
           />
         </div>
@@ -156,21 +157,21 @@ export function Alimentacion() {
             className="input-rosa"
             type="number"
             value={calorias}
-            placeholder="kcal"
+            placeholder={tr("kcal")}
             style={{ width: "90px" }}
             onChange={(e) => setCalorias(e.target.value)}
           />
           <button type="button" className="habit-btn" onClick={agregar}>
-            Agregar
+            {tr("agregar")}
           </button>
         </div>
 
         {sugerencia && <Ayuda>{sugerencia}</Ayuda>}
       </Panel>
 
-      <Panel titulo={`Hoy · ${total} kcal`}>
+      <Panel titulo={tr("hoyKcal", { n: total })}>
         {delDia.length === 0 ? (
-          <Ayuda>Todavía no anotaste ninguna comida hoy.</Ayuda>
+          <Ayuda>{tr("sinComidasHoy")}</Ayuda>
         ) : (
           <ul className="lista-simple">
             {delDia.map((comida: any, i: number) => (
@@ -183,9 +184,7 @@ export function Alimentacion() {
         )}
       </Panel>
 
-      <Ayuda>
-        Las calorías son aproximadas y salen de un diccionario con comida argentina.
-      </Ayuda>
+      <Ayuda>{tr("notaCalorias")}</Ayuda>
     </Pagina>
   );
 }

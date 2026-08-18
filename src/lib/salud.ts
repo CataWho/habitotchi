@@ -45,11 +45,11 @@ function __leerCrudo(clave: Parameters<typeof leerTexto>[0]): string | null {
    son la clave con la que quedaron guardados los registros
    anteriores. Renombrarlos dejaría esas entradas huérfanas. */
 export const ANIMOS = [
-  { id: "muybien", nombre: "Muy bien",   color: "#7ac07a" },
-  { id: "bien",    nombre: "Bien",       color: "#a9d06a" },
-  { id: "normal",  nombre: "Normal",     color: "#e8c34a" },
-  { id: "bajon",   nombre: "Triste",     color: "#e8945a" },
-  { id: "mal",     nombre: "Muy triste", color: "#d67a9e" },
+  { id: "muybien", clave: "animoMuybien", color: "#7ac07a" },
+  { id: "bien", clave: "animoBien", color: "#a9d06a" },
+  { id: "normal", clave: "animoNormal", color: "#e8c34a" },
+  { id: "bajon", clave: "animoBajon", color: "#e8945a" },
+  { id: "mal", clave: "animoMal", color: "#d67a9e" },
 ];
 
 /* Una carita pixel art por cada ánimo, para los botones de

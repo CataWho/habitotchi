@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { tr } from "@/lib/idioma";
 import { fechaDeHoy, ultimosSieteDias } from "@/lib/fechas";
 import {
   ANIMOS,
@@ -45,16 +46,13 @@ export function Salud() {
   const perfil = useGuardado(CLAVES.perfil, cargarPerfil);
 
   return (
-    <Pagina nombre="Salud">
+    <Pagina clave="pantallaSalud">
       <AnimoDelDia />
       <Medicaciones />
       <RegistroDePeso />
       {perfil.cicloActivado !== false && <Ciclo />}
 
-      <Ayuda>
-        Nada de lo que anotás acá suma ni resta puntos. Es tu registro, no una meta que
-        cumplir.
-      </Ayuda>
+      <Ayuda>{tr("disclaimerSalud")}</Ayuda>
     </Pagina>
   );
 }
@@ -95,7 +93,7 @@ function AnimoDelDia() {
   };
 
   return (
-    <Panel titulo="¿Cómo te sentís?">
+    <Panel titulo={tr("comoTeSentis")}>
       <div className="animo-botones">
         {ANIMOS.map((animo) => (
           <button
@@ -106,7 +104,7 @@ function AnimoDelDia() {
             onClick={() => anotar(animo.id)}
           >
             <CaritaDeAnimo animoId={animo.id} color={animo.color} />
-            <span>{animo.nombre}</span>
+            <span>{tr(animo.clave)}</span>
           </button>
         ))}
       </div>
@@ -115,13 +113,13 @@ function AnimoDelDia() {
         <input
           className="input-rosa"
           value={nota}
-          placeholder="Nota (opcional)"
+          placeholder={tr("notaOpcional")}
           onChange={(e) => setNota(e.target.value)}
         />
       </div>
 
       {delDia.length === 0 ? (
-        <Ayuda>Todavía no anotaste cómo te sentís hoy.</Ayuda>
+        <Ayuda>{tr("sinAnimoHoy")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {delDia.map((registro: any, i: number) => {
@@ -131,7 +129,7 @@ function AnimoDelDia() {
                 key={i}
                 alBorrar={() => setDatos({ ...borrarAnimo(datos, hoy, i) })}
               >
-                {registro.hora} · <b>{datosAnimo?.nombre ?? registro.animo}</b>
+                {registro.hora} · <b>{datosAnimo ? tr(datosAnimo.clave) : registro.animo}</b>
                 {registro.nota && ` · ${registro.nota}`}
               </Fila>
             );
@@ -140,8 +138,11 @@ function AnimoDelDia() {
       )}
 
       <Ayuda>
-        Esta semana:{" "}
-        {ANIMOS.map((a) => `${a.nombre.toLowerCase()} ${resumen[a.id] ?? 0}`).join(" · ")}
+        {tr("estaSemana", {
+          resumen: ANIMOS.map(
+            (a) => `${tr(a.clave).toLowerCase()} ${resumen[a.id] ?? 0}`
+          ).join(" · "),
+        })}
       </Ayuda>
     </Panel>
   );
@@ -167,9 +168,9 @@ function Medicaciones() {
   };
 
   return (
-    <Panel titulo="Medicaciones">
+    <Panel titulo={tr("medicaciones")}>
       {lista.length === 0 ? (
-        <Ayuda>No cargaste ninguna medicación.</Ayuda>
+        <Ayuda>{tr("sinMedicaciones")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {lista.map((medicacion: any) => (
@@ -198,7 +199,7 @@ function Medicaciones() {
                 type="button"
                 className="fila-borrar"
                 onClick={() => setLista([...eliminarMedicacion(lista, medicacion.id)])}
-                aria-label="Borrar"
+                aria-label={tr("borrar")}
               >
                 ×
               </button>
@@ -208,15 +209,15 @@ function Medicaciones() {
       )}
 
       <div className="campo-fila">
-        <input className="input-rosa" value={nombre} placeholder="nombre"
+        <input className="input-rosa" value={nombre} placeholder={tr("nombre")}
           onChange={(e) => setNombre(e.target.value)} />
-        <input className="input-rosa" value={dosis} placeholder="dosis"
+        <input className="input-rosa" value={dosis} placeholder={tr("dosis")}
           onChange={(e) => setDosis(e.target.value)} />
       </div>
       <div className="campo-fila">
-        <input className="input-rosa" value={horarios} placeholder="09:00, 21:00"
+        <input className="input-rosa" value={horarios} placeholder={tr("ejemploHorarios")}
           onChange={(e) => setHorarios(e.target.value)} />
-        <button type="button" className="habit-btn" onClick={agregar}>Agregar</button>
+        <button type="button" className="habit-btn" onClick={agregar}>{tr("agregar")}</button>
       </div>
     </Panel>
   );
@@ -244,21 +245,21 @@ function RegistroDePeso() {
   );
 
   return (
-    <Panel titulo="Registro de peso">
+    <Panel titulo={tr("registroDePeso")}>
       <div className="campo-fila">
-        <input className="input-rosa" type="number" value={kg} placeholder="kg de hoy"
+        <input className="input-rosa" type="number" value={kg} placeholder={tr("kgDeHoy")}
           onChange={(e) => setKg(e.target.value)} />
-        <button type="button" className="habit-btn" onClick={agregar}>Guardar</button>
+        <button type="button" className="habit-btn" onClick={agregar}>{tr("guardar")}</button>
       </div>
 
       {historial.length === 0 ? (
-        <Ayuda>Todavía no hay ningún registro.</Ayuda>
+        <Ayuda>{tr("sinPeso")}</Ayuda>
       ) : (
         <>
           <GraficoDeLineas
             mediciones={mediciones}
             etiqueta="kg"
-            vacio="Anotá tu peso al menos dos veces para ver cómo se mueve."
+            vacio={tr("pesoVacio")}
           />
 
           <ul className="lista-simple">
@@ -287,23 +288,23 @@ function Ciclo() {
   };
 
   return (
-    <Panel titulo="Ciclo menstrual">
+    <Panel titulo={tr("cicloMenstrual")}>
       <div className="campo-fila">
         {/* Un campo de fecha no admite placeholder, así que sin
             aria-label un lector de pantalla solo dice "fecha"
             sin decir de qué. */}
         <input className="input-rosa" type="date" value={fecha}
-          aria-label="Cuándo empezó"
+          aria-label={tr("cuandoEmpezo")}
           onChange={(e) => setFecha(e.target.value)} />
-        <input className="input-rosa" type="number" value={duracion} placeholder="días"
+        <input className="input-rosa" type="number" value={duracion} placeholder={tr("dias")}
           onChange={(e) => setDuracion(e.target.value)} />
-        <button type="button" className="habit-btn" onClick={agregar}>Guardar</button>
+        <button type="button" className="habit-btn" onClick={agregar}>{tr("guardar")}</button>
       </div>
 
-      {ultimo && <Ayuda>Último registro: {ultimo.fecha}</Ayuda>}
+      {ultimo && <Ayuda>{tr("ultimoRegistro", { fecha: ultimo.fecha })}</Ayuda>}
 
       {historial.length === 0 ? (
-        <Ayuda>Todavía no cargaste ningún registro.</Ayuda>
+        <Ayuda>{tr("sinCiclo")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {historial.slice(0, 6).map((entrada: any, i: number) => (

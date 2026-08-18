@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { tr } from "@/lib/idioma";
 import type { Compras, Equipado, Fecha, IdHabito, IdMascota, Metas, Registro, Vida } from "@/tipos";
 import {
   agregarACementerio,
@@ -152,7 +153,7 @@ export const useHabitotchi = create<EstadoHabitotchi>((set, get) => ({
     const estadoVida = calcularEstadoVida(registro, metas, vida.desde);
     if (!estadoVida.muerta) return { murio: false, comoSeLlamaba: "" };
 
-    const nombreDeEspecie = MASCOTAS[vida.mascota]?.nombre ?? "tu mascota";
+    const nombreDeEspecie = tr(MASCOTAS[vida.mascota]?.clave ?? "") || "tu mascota";
     const comoSeLlamaba = vida.nombre ?? nombreDeEspecie.toLowerCase();
 
     const nuevoCementerio = agregarACementerio(cementerio, {
@@ -176,5 +177,5 @@ export const useHabitotchi = create<EstadoHabitotchi>((set, get) => ({
    la especie si nunca le pusiste ninguno. */
 export function nombreDeLaMascota(vida: Vida | null): string {
   if (!vida) return "tu mascota";
-  return vida.nombre ?? (MASCOTAS[vida.mascota]?.nombre ?? "tu mascota").toLowerCase();
+  return vida.nombre ?? (tr(MASCOTAS[vida.mascota]?.clave ?? "") || "tu mascota").toLowerCase();
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
 import {
@@ -27,8 +28,8 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
 
 export function Trabajo() {
   return (
-    <Pagina nombre="Trabajo">
-      <Panel titulo="Tu meta de hoy">
+    <Pagina clave="pantallaTrabajo">
+      <Panel titulo={tr("tuMetaDeHoy")}>
         <ListaDeHabitos ids={["trabajo"]} />
       </Panel>
 
@@ -66,12 +67,12 @@ function Horas() {
   };
 
   return (
-    <Panel titulo="Horas de hoy">
+    <Panel titulo={tr("horasDeHoy")}>
       <div className="campo-fila">
         <Select
           valor={tipo}
           alCambiar={setTipo}
-          opciones={Object.entries(TIPOS_TRABAJO).map(([id, t]) => ({ id, nombre: t.nombre }))}
+          opciones={Object.entries(TIPOS_TRABAJO).map(([id, t]) => ({ id, nombre: tr(t.clave) }))}
         />
         <input className="input-rosa" type="number" value={horas} placeholder="horas"
           style={{ width: "80px" }} onChange={(e) => setHoras(e.target.value)} />
@@ -79,12 +80,12 @@ function Horas() {
       </div>
 
       {delDia.length === 0 ? (
-        <Ayuda>Todavía no cargaste horas hoy.</Ayuda>
+        <Ayuda>{tr("sinHorasHoy")}</Ayuda>
       ) : (
         <ul className="lista-simple">
           {delDia.map((sesion: any, i: number) => (
             <Fila key={i} alBorrar={() => sincronizar(eliminarSesionTrabajo(sesiones, hoy, i))}>
-              <b>{TIPOS_TRABAJO[sesion.tipo]?.nombre ?? sesion.tipo}</b> · {sesion.horas} h
+              <b>{tr(TIPOS_TRABAJO[sesion.tipo]?.clave ?? "") || sesion.tipo}</b> · {sesion.horas} h
             </Fila>
           ))}
         </ul>
@@ -106,16 +107,16 @@ function Pendientes() {
   const sinHacer = lista.filter((t: any) => !t.hecho).length;
 
   return (
-    <Panel titulo="Pendientes">
+    <Panel titulo={tr("pendientes")}>
       <div className="campo-fila">
-        <input className="input-rosa" value={texto} placeholder="qué tenés que hacer"
+        <input className="input-rosa" value={texto} placeholder={tr("quePendiente")}
           onChange={(e) => setTexto(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && agregar()} />
         <button type="button" className="habit-btn" onClick={agregar}>Agregar</button>
       </div>
 
       {lista.length === 0 ? (
-        <Ayuda>No tenés pendientes cargados.</Ayuda>
+        <Ayuda>{tr("sinPendientesCargados")}</Ayuda>
       ) : (
         <>
           <ul className="lista-simple">
@@ -130,13 +131,15 @@ function Pendientes() {
                   <span>{todo.texto}</span>
                 </label>
                 <button type="button" className="fila-borrar"
-                  onClick={() => setLista([...eliminarTodo(lista, todo.id).lista])} aria-label="Borrar">
+                  onClick={() => setLista([...eliminarTodo(lista, todo.id).lista])} aria-label={tr("borrar")}>
                   ×
                 </button>
               </li>
             ))}
           </ul>
-          <Ayuda>{sinHacer === 0 ? "¡No te queda nada pendiente!" : `Te quedan ${sinHacer}.`}</Ayuda>
+          <Ayuda>
+            {sinHacer === 0 ? tr("sinPendientes") : tr("teQuedan", { n: sinHacer })}
+          </Ayuda>
         </>
       )}
     </Panel>
@@ -148,7 +151,7 @@ function GraficoDeHoras() {
   const [sesiones] = useState(() => cargarSesionesTrabajo());
 
   return (
-    <Panel titulo="Cómo venís">
+    <Panel titulo={tr("comoVenis")}>
       <GraficoDeBarras
         calcular={(baldes) => {
           const resumen = resumenTrabajoPorBuckets(sesiones, baldes);

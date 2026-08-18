@@ -29,7 +29,8 @@ export type Fecha = string;
 export type TipoDeHabito = "meta" | "registro";
 
 export interface Habito {
-  nombre: string;
+  /* Clave del diccionario, no el texto: ver lib/idioma.ts */
+  clave: string;
   tipo: TipoDeHabito;
   meta: number;
   unidad: string;
@@ -67,7 +68,8 @@ export interface DibujoDeEtapa {
 }
 
 export interface Mascota {
-  nombre: string;
+  /* Clave del diccionario */
+  clave: string;
   /* Si no tiene precio, viene desbloqueada de entrada */
   precio?: number;
   /* De qué color es cada letra del dibujo */
@@ -78,7 +80,8 @@ export interface Mascota {
 export type IdMascota = string;
 
 export interface Accesorio {
-  nombre: string;
+  /* Clave del diccionario */
+  clave: string;
   precio: number;
   colores: Record<string, string>;
   /* Posición RELATIVA a la cara, para que sirva en cualquier
@@ -88,7 +91,8 @@ export interface Accesorio {
 }
 
 export interface Fondo {
-  nombre: string;
+  /* Clave del diccionario */
+  clave: string;
   precio: number;
   degradado: string;
   /* Los tres canales sueltos ("r, g, b"): el CSS los usa para
@@ -153,8 +157,9 @@ export type TipoDeArticulo = "mascota" | "accesorio" | "fondo";
 
 export interface Logro {
   id: string;
-  nombre: string;
-  descripcion: string;
+  /* Claves del diccionario */
+  clave: string;
+  claveDescripcion: string;
 }
 
 export interface LogroConseguido extends Logro {
