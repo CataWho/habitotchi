@@ -29,6 +29,7 @@
 import { useEffect, useState } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { CLAVES, leer, escribir, borrar, alCambiar, type Clave } from "./almacenamiento";
+import { tr } from "./idioma";
 
 const TABLA = "datos_usuario";
 
@@ -646,4 +647,52 @@ export function iniciarSincronizacionEnSegundoPlano(): void {
       void empujarClave(clave, leer<unknown>(clave, null));
     });
   }
+}
+
+
+/* ==========================================================
+   TRADUCIR LOS ERRORES DE SUPABASE
+   ==========================================================
+   Supabase contesta siempre en inglés y con frases pensadas
+   para quien programa, no para quien usa la app. Antes ese
+   texto se mostraba tal cual: alguien que se quería registrar
+   veía "email rate limit exceeded" y no tenía forma de saber
+   qué había pasado ni qué hacer.
+
+   Se comparan pedazos del mensaje y no la frase entera porque
+   Supabase la cambia entre versiones; los pedazos que se miran
+   acá son los que se mantuvieron estables.
+
+   Si llega uno que no conocemos se muestra el original: un
+   mensaje raro es mejor que uno inventado que diga otra cosa.
+   ========================================================== */
+export function mensajeDeError(error: any): string {
+  const crudo = String(error?.message ?? "").toLowerCase();
+
+  if (!crudo) return tr("algoSalioMal");
+
+  /* El más común de todos, y el más confuso: no es que tu mail
+     esté mal, es que el servidor no manda más mails por un
+     rato. */
+  if (crudo.includes("rate limit") || crudo.includes("too many requests")) {
+    return tr("errorDemasiadosMails");
+  }
+
+  if (crudo.includes("already registered") || crudo.includes("already exists")) {
+    return tr("errorMailYaRegistrado");
+  }
+
+  if (crudo.includes("invalid login credentials")) return tr("errorDatosIncorrectos");
+  if (crudo.includes("email not confirmed")) return tr("errorFaltaConfirmar");
+  if (crudo.includes("password should be")) return tr("minimoSeisCaracteres");
+
+  if (crudo.includes("invalid email") || crudo.includes("unable to validate email")) {
+    return tr("errorMailInvalido");
+  }
+
+  if (crudo.includes("failed to fetch") || crudo.includes("network")) {
+    return tr("errorSinConexion");
+  }
+
+  return error?.message ?? tr("algoSalioMal");
 }

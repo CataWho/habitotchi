@@ -4,6 +4,7 @@ import {
   cambiarContraseña, crearCuenta, guardarSiQuiereQueLoRecuerden, hayDatosLocales,
   iniciarSesion, pedirRecuperarContraseña, quiereQueLoRecuerden,
   reservarDatosLocalesParaLaCuentaNueva, soltarReserva,
+  mensajeDeError,
   subirDatosLocales, terminarRecuperacion,
 } from "@/lib/nube";
 import { Aparato, Pantalla } from "@/componentes/aparato/Aparato";
@@ -75,7 +76,7 @@ function ContraseñaNueva() {
       terminarRecuperacion();
       location.reload();
     } catch (e: any) {
-      setError(e?.message ?? tr("noSePudoCambiarContrasena"));
+      setError(mensajeDeError(e));
       setTrabajando(false);
     }
   };
@@ -180,7 +181,7 @@ function Formulario() {
       else if (modo === "crear") await crear();
       else await recuperar();
     } catch (e: any) {
-      setError(e?.message ?? tr("algoSalioMal"));
+      setError(mensajeDeError(e));
     } finally {
       setTrabajando(false);
     }

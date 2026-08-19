@@ -162,6 +162,14 @@ export const ES = {
   pesoVacio: "Anotá tu peso al menos dos veces para ver cómo se mueve.",
   disclaimerSalud: "Nada de lo que anotás acá suma ni resta puntos. Es tu registro, no una meta que cumplir.",
 
+  /* ---------- errores de la cuenta ---------- */
+  errorDemasiadosMails: "Se mandaron muchos mails de confirmación en poco tiempo. Esperá unos minutos y probá de nuevo.",
+  errorMailYaRegistrado: "Ese mail ya tiene una cuenta. Probá entrar, o recuperar la contraseña.",
+  errorDatosIncorrectos: "El mail o la contraseña no coinciden.",
+  errorFaltaConfirmar: "Te falta confirmar tu mail: buscá el mensaje que te mandamos.",
+  errorMailInvalido: "Ese mail no parece válido.",
+  errorSinConexion: "No hay conexión. Fijate el internet y probá de nuevo.",
+
   /* ---------- tenerla como app ---------- */
   comoTenerlaComoApp: "Tenela como una app",
   instalarIphone: "Tocá el botón de compartir de abajo y elegí «Agregar a inicio».",

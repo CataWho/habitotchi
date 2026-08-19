@@ -165,6 +165,14 @@ export const EN: Textos = {
   pesoVacio: "Log your weight at least twice to see how it moves.",
   disclaimerSalud: "Nothing you log here adds or takes away points. It's your record, not a goal to hit.",
 
+  /* ---------- account errors ---------- */
+  errorDemasiadosMails: "Too many confirmation emails were sent in a short time. Wait a few minutes and try again.",
+  errorMailYaRegistrado: "That email already has an account. Try signing in, or reset the password.",
+  errorDatosIncorrectos: "That email and password don’t match.",
+  errorFaltaConfirmar: "You still need to confirm your email — look for the message we sent.",
+  errorMailInvalido: "That email doesn’t look valid.",
+  errorSinConexion: "No connection. Check your internet and try again.",
+
   /* ---------- keep it as an app ---------- */
   comoTenerlaComoApp: "Keep it as an app",
   instalarIphone: "Tap the share button at the bottom and choose “Add to Home Screen”.",

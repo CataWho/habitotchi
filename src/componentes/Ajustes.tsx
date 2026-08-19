@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PRONOMBRES, cargarPerfil, guardarPerfil } from "@/lib/perfil";
 import { fechaDeHoy } from "@/lib/fechas";
 import {
-  borrarTodoDeLaNube, cambiarContraseña, cerrarSesion, hayNubeConfigurada, usarSesion,
+  borrarTodoDeLaNube, cambiarContraseña, cerrarSesion, hayNubeConfigurada, mensajeDeError, usarSesion,
 } from "@/lib/nube";
 import { CLAVES } from "@/lib/almacenamiento";
 import { usarEstiloDelFondo } from "@/componentes/aparato/Aparato";
@@ -212,7 +212,7 @@ function CuentaEnLaNube() {
       setContraseña("");
       setCambiando(false);
     } catch (e: any) {
-      setAviso(e?.message ?? tr("noSePudoCambiarContrasena"));
+      setAviso(mensajeDeError(e));
     } finally {
       setTrabajando(false);
     }
@@ -392,7 +392,7 @@ function TusDatos() {
     try {
       await borrarTodoDeLaNube();
     } catch (e: any) {
-      setAviso(e?.message ?? tr("noSePudoBorrarNube"));
+      setAviso(mensajeDeError(e));
       return;
     }
 
