@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   sonidoActivado, activarSonido, sonidoSalto, sonidoPunto, sonidoGol,
-  sonidoPerder, sonidoDesbloqueo, sonidoRechazo, iniciarAmbiente, detenerAmbiente,
+  sonidoPerder, sonidoDesbloqueo, sonidoRechazo, sonidoRebote, iniciarAmbiente, detenerAmbiente,
 } from "@/lib/sonido";
 
 /* ==========================================================
@@ -181,9 +181,25 @@ describe("cada efecto suena", () => {
 
   it("ningún efecto se pasa de un volumen que moleste", () => {
     /* Todo por debajo de 0.2: son sonidos de UI, no una alarma. */
-    sonidoSalto(); sonidoPunto(); sonidoGol(); sonidoPerder(); sonidoDesbloqueo(); sonidoRechazo();
+    sonidoSalto(); sonidoPunto(); sonidoGol(); sonidoPerder(); sonidoDesbloqueo(); sonidoRechazo(); sonidoRebote();
 
     for (const n of notas) expect(n.volumen).toBeLessThan(0.2);
+  });
+
+  it("el rebote en la paleta de la compu suena más apagado que tu punto", () => {
+    /* Ese lado de la cancha no suma nada, así que no puede sonar
+       igual de "premio" que devolver la pelota vos. */
+    sonidoPunto();
+    const agudoDePunto = Math.max(...notas.map((n) => n.frecuencia));
+    const volumenDePunto = Math.max(...notas.map((n) => n.volumen));
+    notas.length = 0;
+
+    sonidoRebote();
+    const agudoDeRebote = Math.max(...notas.map((n) => n.frecuencia));
+    const volumenDeRebote = Math.max(...notas.map((n) => n.volumen));
+
+    expect(agudoDeRebote).toBeLessThan(agudoDePunto);
+    expect(volumenDeRebote).toBeLessThanOrEqual(volumenDePunto);
   });
 });
 

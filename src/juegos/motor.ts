@@ -1,5 +1,5 @@
 import { CLAVES, escribir, leerTexto } from "@/lib/almacenamiento";
-import { sonidoPerder, sonidoPunto, sonidoGol, sonidoSalto } from "@/lib/sonido";
+import { sonidoPerder, sonidoPunto, sonidoGol, sonidoSalto, sonidoRebote } from "@/lib/sonido";
 
 /* ==========================================================
    HABITOTCHI · juegos
@@ -327,11 +327,16 @@ export function crearPong(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: numbe
     const objetivo = pelota.x - compuX;
     compuX += Math.max(-2.4, Math.min(2.4, objetivo * 0.09)) * factor;
 
-    /* Rebote contra la paleta de la compu (arriba) */
+    /* Rebote contra la paleta de la compu (arriba).
+
+       No suma nada —solo tu paleta puntúa—, pero necesita su
+       propio sonido: antes ese lado de la cancha era mudo y la
+       pelota parecía rebotar contra la nada. */
     if (pelota.y - RADIO < ALTO_PALETA + 4 &&
         Math.abs(pelota.x - compuX) < ANCHO_PALETA / 2) {
       pelota.vy = Math.abs(pelota.vy);
       pelota.y = ALTO_PALETA + 4 + RADIO;
+      sonidoRebote();
     }
 
     /* Rebote contra tu paleta (abajo) */
@@ -727,7 +732,10 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
       obstaculos.shift();
       puntaje++;
       alCambiarPuntaje(puntaje);
-      sonidoPunto();
+      /* Sin sonido acá a propósito: pasar un obstáculo suele
+         coincidir con el salto que lo esquivó, y las dos notas
+         juntas —la del salto y la del punto— se pisaban. Alcanza
+         con el sonido del salto. */
     }
 
     /* Cada 20 puntos, un escalón más rápido. Sale del puntaje,

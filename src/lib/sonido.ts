@@ -148,9 +148,17 @@ export function sonidoSalto(): void {
   melodia([MI5, LA5], 0.045, 0.09, 0.11, "triangle");
 }
 
-/** Sumar un punto: pasar un obstáculo, comer, devolver la pelota. */
+/** Sumar un punto: comer, devolver la pelota (tu paleta). */
 export function sonidoPunto(): void {
   melodia([DO5], 0.08, 0.09, 0.11, "square");
+}
+
+/** La pelota de Pong pica contra la paleta de la compu: no suma
+    nada, así que es una nota más apagada y grave que la de tu
+    punto —para que se note que ese lado no cuenta igual. Sin
+    esto, media cancha jugaba en silencio. */
+export function sonidoRebote(): void {
+  melodia([MI4], 0.08, 0.07, 0.08, "triangle");
 }
 
 /** El gol de Pong: más largo, más fiesta que un punto común. */
