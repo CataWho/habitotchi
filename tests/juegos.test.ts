@@ -260,6 +260,45 @@ describe("Pong", () => {
 describe("Saltador", () => {
   const dibujoDeMentira = () => {};
 
+  it("al perder se dibuja como fantasma en el último cuadro, sea cual sea la causa", () => {
+    /* Sin tocar nada, la mascota camina derecho al primer
+       obstáculo y pierde —el mismo escenario que ya prueba
+       "corre solo y en algún momento se pierde", más abajo.
+       No hace falta forzar un pozo: cualquier muerte (acá,
+       chocar con un pincho) tiene que dejarla como fantasma. */
+    const canvas = canvasDeMentira();
+    let dibujosDelSpriteNormal = 0;
+    let perdio = false;
+
+    const juego = crearSaltador(
+      canvas, () => {}, () => { perdio = true; },
+      () => { dibujosDelSpriteNormal++; }
+    );
+
+    juego.arrancar();
+    avanzar(60_000);
+    juego.detener();
+
+    expect(perdio, "tenía que perder para poder revisar el cuadro final").toBe(true);
+
+    /* dibujar() empieza SIEMPRE pintando el fondo entero, tanto
+       si ese cuadro terminó siendo el sprite como el fantasma:
+       contar esos rellenos es contar cuántos cuadros se
+       dibujaron en total. */
+    const totalDeCuadros = loDibujado(canvas, "fillRect")
+      .filter((l: any) => l.args[2] === 300 && l.args[3] === 230).length;
+
+    /* Si el último cuadro se pintó como fantasma, el sprite
+       normal tiene que haberse dibujado exactamente una vez
+       MENOS que el total de cuadros: todos menos el de la
+       muerte. Si el fantasma nunca se dibujara, los dos números
+       serían iguales. */
+    expect(
+      dibujosDelSpriteNormal,
+      "el último cuadro no se pintó como fantasma"
+    ).toBe(totalDeCuadros - 1);
+  });
+
   it("saltar y soltar no explotan", () => {
     const juego = crearSaltador(canvasDeMentira(), () => {}, () => {}, dibujoDeMentira);
     juego.arrancar();

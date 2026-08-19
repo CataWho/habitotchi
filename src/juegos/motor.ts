@@ -574,7 +574,7 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
   let mascota: any, obstaculos: any, velocidad: any, puntaje: any, reloj: any, viva: any, nubes: any;
 
   function arrancar() {
-    mascota = { x: 26, y: PISO, vy: 0, alto: 20, ancho: 20, apoyada: true };
+    mascota = { x: 26, y: PISO, vy: 0, alto: 20, ancho: 20, apoyada: true, fantasma: false };
     obstaculos = [];
     nubes = [
       { x: 96,  y: 54, escala: 1 },
@@ -609,6 +609,53 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
 
   /* El sol o la luna y las nubes. Todo con los mismos dos
      colores de la pantallita: no hay grises ni medios tonos. */
+  /* Cada vez que perdés —caer en un pozo o chocar con un
+     pincho— la mascota se dibuja como un fantasmita en vez de
+     con su sprite de siempre: cúpula redonda arriba, dos ojitos
+     huecos, y un borde ondulado abajo, como cualquier fantasma
+     de toda la vida.
+
+     `opacidad` solo baja cayendo en un pozo, a medida que se
+     hunde: para cuando llega al fondo (y perdés) ya casi no se
+     ve, como si se hubiera esfumado. En cualquier otra muerte
+     sale directo a opacidad completa. */
+  function dibujarFantasma(x: number, y: number, ancho: number, alto: number, opacidad: number) {
+    const cx = x + ancho / 2;
+    const r = ancho / 2;
+    const topeY = y + r;
+    const pisoY = y + alto;
+    const hondoDeLaMuesca = (pisoY - topeY) * 0.4;
+
+    ctx.save();
+    ctx.globalAlpha = opacidad;
+    ctx.fillStyle = tintaLCD();
+
+    ctx.beginPath();
+    ctx.moveTo(x, topeY);
+    ctx.arc(cx, topeY, r, Math.PI, 2 * Math.PI);   // la cúpula de la cabeza
+    ctx.lineTo(x + ancho, pisoY);                              // baja por la derecha
+    ctx.lineTo(x + (ancho * 5) / 6, pisoY - hondoDeLaMuesca);
+    ctx.lineTo(x + (ancho * 4) / 6, pisoY);
+    ctx.lineTo(x + (ancho * 3) / 6, pisoY - hondoDeLaMuesca);   // la muesca del medio
+    ctx.lineTo(x + (ancho * 2) / 6, pisoY);
+    ctx.lineTo(x + (ancho * 1) / 6, pisoY - hondoDeLaMuesca);
+    ctx.lineTo(x, pisoY);                                       // vuelve a la esquina izquierda
+    ctx.closePath();
+    ctx.fill();
+
+    /* Los ojos son huecos del color de la pantalla, la misma
+       idea que ya usan las nubes y la luna para "recortar". */
+    ctx.fillStyle = fondoLCD();
+    const radioOjo = Math.max(1, ancho * 0.09);
+
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.4, topeY - r * 0.15, radioOjo, 0, Math.PI * 2);
+    ctx.arc(cx + r * 0.4, topeY - r * 0.15, radioOjo, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   function dibujarCielo() {
     const tinta = tintaLCD();
     const fondo = fondoLCD();
@@ -690,6 +737,18 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
        que permitir. */
     mascota.apoyada = hayPiso && mascota.y >= PISO;
 
+    /* Mientras se está hundiendo en un pozo, ya se dibuja como
+       fantasma —no hace falta esperar a perder para eso. Recién
+       se prende cuando LLEGA al piso del pozo, no mientras
+       todavía está en el aire por arriba de la línea del suelo
+       —eso sería un salto normal, que se ve igual pase lo que
+       pase abajo.
+
+       (El resto de las muertes, como chocar con un pincho, se
+       marcan directo en perder(): ahí no hay ningún hundimiento
+       que animar, es instantáneo.) */
+    mascota.fantasma = !hayPiso && mascota.y >= PISO;
+
     /* Si se hundió del todo, se perdió. Se deja que baje un
        poco antes de cortar para que la caída SE VEA: perder
        justo en el borde parecería un error del juego. */
@@ -767,6 +826,18 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
   function perder() {
     viva = false;
     clearInterval(reloj);
+
+    /* Perder siempre te deja como fantasma, no solo cayendo en
+       un pozo —chocar con un pincho también. Como `perder()` se
+       llama con un `return` antes del dibujar() de siempre en
+       paso(), ese último cuadro nunca se pintaba: la pantalla
+       se quedaba mostrando el cuadro ANTERIOR al golpe, con la
+       mascota todavía entera. Acá se dibuja una vez más, ya con
+       el fantasma puesto, y ese es el cuadro que va a quedar
+       congelado en pantalla hasta que se limpie. */
+    mascota.fantasma = true;
+    dibujar();
+
     sonidoPerder();
     alPerder(puntaje);
   }
@@ -818,10 +889,24 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
       }
     }
 
-    /* La mascota: si nos pasaron su dibujo lo usamos, si no,
-       un cuadradito. Así el juego funciona igual aunque algo
-       falle con los sprites. */
-    if (dibujoMascota) {
+    /* La mascota: si se está hundiendo en un pozo o si ya
+       perdió, un fantasmita en vez de su sprite de siempre. Si
+       no, si nos pasaron su dibujo lo usamos, y si no, un
+       cuadradito —así el juego funciona igual aunque algo falle
+       con los sprites. */
+    if (mascota.fantasma) {
+      /* Solo tiene sentido "hundimiento" cayendo en un pozo: 0
+         recién tocando el piso del pozo, 1 en el punto en que se
+         pierde (PISO + 16), y a esa altura el fantasma queda
+         casi transparente. En cualquier otra muerte (un pincho)
+         mascota.y ronda el piso o menos, así que esto da 0 y el
+         fantasma sale a máxima opacidad. */
+      const hundimiento = Math.max(0, Math.min(1, (mascota.y - PISO) / 16));
+      dibujarFantasma(
+        mascota.x, mascota.y - mascota.alto + 2, mascota.ancho, mascota.alto,
+        1 - hundimiento * 0.85
+      );
+    } else if (dibujoMascota) {
       dibujoMascota(ctx, mascota.x, mascota.y - mascota.alto + 2, mascota.ancho, mascota.alto);
     } else {
       ctx.fillRect(mascota.x, mascota.y - mascota.alto, mascota.ancho, mascota.alto);
