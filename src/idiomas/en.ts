@@ -241,7 +241,6 @@ export const EN: Textos = {
   contrasenaNueva: "new password",
   cerrarSesion: "Sign out",
   contrasenaCambiada: "Done, password changed.",
-  noSePudoCambiarContrasena: "Couldn't change the password.",
   descargarMisDatos: "Download my data",
   restaurarCopia: "Restore a backup",
   borrarTodo: "Delete everything",
@@ -251,7 +250,6 @@ export const EN: Textos = {
   borrando: "Deleting…",
   confirmarBorrar1: "Are you sure? This deletes everything you've logged and can't be undone.",
   confirmarBorrar2: "Really, there's no going back. Delete everything?",
-  noSePudoBorrarNube: "Couldn't delete from your account. Nothing was deleted.",
   verPolitica: "Read the privacy policy",
   notaDatos: "Everything is saved to your account, so you'll find it on any device. The downloaded backup is for keeping a copy outside the app.",
 

@@ -238,7 +238,6 @@ export const ES = {
   contrasenaNueva: "contraseña nueva",
   cerrarSesion: "Cerrar sesión",
   contrasenaCambiada: "Listo, contraseña cambiada.",
-  noSePudoCambiarContrasena: "No se pudo cambiar la contraseña.",
   descargarMisDatos: "Descargar mis datos",
   restaurarCopia: "Restaurar una copia",
   borrarTodo: "Borrar todo",
@@ -248,7 +247,6 @@ export const ES = {
   borrando: "Borrando…",
   confirmarBorrar1: "¿Seguro? Se borra todo lo que anotaste y no se puede recuperar.",
   confirmarBorrar2: "De verdad, no hay vuelta atrás. ¿Borro todo?",
-  noSePudoBorrarNube: "No se pudo borrar de tu cuenta. No se borró nada.",
   verPolitica: "Ver la política de privacidad",
   notaDatos: "Todo se guarda en tu cuenta, así lo encontrás igual desde otro dispositivo. La copia descargada sirve para tenerlo también fuera de la app.",
 
