@@ -516,9 +516,24 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
       empezar(rumbo);
     };
 
+    /* ---------- CUANDO LO ÚNICO QUE LLEGA ES EL CLIC ----------
+       Hay celulares donde no aparece ni el evento del puntero ni
+       el del tacto, y el clic es lo único que se recibe. Ahí no
+       existe el "mantener apretado", así que un toque corre la
+       paleta un tramo entero de una vez en lugar de no hacer
+       nada.
+
+       No arranca el reloj a propósito: sin un "solté el dedo"
+       que lo apague, la paleta se iría sola hasta la pared. */
+    const unSoloToque = (e: React.SyntheticEvent) => {
+      if (recienAtendido(e.currentTarget)) return;
+      for (let paso = 0; paso < 5; paso++) moverPaleta(rumbo);
+    };
+
     return {
       onPointerDown: arrancar,
       onTouchStart: arrancar,
+      onClick: unSoloToque,
       onPointerUp: parar,
       onPointerLeave: parar,
       onPointerCancel: parar,
@@ -547,6 +562,18 @@ function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
     activo.current?.saltar?.();
   };
 
+  /* Si el navegador solo manda el clic, no hay forma de saber
+     cuánto tiempo tuviste el dedo apoyado. En ese caso el toque
+     vale un salto COMPLETO: nunca se avisa que se soltó, y sin
+     ese aviso el motor no corta el envión.
+
+     Es la opción correcta de las dos: con el salto corto no
+     llegarías a pasar los pinches altos. */
+  const saltoDeUnToque = (e: React.SyntheticEvent) => {
+    if (recienAtendido(e.currentTarget)) return;
+    activo.current?.saltar?.();
+  };
+
   return (
     <div className="juego-dpad juego-dpad--fila">
       <button
@@ -555,6 +582,7 @@ function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
         aria-label={tr("arriba")}
         onPointerDown={saltar}
         onTouchStart={saltar}
+        onClick={saltoDeUnToque}
         onPointerUp={soltar}
         onPointerLeave={soltar}
         onPointerCancel={soltar}
