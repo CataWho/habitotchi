@@ -180,7 +180,7 @@ export async function crearCuenta(email: string, contraseña: string) {
     },
   });
 
-  if (error) throw new Error(traducirError(error.message));
+  if (error) throw new Error(error.message);
 
   /* Si el proyecto tiene activada la confirmación de mail,
      signUp crea la cuenta pero NO devuelve sesión: la persona
@@ -208,21 +208,21 @@ export async function pedirRecuperarContraseña(email: string): Promise<void> {
     redirectTo: window.location.origin,
   });
 
-  if (error) throw new Error(traducirError(error.message));
+  if (error) throw new Error(error.message);
 }
 
 export async function cambiarContraseña(nueva: string): Promise<void> {
   if (!cliente) throw new Error("La cuenta en la nube no está disponible.");
 
   const { error } = await cliente.auth.updateUser({ password: nueva });
-  if (error) throw new Error(traducirError(error.message));
+  if (error) throw new Error(error.message);
 }
 
 export async function iniciarSesion(email: string, contraseña: string) {
   if (!cliente) throw new Error("La cuenta en la nube no está disponible.");
 
   const { data, error } = await cliente.auth.signInWithPassword({ email, password: contraseña });
-  if (error) throw new Error(traducirError(error.message));
+  if (error) throw new Error(error.message);
   return data.user;
 }
 
@@ -349,18 +349,6 @@ export function terminarRecuperacion(): void {
   if (window.location.hash) {
     history.replaceState(null, "", window.location.pathname + window.location.search);
   }
-}
-
-/* Los mensajes de Supabase vienen en inglés y con jerga
-   técnica ("Invalid login credentials"). Se traducen los que
-   más van a aparecer; el resto pasa tal cual, mejor eso que
-   inventar una traducción que no corresponde. */
-function traducirError(mensaje: string): string {
-  if (/invalid login credentials/i.test(mensaje)) return "Mail o contraseña incorrectos.";
-  if (/user already registered/i.test(mensaje)) return "Ya existe una cuenta con ese mail.";
-  if (/password should be at least/i.test(mensaje)) return "La contraseña necesita al menos 6 caracteres.";
-  if (/unable to validate email/i.test(mensaje)) return "Ese mail no parece válido.";
-  return mensaje;
 }
 
 /* ----------------------------------------------------------
