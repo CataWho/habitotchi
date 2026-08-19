@@ -409,6 +409,42 @@ export function Juegos() {
      pong     · izquierda y derecha
      saltador · una sola flecha para saltar
    ========================================================== */
+/* ---------- POR QUÉ LAS FLECHAS LLEVAN UN CARÁCTER INVISIBLE ----------
+   En iOS, ◀ y ▶ (a diferencia de ▲ y ▼) vienen marcados como
+   emoji por defecto: el teléfono los dibujaba como cuadraditos
+   azules, mientras arriba y abajo salían bien. Se veía como si
+   fueran dos botones de otro juego.
+
+   El ︎ que va pegado es el "selector de variante de
+   texto": le pide al sistema la versión de imprenta y no la de
+   emoji. No ocupa lugar ni se lee en voz alta. Se le pone a las
+   cuatro para que ninguna dependa de cómo la interprete cada
+   teléfono. */
+const FLECHAS = {
+  arriba: "▲︎",
+  abajo: "▼︎",
+  izquierda: "◀︎",
+  derecha: "▶︎",
+};
+
+/* Responder al APRETAR y no al soltar.
+
+   onClick espera a que levantes el dedo, y encima el navegador
+   del celular mete su propia demora antes de decidir que fue un
+   toque y no el principio de un arrastre. En un juego eso se
+   siente como que el botón no anda.
+
+   preventDefault evita que el mismo dedo dispare después el
+   click de siempre y termine girando dos veces. */
+function alApretar(hacer: () => void) {
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      e.preventDefault();
+      hacer();
+    },
+  };
+}
+
 function Controles({ juego, activo, moverPaleta }: {
   juego: string;
   activo: React.RefObject<any>;
@@ -450,8 +486,8 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
 
   return (
     <div className="juego-dpad juego-dpad--fila">
-      <button type="button" className="dpad-btn" aria-label={tr("izquierda")} {...gatillo(-1)}>◀</button>
-      <button type="button" className="dpad-btn" aria-label={tr("derecha")} {...gatillo(1)}>▶</button>
+      <button type="button" className="dpad-btn" aria-label={tr("izquierda")} {...gatillo(-1)}>{FLECHAS.izquierda}</button>
+      <button type="button" className="dpad-btn" aria-label={tr("derecha")} {...gatillo(1)}>{FLECHAS.derecha}</button>
     </div>
   );
 }
@@ -474,7 +510,7 @@ function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
         onPointerLeave={soltar}
         onPointerCancel={soltar}
       >
-        ▲
+        {FLECHAS.arriba}
       </button>
     </div>
   );
@@ -495,11 +531,11 @@ function Dpad({ activo }: { activo: React.RefObject<any> }) {
      nada. */
   return (
     <div className="juego-dpad">
-      <button type="button" className="dpad-btn dpad-arriba" onClick={() => girar("arriba")} aria-label={tr("arriba")}>▲</button>
-      <button type="button" className="dpad-btn dpad-izquierda" onClick={() => girar("izquierda")} aria-label={tr("izquierda")}>◀</button>
+      <button type="button" className="dpad-btn dpad-arriba" {...alApretar(() => girar("arriba"))} aria-label={tr("arriba")}>{FLECHAS.arriba}</button>
+      <button type="button" className="dpad-btn dpad-izquierda" {...alApretar(() => girar("izquierda"))} aria-label={tr("izquierda")}>{FLECHAS.izquierda}</button>
       <span className="dpad-centro" aria-hidden="true" />
-      <button type="button" className="dpad-btn dpad-derecha" onClick={() => girar("derecha")} aria-label={tr("derecha")}>▶</button>
-      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label={tr("abajo")}>▼</button>
+      <button type="button" className="dpad-btn dpad-derecha" {...alApretar(() => girar("derecha"))} aria-label={tr("derecha")}>{FLECHAS.derecha}</button>
+      <button type="button" className="dpad-btn dpad-abajo" {...alApretar(() => girar("abajo"))} aria-label={tr("abajo")}>{FLECHAS.abajo}</button>
     </div>
   );
 }

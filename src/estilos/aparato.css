@@ -2455,7 +2455,38 @@
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+
+  /* ---------- LO QUE LOS HACÍA LENTOS ----------
+     Sin touch-action, el navegador del celular no sabe si el
+     dedo va a ser un toque, un arrastre o un doble toque para
+     hacer zoom, así que ESPERA antes de avisar. Esa espera son
+     ~300ms en cada apretón: en una app se nota poco, en un
+     juego se siente roto.
+
+     Con "manipulation" se descarta el doble toque de zoom, y el
+     navegador puede avisar del toque en el momento. También
+     evita que un apretón sobre el botón se interprete como el
+     comienzo de un scroll, que era lo que hacía que en Pong y
+     en el Saltador los botones no respondieran nunca. */
+  touch-action: manipulation;
 }
+
+/* El área que responde al dedo es más grande que el botón
+   dibujado: cinco píxeles alrededor. No se ve, pero perdona
+   que le pegues un poco afuera.
+
+   Se puede agrandar para los cuatro lados sin que un botón le
+   robe el toque al vecino, porque en la cruz no hay dos
+   botones pegados: entre izquierda y derecha está el círculo
+   del medio, y arriba y abajo quedan en otra fila. En la fila
+   de Pong hay 16px de separación. */
+.dpad-btn::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
+.dpad-btn { position: relative; }
 
 .dpad-btn:active { transform: translateY(2px); }
 
