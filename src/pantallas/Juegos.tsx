@@ -444,6 +444,14 @@ function recienAtendido(nodo: any) {
   return false;
 }
 
+/* Deja el sello sin preguntar nada. Lo usan los oyentes que se
+   enganchan al nodo directamente: ellos ya saben que atendieron
+   el toque, y solo necesitan que el clic que viene después no
+   lo cuente de nuevo. */
+function marcarAtendido(nodo: any) {
+  nodo.__ultimoToque = Date.now();
+}
+
 /* Responder al APRETAR y no al soltar.
 
    onClick espera a que levantes el dedo, y encima el navegador
@@ -488,6 +496,99 @@ function Controles({ juego, activo, moverPaleta }: {
 
    Con un toque = un paso no alcanzaba: para cruzar la cancha
    había que dar veinte golpecitos. */
+/* ==========================================================
+   UN BOTÓN QUE SE PUEDE MANTENER APRETADO
+   ==========================================================
+   Devuelve una referencia para colgarle a un <button>, y le
+   engancha los eventos DIRECTAMENTE al nodo, sin pasar por
+   React.
+
+   ---------- POR QUÉ SIN REACT ----------
+   React no escucha en cada botón: pone un solo oyente en la
+   raíz de la app y desde ahí reparte. En algún teléfono esa
+   distribución no le estaba entregando los eventos del tacto ni
+   los del puntero — el clic llegaba y el resto no—, y sin ellos
+   no hay forma de saber cuánto tiempo tuviste el dedo apoyado.
+
+   Enganchados al botón mismo no hay intermediario: el evento
+   pasa por el nodo antes que por cualquier otra cosa.
+
+   ---------- POR QUÉ TAMBIÉN ESCUCHA A LA VENTANA ----------
+   Si levantás el dedo fuera del botón —o el navegador se queda
+   con el gesto a mitad de camino— el "lo solté" nunca llegaría
+   al botón, y la paleta seguiría moviéndose sola para siempre.
+   ========================================================== */
+function usarBotonSostenido(apretar: () => void, soltar?: () => void) {
+  const nodo = useRef<HTMLButtonElement>(null);
+
+  /* Las acciones se guardan aparte para que los oyentes se
+     enganchen UNA vez y sigan llamando a la versión de ahora,
+     sin re-engancharse en cada dibujado. */
+  const acciones = useRef({ apretar, soltar });
+  acciones.current = { apretar, soltar };
+
+  useEffect(() => {
+    const boton = nodo.current;
+    if (!boton) return;
+
+    let apretado = false;
+
+    /* Un mismo dedo dispara varios eventos seguidos (tacto,
+       puntero y mouse). Con esta bandera, el primero que llegue
+       gana y los demás se ignoran hasta que se suelte. */
+    const alApretarlo = () => {
+      if (apretado) return;
+      apretado = true;
+      marcarAtendido(boton);
+      acciones.current.apretar();
+    };
+
+    const alSoltarlo = () => {
+      if (!apretado) return;
+      apretado = false;
+      acciones.current.soltar?.();
+    };
+
+    boton.addEventListener("touchstart", alApretarlo, { passive: true });
+    boton.addEventListener("pointerdown", alApretarlo);
+    boton.addEventListener("mousedown", alApretarlo);
+
+    boton.addEventListener("touchend", alSoltarlo);
+    boton.addEventListener("touchcancel", alSoltarlo);
+    boton.addEventListener("pointerup", alSoltarlo);
+    boton.addEventListener("pointercancel", alSoltarlo);
+    boton.addEventListener("mouseup", alSoltarlo);
+    boton.addEventListener("mouseleave", alSoltarlo);
+
+    window.addEventListener("touchend", alSoltarlo);
+    window.addEventListener("pointerup", alSoltarlo);
+    window.addEventListener("mouseup", alSoltarlo);
+    window.addEventListener("blur", alSoltarlo);
+
+    return () => {
+      alSoltarlo();
+
+      boton.removeEventListener("touchstart", alApretarlo);
+      boton.removeEventListener("pointerdown", alApretarlo);
+      boton.removeEventListener("mousedown", alApretarlo);
+
+      boton.removeEventListener("touchend", alSoltarlo);
+      boton.removeEventListener("touchcancel", alSoltarlo);
+      boton.removeEventListener("pointerup", alSoltarlo);
+      boton.removeEventListener("pointercancel", alSoltarlo);
+      boton.removeEventListener("mouseup", alSoltarlo);
+      boton.removeEventListener("mouseleave", alSoltarlo);
+
+      window.removeEventListener("touchend", alSoltarlo);
+      window.removeEventListener("pointerup", alSoltarlo);
+      window.removeEventListener("mouseup", alSoltarlo);
+      window.removeEventListener("blur", alSoltarlo);
+    };
+  }, []);
+
+  return nodo;
+}
+
 function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }) {
   const reloj = useRef<number | undefined>(undefined);
 
@@ -502,50 +603,24 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
     reloj.current = window.setInterval(() => moverPaleta(rumbo), 16);
   };
 
-  /* Si te vas de la pantalla con el dedo apoyado, nunca llega
-     el "lo solté" y la paleta seguiría sola para siempre. */
   useEffect(() => parar, []);
 
-  /* Igual que alApretar, pero con soltar: además del puntero se
-     escucha el tacto, porque hay navegadores que solo mandan
-     ese. El guardia evita que un dedo arranque el movimiento
-     dos veces. */
-  const gatillo = (rumbo: number) => {
-    const arrancar = (e: React.SyntheticEvent) => {
-      if (recienAtendido(e.currentTarget)) return;
-      empezar(rumbo);
-    };
+  const izquierda = usarBotonSostenido(() => empezar(-1), parar);
+  const derecha = usarBotonSostenido(() => empezar(1), parar);
 
-    /* ---------- CUANDO LO ÚNICO QUE LLEGA ES EL CLIC ----------
-       Hay celulares donde no aparece ni el evento del puntero ni
-       el del tacto, y el clic es lo único que se recibe. Ahí no
-       existe el "mantener apretado", así que un toque corre la
-       paleta un tramo entero de una vez en lugar de no hacer
-       nada.
-
-       No arranca el reloj a propósito: sin un "solté el dedo"
-       que lo apague, la paleta se iría sola hasta la pared. */
-    const unSoloToque = (e: React.SyntheticEvent) => {
-      if (recienAtendido(e.currentTarget)) return;
-      for (let paso = 0; paso < 5; paso++) moverPaleta(rumbo);
-    };
-
-    return {
-      onPointerDown: arrancar,
-      onTouchStart: arrancar,
-      onClick: unSoloToque,
-      onPointerUp: parar,
-      onPointerLeave: parar,
-      onPointerCancel: parar,
-      onTouchEnd: parar,
-      onTouchCancel: parar,
-    };
+  /* El clic queda de última red: si un navegador no manda nada
+     de lo de arriba, al menos un toque corre la paleta un tramo
+     en vez de no hacer nada. El guardia lo saltea cuando el
+     apretón sí funcionó. */
+  const porClic = (rumbo: number) => (e: React.MouseEvent) => {
+    if (recienAtendido(e.currentTarget)) return;
+    for (let paso = 0; paso < 5; paso++) moverPaleta(rumbo);
   };
 
   return (
     <div className="juego-dpad juego-dpad--fila">
-      <button type="button" className="dpad-btn" aria-label={tr("izquierda")} {...gatillo(-1)}>{FLECHAS.izquierda}</button>
-      <button type="button" className="dpad-btn" aria-label={tr("derecha")} {...gatillo(1)}>{FLECHAS.derecha}</button>
+      <button ref={izquierda} type="button" className="dpad-btn" aria-label={tr("izquierda")} onClick={porClic(-1)}>{FLECHAS.izquierda}</button>
+      <button ref={derecha} type="button" className="dpad-btn" aria-label={tr("derecha")} onClick={porClic(1)}>{FLECHAS.derecha}</button>
     </div>
   );
 }
@@ -555,21 +630,19 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
    la pantalla. Si solo escucháramos el apretón, desde el botón
    todos los saltos saldrían cortos. */
 function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
-  const soltar = () => activo.current?.soltarSalto?.();
+  const boton = usarBotonSostenido(
+    () => activo.current?.saltar?.(),
+    () => activo.current?.soltarSalto?.()
+  );
 
-  const saltar = (e: React.SyntheticEvent) => {
-    if (recienAtendido(e.currentTarget)) return;
-    activo.current?.saltar?.();
-  };
+  /* Última red, igual que en Pong. Si solo llega el clic no hay
+     manera de saber cuánto tiempo tuviste el dedo apoyado, así
+     que el toque vale un salto COMPLETO: nunca se avisa que se
+     soltó, y sin ese aviso el motor no corta el envión.
 
-  /* Si el navegador solo manda el clic, no hay forma de saber
-     cuánto tiempo tuviste el dedo apoyado. En ese caso el toque
-     vale un salto COMPLETO: nunca se avisa que se soltó, y sin
-     ese aviso el motor no corta el envión.
-
-     Es la opción correcta de las dos: con el salto corto no
+     De las dos opciones es la correcta: con el salto corto no
      llegarías a pasar los pinches altos. */
-  const saltoDeUnToque = (e: React.SyntheticEvent) => {
+  const porClic = (e: React.MouseEvent) => {
     if (recienAtendido(e.currentTarget)) return;
     activo.current?.saltar?.();
   };
@@ -577,17 +650,11 @@ function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
   return (
     <div className="juego-dpad juego-dpad--fila">
       <button
+        ref={boton}
         type="button"
         className="dpad-btn"
         aria-label={tr("arriba")}
-        onPointerDown={saltar}
-        onTouchStart={saltar}
-        onClick={saltoDeUnToque}
-        onPointerUp={soltar}
-        onPointerLeave={soltar}
-        onPointerCancel={soltar}
-        onTouchEnd={soltar}
-        onTouchCancel={soltar}
+        onClick={porClic}
       >
         {FLECHAS.arriba}
       </button>
