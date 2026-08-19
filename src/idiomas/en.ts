@@ -164,6 +164,12 @@ export const EN: Textos = {
   estaSemana: "This week: {resumen}",
   pesoVacio: "Log your weight at least twice to see how it moves.",
   disclaimerSalud: "Nothing you log here adds or takes away points. It's your record, not a goal to hit.",
+
+  /* ---------- keep it as an app ---------- */
+  comoTenerlaComoApp: "Keep it as an app",
+  instalarIphone: "Tap the share button at the bottom and choose “Add to Home Screen”.",
+  instalarAndroid: "Open the browser menu and choose “Install app” or “Add to Home screen”.",
+  instalarAhora: "Install",
   consultarProfesional: "This is a personal record, not medical advice. If anything worries you, talk to a health professional.",
   balanceVacio: "Log how you feel for a few days and the pattern shows up here.",
 

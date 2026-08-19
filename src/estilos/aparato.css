@@ -3354,3 +3354,40 @@
 .chef-overlay--pantalla .chef-modal .habit-btn:hover {
   background: var(--lila-oscuro);
 }
+
+/* ==========================================================
+   EL AVISO DE "TENELA COMO APP"
+   ==========================================================
+   Va al pie de la pantalla de ingreso, separado del formulario
+   por una línea: es información útil, no un paso más para
+   entrar. Por eso también va en letra chica y sin destacarse.
+   ========================================================== */
+.porton-instalar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 6px 0;
+
+  border-top: 1.5px dashed var(--lila);
+}
+
+.porton-instalar-titulo {
+  margin: 0;
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: .04em;
+  color: var(--lila-sombra);
+}
+
+.porton-instalar-como {
+  margin: 0;
+  max-width: 30ch;
+  text-align: center;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--lcd-tinta-suave);
+}

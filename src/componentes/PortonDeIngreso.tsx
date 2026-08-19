@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { tr } from "@/lib/idioma";
 import {
   cambiarContraseña, crearCuenta, guardarSiQuiereQueLoRecuerden, hayDatosLocales,
@@ -40,6 +40,7 @@ export function PortonDeIngreso({ recuperandoContraseña }: { recuperandoContras
         <Pantalla>
           <div className="page porton">
             {recuperandoContraseña ? <ContraseñaNueva /> : <Formulario />}
+            <ComoInstalar />
           </div>
         </Pantalla>
 
@@ -286,6 +287,105 @@ function Formulario() {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ==========================================================
+   TENERLA COMO APP
+   ==========================================================
+   Un aviso en la pantalla de ingreso que explica cómo dejar
+   Habitotchi en la pantalla de inicio del teléfono. Es una PWA,
+   así que instalada se ve sin la barra del navegador y anda sin
+   conexión — pero eso nadie lo adivina si no se lo cuentan.
+
+   ---------- NO SE HACE IGUAL EN TODOS LADOS ----------
+   Chrome, Edge y los navegadores de Android avisan antes de
+   ofrecer la instalación. Ese aviso se puede guardar y abrir el
+   diálogo de verdad cuando la persona toque el botón: ahí no
+   hace falta explicar nada, se instala de una.
+
+   iOS no tiene esa API. En iPhone la única forma es el gesto de
+   compartir, así que ahí se explica con palabras.
+
+   ---------- Y SI YA LA TIENE INSTALADA, NADA ----------
+   Abierta desde la pantalla de inicio, el navegador dice que
+   corre en modo "standalone". Mostrarle cómo instalar algo que
+   ya instaló sería ruido.
+   ========================================================== */
+function yaEstaInstalada() {
+  if (typeof window === "undefined") return false;
+
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches === true ||
+    (navigator as any).standalone === true
+  );
+}
+
+function esDeApple() {
+  const cual = navigator.userAgent;
+
+  /* El iPad moderno se hace pasar por una Mac, así que además
+     se mira si la pantalla responde al tacto. */
+  return (
+    /iphone|ipod|ipad/i.test(cual) ||
+    (/macintosh/i.test(cual) && navigator.maxTouchPoints > 1)
+  );
+}
+
+function ComoInstalar() {
+  const [instalable, setInstalable] = useState<any>(null);
+  const [instalada, setInstalada] = useState(() => yaEstaInstalada());
+
+  useEffect(() => {
+    /* El navegador avisa UNA vez que la app se puede instalar, y
+       ese aviso hay que guardarlo: es lo único que después
+       permite abrir el diálogo. Si se deja pasar, se pierde. */
+    const guardar = (e: any) => {
+      e.preventDefault();
+      setInstalable(e);
+    };
+
+    const listo = () => {
+      setInstalada(true);
+      setInstalable(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", guardar);
+    window.addEventListener("appinstalled", listo);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", guardar);
+      window.removeEventListener("appinstalled", listo);
+    };
+  }, []);
+
+  if (instalada) return null;
+
+  const instalar = async () => {
+    instalable.prompt();
+
+    const { outcome } = await instalable.userChoice;
+    if (outcome === "accepted") setInstalada(true);
+
+    /* El aviso guardado sirve una sola vez: si dijo que no, el
+       botón desaparece y queda la explicación a mano. */
+    setInstalable(null);
+  };
+
+  return (
+    <div className="porton-instalar">
+      <p className="porton-instalar-titulo">{tr("comoTenerlaComoApp")}</p>
+
+      {instalable ? (
+        <button type="button" className="habit-btn" onClick={instalar}>
+          {tr("instalarAhora")}
+        </button>
+      ) : (
+        <p className="porton-instalar-como">
+          {esDeApple() ? tr("instalarIphone") : tr("instalarAndroid")}
+        </p>
+      )}
     </div>
   );
 }

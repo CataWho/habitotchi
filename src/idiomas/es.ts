@@ -161,6 +161,12 @@ export const ES = {
   estaSemana: "Esta semana: {resumen}",
   pesoVacio: "Anotá tu peso al menos dos veces para ver cómo se mueve.",
   disclaimerSalud: "Nada de lo que anotás acá suma ni resta puntos. Es tu registro, no una meta que cumplir.",
+
+  /* ---------- tenerla como app ---------- */
+  comoTenerlaComoApp: "Tenela como una app",
+  instalarIphone: "Tocá el botón de compartir de abajo y elegí «Agregar a inicio».",
+  instalarAndroid: "Abrí el menú del navegador y elegí «Instalar app» o «Agregar a pantalla de inicio».",
+  instalarAhora: "Instalar",
   consultarProfesional: "Esto es un registro personal, no un consejo médico. Ante cualquier duda, consultá con un profesional de la salud.",
   balanceVacio: "Anotá cómo te sentís unos días y acá vas a ver el patrón.",
 
