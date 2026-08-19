@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { tr } from "@/lib/idioma";
+import { detenerAmbiente, iniciarAmbiente, usarSonido } from "@/lib/sonido";
 import { Aparato, Pantalla, usarEstiloDelFondo } from "@/componentes/aparato/Aparato";
 import { Botonera } from "@/componentes/aparato/Chasis";
 import { Paginas, Puntitos, usePaginas } from "@/componentes/aparato/Paginas";
@@ -86,6 +87,21 @@ function Habitotchi() {
   const [statsAbiertas, setStatsAbiertas] = useState(false);
 
   const navegacion = usePaginas(PANTALLAS.length);
+
+  /* El ambiente arranca solo al entrar a la app, y se apaga si
+     lo desactivás desde Ajustes —usarSonido() se entera del
+     cambio y este efecto se vuelve a correr. Si el navegador
+     todavía no dejó sonar nada (falta el primer toque de la
+     persona), iniciarAmbiente() lo deja programado igual: en
+     cuanto se destrabe el audio, sigue solo. */
+  const { activado: sonidoEstaActivado } = usarSonido();
+
+  useEffect(() => {
+    if (sonidoEstaActivado) iniciarAmbiente();
+    else detenerAmbiente();
+
+    return () => detenerAmbiente();
+  }, [sonidoEstaActivado]);
 
   return (
     <>

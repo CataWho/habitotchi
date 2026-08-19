@@ -8,6 +8,7 @@ import { CLAVES } from "@/lib/almacenamiento";
 import { usarEstiloDelFondo } from "@/componentes/aparato/Aparato";
 import { useGuardado } from "@/estado/useGuardado";
 import { tr, usarIdioma } from "@/lib/idioma";
+import { usarSonido } from "@/lib/sonido";
 import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
 import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
@@ -46,6 +47,7 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
             sesión) empuja a Idioma bien abajo del modal, y en el
             celular queda tapado sin hacer scroll. */}
         <Idioma />
+        <Sonido />
         <SobreVos />
         <QueMostrar />
         <CuentaEnLaNube />
@@ -324,6 +326,29 @@ function Idioma() {
           ]}
         />
       </div>
+    </Panel>
+  );
+}
+
+/* ----------------------------------------------------------
+   SONIDO
+   ----------------------------------------------------------
+   Los efectos de los juegos y el ambiente de fondo, generados
+   en el momento (src/lib/sonido.ts): no hay archivos de audio.
+   Es un ajuste del dispositivo, igual que el idioma, y por eso
+   tampoco viaja a la cuenta.
+   ---------------------------------------------------------- */
+function Sonido() {
+  const { activado, cambiar } = usarSonido();
+
+  return (
+    <Panel titulo={tr("sonido")}>
+      <label className="campo-fila">
+        <input type="checkbox" checked={activado} onChange={(e) => cambiar(e.target.checked)} />
+        <span>{tr("sonidoActivado")}</span>
+      </label>
+
+      <Ayuda>{tr("notaSonido")}</Ayuda>
     </Panel>
   );
 }

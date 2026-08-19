@@ -7,6 +7,7 @@ import { FONDOS } from "@/datos/fondos";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { calcularEstadoVida } from "@/lib/crecimiento";
 import { comprar, logrosConseguidos, monedasDisponibles, yaLoTenes } from "@/lib/tienda";
+import { sonidoDesbloqueo, sonidoRechazo } from "@/lib/sonido";
 import { Mascota, TAM_PIXEL_MINI } from "@/componentes/mascota/Mascota";
 import { Pagina } from "@/componentes/comunes/Pagina";
 import { Ayuda, Panel } from "@/componentes/comunes/Panel";
@@ -31,6 +32,9 @@ export function Tienda() {
     const resultado = comprar(registro, metas, compras, tipo, id);
     setMensaje(resultado.mensaje);
     refrescarCompras();
+
+    if (resultado.ok) sonidoDesbloqueo();
+    else sonidoRechazo();
   };
 
   return (

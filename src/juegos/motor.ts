@@ -1,4 +1,5 @@
 import { CLAVES, escribir, leerTexto } from "@/lib/almacenamiento";
+import { sonidoPerder, sonidoPunto, sonidoGol, sonidoSalto } from "@/lib/sonido";
 
 /* ==========================================================
    HABITOTCHI · juegos
@@ -190,6 +191,7 @@ export function crearViborita(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
       puntaje++;
       alCambiarPuntaje(puntaje);
       comida = comidaNueva();
+      sonidoPunto();
     } else {
       vibora.pop();   // si no comió, la cola avanza
     }
@@ -200,6 +202,7 @@ export function crearViborita(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
   function perder() {
     viva = false;
     clearInterval(reloj);
+    sonidoPerder();
     alPerder(puntaje);
   }
 
@@ -352,6 +355,7 @@ export function crearPong(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: numbe
       devoluciones++;
       puntaje++;
       alCambiarPuntaje(puntaje);
+      sonidoPunto();
     }
 
     /* Si la pelota pasó de largo, perdiste */
@@ -364,6 +368,7 @@ export function crearPong(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: numbe
     if (pelota.y + RADIO < 0) {
       puntaje += PUNTOS_POR_GOL;
       alCambiarPuntaje(puntaje);
+      sonidoGol();
 
       pelota.x = canvas.width / 2;
       pelota.y = canvas.height / 2;
@@ -376,6 +381,7 @@ export function crearPong(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: numbe
   function perder() {
     viva = false;
     clearInterval(reloj);
+    sonidoPerder();
     alPerder(puntaje);
   }
 
@@ -721,6 +727,7 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
       obstaculos.shift();
       puntaje++;
       alCambiarPuntaje(puntaje);
+      sonidoPunto();
     }
 
     /* Cada 20 puntos, un escalón más rápido. Sale del puntaje,
@@ -752,6 +759,7 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
   function perder() {
     viva = false;
     clearInterval(reloj);
+    sonidoPerder();
     alPerder(puntaje);
   }
 
@@ -836,7 +844,10 @@ export function crearSaltador(canvas: HTMLCanvasElement, alCambiarPuntaje: (n: n
   function saltar() {
     /* Solo desde piso firme: nada de doble salto, y tampoco
        saltar para salir de un pozo una vez que caíste. */
-    if (viva && mascota.apoyada) mascota.vy = FUERZA_SALTO;
+    if (viva && mascota.apoyada) {
+      mascota.vy = FUERZA_SALTO;
+      sonidoSalto();
+    }
   }
 
   /* Al soltar el dedo: si todavía venía subiendo fuerte, le

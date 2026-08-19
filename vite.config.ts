@@ -79,6 +79,20 @@ export default defineConfig({
     }),
   ],
 
+  /* El servidor de desarrollo usa el puerto que le pasen por la
+     variable PORT, y 5173 si no le pasan ninguno.
+
+     Hace falta cuando algo levanta el proyecto y elige el puerto
+     por su cuenta —porque el de siempre ya está ocupado, por
+     ejemplo—. Sin esto Vite ignora esa asignación, arranca en
+     otro lado y quien lo levantó queda buscándolo donde no está.
+
+     No afecta a la app publicada: en producción no hay servidor
+     de desarrollo. */
+  server: {
+    port: Number(process.env.PORT) || 5173,
+  },
+
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
