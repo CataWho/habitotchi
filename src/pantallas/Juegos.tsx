@@ -427,6 +427,23 @@ const FLECHAS = {
   derecha: "▶︎",
 };
 
+/* ---------- UN GUARDIA CONTRA EL TOQUE DOBLE ----------
+   Un mismo dedo puede disparar varios eventos seguidos (el del
+   puntero, el del tacto y el clic de compatibilidad). Se anota
+   en el propio botón cuándo fue la última vez que se le hizo
+   caso, y los que llegan pisándole los talones se ignoran.
+
+   Va guardado en el nodo del DOM y no en una variable del
+   componente porque tiene que sobrevivir a los redibujados de
+   React, que en un juego pasan todo el tiempo. */
+function recienAtendido(nodo: any) {
+  const ahora = Date.now();
+  if (nodo.__ultimoToque && ahora - nodo.__ultimoToque < 350) return true;
+
+  nodo.__ultimoToque = ahora;
+  return false;
+}
+
 /* Responder al APRETAR y no al soltar.
 
    onClick espera a que levantes el dedo, y encima el navegador
@@ -434,14 +451,26 @@ const FLECHAS = {
    toque y no el principio de un arrastre. En un juego eso se
    siente como que el botón no anda.
 
-   preventDefault evita que el mismo dedo dispare después el
-   click de siempre y termine girando dos veces. */
+   ---------- POR QUÉ TRES ESCUCHAS Y NO UNA ----------
+   No todos los navegadores mandan lo mismo: algunos avisan por
+   puntero, otros solo por tacto, y el clic llega siempre pero
+   tarde. Escuchando las tres, el botón anda en cualquiera; el
+   guardia de arriba se ocupa de que un solo dedo cuente una
+   sola vez.
+
+   Sin preventDefault a propósito: en algunos navegadores del
+   celular, cancelar el evento del puntero corta la cadena y el
+   botón termina sin responder a nada. */
 function alApretar(hacer: () => void) {
+  const atender = (e: React.SyntheticEvent) => {
+    if (recienAtendido(e.currentTarget)) return;
+    hacer();
+  };
+
   return {
-    onPointerDown: (e: React.PointerEvent) => {
-      e.preventDefault();
-      hacer();
-    },
+    onPointerDown: atender,
+    onTouchStart: atender,
+    onClick: atender,
   };
 }
 
@@ -477,12 +506,26 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
      el "lo solté" y la paleta seguiría sola para siempre. */
   useEffect(() => parar, []);
 
-  const gatillo = (rumbo: number) => ({
-    onPointerDown: (e: React.PointerEvent) => { e.preventDefault(); empezar(rumbo); },
-    onPointerUp: parar,
-    onPointerLeave: parar,
-    onPointerCancel: parar,
-  });
+  /* Igual que alApretar, pero con soltar: además del puntero se
+     escucha el tacto, porque hay navegadores que solo mandan
+     ese. El guardia evita que un dedo arranque el movimiento
+     dos veces. */
+  const gatillo = (rumbo: number) => {
+    const arrancar = (e: React.SyntheticEvent) => {
+      if (recienAtendido(e.currentTarget)) return;
+      empezar(rumbo);
+    };
+
+    return {
+      onPointerDown: arrancar,
+      onTouchStart: arrancar,
+      onPointerUp: parar,
+      onPointerLeave: parar,
+      onPointerCancel: parar,
+      onTouchEnd: parar,
+      onTouchCancel: parar,
+    };
+  };
 
   return (
     <div className="juego-dpad juego-dpad--fila">
@@ -499,16 +542,24 @@ function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }
 function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
   const soltar = () => activo.current?.soltarSalto?.();
 
+  const saltar = (e: React.SyntheticEvent) => {
+    if (recienAtendido(e.currentTarget)) return;
+    activo.current?.saltar?.();
+  };
+
   return (
     <div className="juego-dpad juego-dpad--fila">
       <button
         type="button"
         className="dpad-btn"
         aria-label={tr("arriba")}
-        onPointerDown={(e) => { e.preventDefault(); activo.current?.saltar?.(); }}
+        onPointerDown={saltar}
+        onTouchStart={saltar}
         onPointerUp={soltar}
         onPointerLeave={soltar}
         onPointerCancel={soltar}
+        onTouchEnd={soltar}
+        onTouchCancel={soltar}
       >
         {FLECHAS.arriba}
       </button>
