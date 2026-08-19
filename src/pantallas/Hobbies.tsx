@@ -309,7 +309,7 @@ function Actividades() {
         <Select
           valor={categoria}
           alCambiar={setCategoria}
-          opciones={CATEGORIAS_HOBBIES.map((c: any) => ({ id: c.id, nombre: c.nombre }))}
+          opciones={CATEGORIAS_HOBBIES.map((c) => ({ id: c.id, nombre: tr(c.clave) }))}
         />
       </div>
 

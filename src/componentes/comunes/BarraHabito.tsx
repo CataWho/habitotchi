@@ -60,23 +60,32 @@ export function BarraHabito({ id }: { id: IdHabito }) {
       )}
 
       <div className="habit-actions">
-          <button
-            type="button"
-            className="habit-btn habit-btn--restar"
-            onClick={() => sumarHabito(id, -habito.paso)}
-            aria-label={`Restar ${habito.paso} de ${tr(habito.clave)}`}
-          >
-            −{habito.paso}
-          </button>
+          {/* Los que se calculan del detalle (trabajo, ejercicio,
+              comidas) no llevan +/−: su número sale de lo que
+              cargás abajo. Tenerlos era una trampa — sumabas a
+              mano, cargabas una sesión y el total se recalculaba
+              solo, borrándote lo puesto. */}
+          {!habito.seCalculaSolo && (
+            <>
+              <button
+                type="button"
+                className="habit-btn habit-btn--restar"
+                onClick={() => sumarHabito(id, -habito.paso)}
+                aria-label={`Restar ${habito.paso} de ${tr(habito.clave)}`}
+              >
+                −{habito.paso}
+              </button>
 
-          <button
-            type="button"
-            className="habit-btn"
-            onClick={() => sumarHabito(id, habito.paso)}
-            aria-label={`Sumar ${habito.paso} a ${tr(habito.clave)}`}
-          >
-            +{habito.paso}
-          </button>
+              <button
+                type="button"
+                className="habit-btn"
+                onClick={() => sumarHabito(id, habito.paso)}
+                aria-label={`Sumar ${habito.paso} a ${tr(habito.clave)}`}
+              >
+                +{habito.paso}
+              </button>
+            </>
+          )}
 
           {esDeMeta && !editando && (
             <button

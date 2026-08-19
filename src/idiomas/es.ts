@@ -161,13 +161,15 @@ export const ES = {
   estaSemana: "Esta semana: {resumen}",
   pesoVacio: "Anotá tu peso al menos dos veces para ver cómo se mueve.",
   disclaimerSalud: "Nada de lo que anotás acá suma ni resta puntos. Es tu registro, no una meta que cumplir.",
+  consultarProfesional: "Esto es un registro personal, no un consejo médico. Ante cualquier duda, consultá con un profesional de la salud.",
+  balanceVacio: "Anotá cómo te sentís unos días y acá vas a ver el patrón.",
 
   /* ---------- Juegos ---------- */
   viborita: "Viborita",
   pong: "Pong",
   saltador: "Saltador",
   ayudaViborita: "Deslizá el dedo sobre la pantalla para girar (o usá las flechas).",
-  ayudaPong: "Movés la paleta con el dedo o el mouse. Las primeras 5 jugadas van lentas.",
+  ayudaPong: "Movés la paleta con el dedo o el mouse.",
   ayudaSaltador: "Tocá la pantalla para saltar los obstáculos.",
   puntos: "Puntos: {n}",
   record: "Récord: {n}",
@@ -231,7 +233,6 @@ export const ES = {
   confirmarBorrar2: "De verdad, no hay vuelta atrás. ¿Borro todo?",
   noSePudoBorrarNube: "No se pudo borrar de tu cuenta. No se borró nada.",
   verPolitica: "Ver la política de privacidad",
-  notaPolitica: "La política está en español, aunque uses la app en inglés: es un documento legal y traducirlo mal sería peor que no traducirlo.",
   notaDatos: "Todo se guarda en tu cuenta, así lo encontrás igual desde otro dispositivo. La copia descargada sirve para tenerlo también fuera de la app.",
 
   /* ---------- el portón de ingreso ---------- */

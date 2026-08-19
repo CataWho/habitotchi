@@ -2,6 +2,7 @@ import { useState } from "react";
 import { tr } from "@/lib/idioma";
 import { useHabitotchi } from "@/estado/useHabitotchi";
 import { fechaDeHoy } from "@/lib/fechas";
+import { obtenerMeta } from "@/lib/registro";
 import {
   TIPOS_TRABAJO,
   agregarSesionTrabajo,
@@ -27,22 +28,32 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
    ========================================================== */
 
 export function Trabajo() {
+  /* ---------- LAS SESIONES VIVEN ACÁ ARRIBA ----------
+     Las miran DOS paneles: la lista de horas y el gráfico. Cada
+     uno tenía su propia copia, y la del gráfico era una foto
+     del momento en que abrías la pestaña: agregabas horas, la
+     lista crecía, la meta subía… y el gráfico seguía igual
+     hasta que salías y volvías.
+
+     Compartiendo una sola, los dos miran lo mismo. Es como ya
+     estaba hecho en Ejercicio. */
+  const [sesiones, setSesiones] = useState(() => cargarSesionesTrabajo());
+
   return (
     <Pagina clave="pantallaTrabajo">
       <Panel titulo={tr("tuMetaDeHoy")}>
         <ListaDeHabitos ids={["trabajo"]} />
       </Panel>
 
-      <Horas />
-      <GraficoDeHoras />
+      <Horas sesiones={sesiones} setSesiones={setSesiones} />
+      <GraficoDeHoras sesiones={sesiones} />
       <Pendientes />
     </Pagina>
   );
 }
 
-function Horas() {
+function Horas({ sesiones, setSesiones }: { sesiones: any; setSesiones: (s: any) => void }) {
   const { fijarHabito } = useHabitotchi();
-  const [sesiones, setSesiones] = useState(() => cargarSesionesTrabajo());
   const [tipo, setTipo] = useState(Object.keys(TIPOS_TRABAJO)[0] ?? "trabajo");
   const [horas, setHoras] = useState("");
 
@@ -147,8 +158,12 @@ function Pendientes() {
 }
 
 /* Cuántas horas le dedicaste, por semana, mes o año */
-function GraficoDeHoras() {
-  const [sesiones] = useState(() => cargarSesionesTrabajo());
+function GraficoDeHoras({ sesiones }: { sesiones: any }) {
+  /* La meta del hábito, para que el gráfico tenga una
+     referencia fija en vez de escalarse contra sí mismo. */
+  const metas = useHabitotchi((e) => e.metas);
+  const metaDiaria = obtenerMeta(metas, "trabajo");
+
 
   return (
     <Panel titulo={tr("comoVenis")}>
@@ -162,6 +177,7 @@ function GraficoDeHoras() {
         }}
         etiquetaA="trabajo"
         etiquetaB="estudio"
+        metaDiaria={metaDiaria}
       />
     </Panel>
   );

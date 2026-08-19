@@ -278,3 +278,17 @@ function bucketsPorMes(cantidad: number): Balde[] {
 
   return baldes;
 }
+
+/* Día y mes cortito para las filas: "19 ago".
+
+   Con números (19/08) habría que decidir el orden según el
+   idioma —en inglés va al revés— y una fecha ambigua es peor
+   que una larga. Con el nombre del mes se lee igual en los
+   dos, y sale del diccionario. */
+export function diaYMes(fecha: Fecha): string {
+  const partes = fecha.split("-");
+  const mes = Number(partes[1]) - 1;
+  const dia = Number(partes[2]);
+
+  return `${dia} ${(nombresDeMes()[mes] ?? "").slice(0, 3).toLowerCase()}`;
+}

@@ -1110,9 +1110,9 @@
   --lila-medio:  rgba(var(--lcd-tinta-rgb), 0.44);
   --lila-oscuro: rgba(var(--lcd-tinta-rgb), 0.70);
   --lila-sombra: rgb(var(--lcd-tinta-rgb));
-  --blanco:      rgba(255, 255, 255, 0.42);
+  --blanco:      rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.42);
   --rosa:        rgba(var(--lcd-tinta-rgb), 0.50);
-  --lcd-claro:   rgba(255, 255, 255, 0.26);
+  --lcd-claro:   rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.26);
 }
 
 .page {
@@ -1304,7 +1304,7 @@
   font-weight: 600;
   color: var(--lcd-tinta);
 
-  background: rgba(255, 255, 255, 0.42);
+  background: var(--blanco);
   border: 2px solid var(--lcd-borde-fuerte);
   border-radius: 10px;
 }
@@ -1331,7 +1331,7 @@
   font-weight: 600;
   color: var(--lcd-tinta);
 
-  background-color: rgba(255, 255, 255, 0.42);
+  background-color: var(--blanco);
   border: 2px solid var(--lcd-borde-fuerte);
   border-radius: 10px;
 
@@ -1510,7 +1510,7 @@
   text-align: left;
   color: var(--lcd-tinta);
 
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.28);
   border: 1px solid var(--lcd-borde);
   border-radius: 10px;
 }
@@ -1543,7 +1543,7 @@
   flex: 0 0 auto;
   padding: 13px 14px;
 
-  background: rgba(255, 255, 255, 0.30);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.30);
   border: 2px solid var(--lcd-borde-fuerte);
   border-radius: 4px 16px 16px 16px;
   color: var(--lcd-tinta);
@@ -1581,8 +1581,11 @@
 .tapa {
   flex: 0 0 auto;
   width: 58px;
-  object-fit: cover;
-  background: rgba(255,255,255,0.5);
+  /* contain y no cover: cover RECORTA la tapa para llenar la
+     caja, y de un libro se veía solo el centro. Mejor verla
+     entera aunque sobre aire a los costados. */
+  object-fit: contain;
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.5);
 }
 
 /* El libro tiene forma de libro; el disco, cuadrado */
@@ -1641,11 +1644,11 @@
   font-size: 16px;
   color: var(--lcd-tinta);
 
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.35);
   border: 2px solid var(--lcd-borde-fuerte);
 }
 
-.mes-flecha:hover { background: rgba(255, 255, 255, 0.6); }
+.mes-flecha:hover { background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.6); }
 
 .mes-flecha:focus-visible {
   outline: 3px solid var(--lcd-tinta);
@@ -1695,7 +1698,7 @@
   justify-content: center;
   gap: 2px;
 
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.26);
   border: 2px solid transparent;
   border-radius: 8px;
 
@@ -1711,7 +1714,7 @@
 }
 
 /* Los días del mes anterior o siguiente, apagados */
-.mes-dia--otro { background: rgba(255, 255, 255, 0.08); }
+.mes-dia--otro { background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.08); }
 .mes-dia--otro .mes-dia-numero {
   color: var(--lcd-tinta-suave);
   opacity: 0.6;
@@ -1769,7 +1772,7 @@
    punteado hace el trabajo aunque no distingas colores.
    ---------------------------------------------------------- */
 .fila-simple--google {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.14);
   border-style: dashed;
   border-color: var(--lcd-borde-fuerte);
 }
@@ -1849,7 +1852,7 @@
   display: block;
   width: 100%;
   height: auto;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.22);
   border: 2px solid var(--lcd-borde);
   border-radius: 10px;
   margin: 6px 0;
@@ -2412,31 +2415,113 @@
 }
 
 /* La crucecita de flechas para la viborita */
+/* ==========================================================
+   EL D-PAD
+   ==========================================================
+   Una cruz de 3x3 de verdad, con el hueco del medio: arriba
+   arriba, abajo abajo, y el pulgar encuentra cada flecha sin
+   mirar. Antes era una "T" de dos filas y había que apuntar.
+
+   ---------- POR QUÉ TAN GRANDES ----------
+   Empezaron en 34px, después 48. Las dos medidas se eligieron
+   mirando el mínimo de accesibilidad (44px), y ese mínimo es
+   justamente eso: el piso para poder tocar algo, no la medida
+   cómoda para un juego donde tenés que apretar rápido y sin
+   mirar. En un iPhone moderno quedaban chiquitos igual.
+
+   66px es lo que usan los jueguitos de celular de verdad, y
+   entra cómodo en el ancho de la pantallita. */
 .juego-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 34px);
-  grid-template-rows: repeat(2, 34px);
+  grid-template-columns: repeat(3, 66px);
+  grid-template-rows: repeat(3, 66px);
   justify-content: center;
-  gap: 4px;
-  margin: 10px 0;
+  gap: 3px;
+  margin: 12px 0 6px;
 }
 
 .dpad-btn {
   cursor: pointer;
-  font-size: 12px;
+  font-size: 24px;
+  line-height: 1;
   color: var(--lila-sombra);
 
   background: linear-gradient(160deg, #ffd9ee 0%, var(--rosa) 100%);
   border: 2px solid var(--lila-oscuro);
-  border-radius: 8px;
+  border-radius: 14px;
+
+  /* Sin esto, mantener apretado en el celular selecciona la
+     flecha como si fuera texto y aparece la lupita. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dpad-btn:active { transform: translateY(2px); }
 
+/* Pong y el saltador no necesitan la cruz entera: van en una
+   fila. Además de ser lo que corresponde, ocupa un tercio del
+   alto, que en esta pantallita se agradece. */
+.juego-dpad--fila {
+  display: flex;
+  gap: 16px;
+}
+
+.juego-dpad--fila .dpad-btn {
+  width: 66px;
+  height: 66px;
+}
+
+/* El botón redondo del medio: no hace nada, pero sin él la
+   cruz se ve incompleta y las flechas parecen sueltas. */
+.dpad-centro {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--lila-claro);
+  box-shadow: inset 0 2px 4px rgba(60, 40, 90, 0.25);
+}
+
 .dpad-arriba     { grid-column: 2; grid-row: 1; }
 .dpad-izquierda  { grid-column: 1; grid-row: 2; }
-.dpad-abajo      { grid-column: 2; grid-row: 2; }
 .dpad-derecha    { grid-column: 3; grid-row: 2; }
+.dpad-abajo      { grid-column: 2; grid-row: 3; }
+
+/* ---------- SIN ESPACIO MUERTO ABAJO DE LAS FLECHAS ----------
+   Mientras jugás, las flechas son lo último que hay. El relleno
+   de siempre (el del panel más el de la página) dejaba unos
+   30px vacíos abajo, y como el contenido es más alto que la
+   pantallita, había que deslizar por una franja donde no hay
+   nada para llegar al final.
+
+   Va con :has() y apuntando a la pantalla de Juegos para no
+   tocar el relleno de las otras ocho, que sí lo necesitan. Si
+   un navegador viejo no entiende :has(), queda el espacio de
+   antes: se desliza como hasta ahora, no se rompe nada. */
+.juego-dpad:last-child { margin-bottom: 0; }
+
+.page[data-page-name="pantallaJuegos"] .panel:has(> .juego-dpad:last-child) {
+  padding-bottom: 4px;
+}
+
+.page[data-page-name="pantallaJuegos"]:has(.juego-dpad:last-child) {
+  padding-bottom: 8px;
+}
+
+/* En pantallas angostas se achican, pero nunca por debajo del
+   mínimo táctil de 44px. */
+@media (max-width: 380px) {
+  .juego-dpad {
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(3, 56px);
+  }
+
+  .dpad-btn { font-size: 20px; }
+}
 
 
 /* ==========================================================
@@ -2458,7 +2543,18 @@
   color: var(--lila-claro);
 }
 
-.estrella--llena { color: #e8b64a; }
+/* Dorado, con un borde apenas oscuro para que no se pierda
+   sobre los fondos claros. Las vacías toman la tinta suave de
+   la pantalla, así se ve cuáles faltan. */
+/* La clase la pone Estrellas.tsx y es "is-on", igual que en los
+   botones de juego. Acá decía .estrella--llena, que no existe en
+   ningún lado: la regla no matcheaba nunca y las estrellas
+   llenas se quedaban con el gris de las vacías. Se veían
+   apagadas desde siempre y no era el color, era el selector. */
+.estrella.is-on {
+  color: #f0b429;
+  text-shadow: 0 0 1px rgba(120, 72, 0, 0.55);
+}
 
 .control-volumen {
   flex: 1;
@@ -2815,7 +2911,9 @@
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-  object-fit: cover;
+  /* Igual que .tapa: la miniatura es cuadrada y las tapas no,
+     así que recortando se perdía media portada. */
+  object-fit: contain;
   border-radius: 6px;
   border: 2px solid var(--lcd-borde-fuerte);
 }
@@ -2888,21 +2986,9 @@
 
 .botonera .page-arrow { flex: 0 0 auto; }
 
-/* ==========================================================
-   EL D-PAD, USABLE CON EL DEDO
-   ==========================================================
-   34px era cómodo con el mouse pero chico para un pulgar. Las
-   guías de accesibilidad piden 44px como mínimo para un
-   objetivo táctil, así que van 48.
-   ========================================================== */
-.juego-dpad {
-  grid-template-columns: repeat(3, 48px);
-  grid-template-rows: repeat(2, 48px);
-  gap: 6px;
-  margin: 14px 0 6px;
-}
-
-.dpad-btn { font-size: 16px; }
+/* El D-pad se define una sola vez, más arriba. Acá había una
+   segunda copia que lo volvía a 48px y pisaba a la primera:
+   dos tamaños en dos lugares para el mismo botón. */
 
 
 /* ==========================================================
@@ -3164,4 +3250,76 @@
   font-family: var(--pixel);
   font-size: 11px;
   color: var(--lila-claro);
+}
+
+/* ==========================================================
+   LOS MODALES DEL APARATO SIGUEN EL FONDO
+   ==========================================================
+   Cementerio, Hoy y estadísticas son las tres teclas A/B/C:
+   muestran contenido de la pantallita, así que se pintan como
+   la pantallita. Se montan fuera del aparato (son hermanos
+   suyos en el DOM), y por eso hasta ahora no se enteraban del
+   fondo elegido: caían al verde clásico de base.css y quedaban
+   verdes tuvieras el fondo que tuvieras.
+
+   El de Ajustes NO lleva esto a propósito: es configuración de
+   la app, no contenido del aparato, y mantiene su ventana
+   propia.
+   ========================================================== */
+.chef-overlay--pantalla .chef-modal {
+  background: var(--lcd-degradado);
+  color: var(--lcd-tinta);
+}
+
+/* La misma paleta que arma .app-pages a partir de la tinta.
+   Sin esto, los modales tomaban la paleta lila de base.css: el
+   fondo pasaba a ser el de tu pantalla pero los títulos y las
+   filas seguían del color de la app, y en Noche quedaba texto
+   violeta sobre azul oscuro. */
+.chef-overlay--pantalla {
+  --lila-claro:  rgba(var(--lcd-tinta-rgb), 0.16);
+  --lila:        rgba(var(--lcd-tinta-rgb), 0.26);
+  --lila-medio:  rgba(var(--lcd-tinta-rgb), 0.44);
+  --lila-oscuro: rgba(var(--lcd-tinta-rgb), 0.70);
+  --lila-sombra: rgb(var(--lcd-tinta-rgb));
+  --blanco:      rgba(var(--lcd-campo-rgb), 0.42);
+  --rosa:        rgba(var(--lcd-tinta-rgb), 0.50);
+  --lcd-claro:   rgba(var(--lcd-campo-rgb), 0.26);
+  --lcd-tinta:   rgb(var(--lcd-tinta-rgb));
+}
+
+/* ==========================================================
+   LOS MODALES DEL APARATO NO USAN LA PALETA CLARA
+   ==========================================================
+   El bloque de arriba le devuelve a los modales los colores
+   claros originales, porque son formularios largos y se leen
+   mejor así. Eso vale para el chef.
+
+   Pero cementerio, hoy, estadísticas y ajustes ahora siguen el
+   fondo de pantalla que tengas puesto, y ahí ese bloque hace
+   daño: el panel se queda de un blanco fijo mientras el título
+   toma la tinta del fondo. Con "Noche" la tinta es casi blanca
+   → letra blanca sobre panel blanco, ilegible.
+
+   Acá se deshace: el panel pasa a ser un parche del color del
+   fondo, igual que los paneles de adentro de la pantallita.
+   ========================================================== */
+.chef-overlay--pantalla .chef-modal .panel {
+  background: rgba(var(--lcd-campo-rgb, 255, 255, 255), 0.22);
+  border-color: var(--lila-medio);
+  color: var(--lila-sombra);
+}
+
+/* Los botones son una pastilla de tinta llena con la letra del
+   color de la pantalla, como en el resto de la app. Antes la
+   letra salía de --blanco, que ahora es el parche del fondo: en
+   los fondos oscuros quedaba letra oscura sobre botón oscuro. */
+.chef-overlay--pantalla .chef-modal .habit-btn {
+  background: var(--lila-sombra);
+  border-color: var(--lila-sombra);
+  color: var(--lcd-contratinta);
+}
+
+.chef-overlay--pantalla .chef-modal .habit-btn:hover {
+  background: var(--lila-oscuro);
 }

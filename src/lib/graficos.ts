@@ -50,12 +50,44 @@ export function dibujarGraficoBarras(canvas: any, buckets: any, valoresA: any, v
   const margenSuperior = 8;
   const alturaUtil = alto - margenInferior - margenSuperior;
 
-  const maximo = Math.max(1, ...valoresA, ...valoresB);
+  /* ---------- LA ESCALA SE ANCLA A TU META ----------
+     Antes el tope era simplemente la barra más alta que se
+     viera. Con un solo día cargado esa barra ES el máximo, así
+     que 4 horas llenaban el gráfico… y 8 horas lo llenaban
+     igual. La altura no significaba nada y no había ningún
+     número de referencia para darse cuenta.
+
+     Ahora el tope es el doble de tu meta: llegar a la meta te
+     deja justo en la mitad, y el doble llega arriba de todo.
+     Dos días distintos se ven distintos.
+
+     Si algún día te pasás del doble, el tope se estira para que
+     entre: la barra nunca se sale del gráfico. */
+  const meta = Number(op.meta) > 0 ? Number(op.meta) : 0;
+  const maximo = Math.max(1, meta * 2, ...valoresA, ...valoresB);
+
   const anchoGrupo = ancho / buckets.length;
   const anchoBarra = Math.max(3, Math.min(14, anchoGrupo / 3));
 
   ctx.font = "8px 'Quicksand', sans-serif";
   ctx.textAlign = "center";
+
+  /* La línea de la meta, punteada, para saber de un vistazo si
+     llegaste sin tener que leer ningún número. */
+  if (meta > 0) {
+    const y = alto - margenInferior - (meta / maximo) * alturaUtil;
+
+    ctx.save();
+    ctx.strokeStyle = op.colorTexto || GRAFICO_TEXTO;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(ancho, y);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   buckets.forEach((balde: any, i: number) => {
     const xCentro = anchoGrupo * i + anchoGrupo / 2;
@@ -141,5 +173,74 @@ export function dibujarGraficoLineas(canvas: any, puntos: any, opciones: any) {
     const esUltimo = i === puntos.length - 1;
     if (i % saltoEtiquetas !== 0 && !esUltimo) return;
     ctx.fillText(punto.etiqueta, coordenadaX(i), alto - 4);
+  });
+}
+
+
+/* ----------------------------------------------------------
+   GRÁFICO DE PUNTOS (el balance de ánimo)
+   ----------------------------------------------------------
+   Un punto por registro, a la altura del ánimo que anotaste.
+   Un día con dos registros muestra dos puntos: la idea es ver
+   el patrón, no un promedio que aplane los días raros.
+
+   baldes: los tramos de fecha (ver lib/fechas)
+   porBalde: para cada balde, [{ nivel, color }]
+     nivel va de 0 (el mejor) a niveles-1 (el peor)
+   ---------------------------------------------------------- */
+export function dibujarGraficoPuntos(canvas: any, baldes: any, porBalde: any, opciones: any) {
+  const ctx = canvas.getContext("2d");
+  const ancho = canvas.width;
+  const alto = canvas.height;
+  const op = opciones || {};
+  const niveles = op.niveles || 5;
+
+  ctx.clearRect(0, 0, ancho, alto);
+
+  const margenInferior = 16;
+  const margenSuperior = 10;
+  const alturaUtil = alto - margenInferior - margenSuperior;
+  const anchoBalde = ancho / baldes.length;
+  const radio = 4;
+
+  /* La línea del medio: separa los días buenos de los malos de
+     un vistazo, sin tener que leer ninguna etiqueta. */
+  const yMedio = margenSuperior + alturaUtil / 2;
+
+  ctx.save();
+  ctx.strokeStyle = op.colorTexto || GRAFICO_TEXTO;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(0, yMedio);
+  ctx.lineTo(ancho, yMedio);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.font = "8px 'Quicksand', sans-serif";
+  ctx.textAlign = "center";
+
+  baldes.forEach((balde: any, i: number) => {
+    const puntos = porBalde[i] || [];
+
+    /* Los registros de un mismo tramo se reparten a lo ancho en
+       vez de apilarse: con dos anotaciones el mismo día, uno
+       encima del otro se vería como un solo punto. */
+    puntos.forEach((punto: any, k: number) => {
+      const x = anchoBalde * i + (anchoBalde * (k + 1)) / (puntos.length + 1);
+      const y = margenSuperior + (punto.nivel / (niveles - 1)) * alturaUtil;
+
+      ctx.beginPath();
+      ctx.arc(x, y, radio, 0, Math.PI * 2);
+      ctx.fillStyle = punto.color;
+      ctx.fill();
+
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = op.colorTexto || GRAFICO_TEXTO;
+      ctx.stroke();
+    });
+
+    ctx.fillStyle = op.colorTexto || GRAFICO_TEXTO;
+    ctx.fillText(balde.etiqueta, anchoBalde * i + anchoBalde / 2, alto - 4);
   });
 }

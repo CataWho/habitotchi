@@ -36,6 +36,7 @@ export const HABITOS_POR_DEFECTO: Habitos = {
   comida: {
     clave: "habitoComida",
     tipo: "meta",
+    seCalculaSolo: true,
     meta: 3, // desayuno, almuerzo y cena
     unidad: "unidadComidas",
     paso: 1, // el registro de alimentacion es quien realmente lo mueve
@@ -45,6 +46,8 @@ export const HABITOS_POR_DEFECTO: Habitos = {
   ejercicio: {
     clave: "habitoEjercicio",
     tipo: "meta",
+    /* Sale de las sesiones que cargás abajo, no de un botón. */
+    seCalculaSolo: true,
     meta: 30,
     unidad: "unidadMin",
     paso: 10,
@@ -63,6 +66,7 @@ export const HABITOS_POR_DEFECTO: Habitos = {
   trabajo: {
     clave: "habitoTrabajo",
     tipo: "meta",
+    seCalculaSolo: true,
     meta: 4, // horas combinadas: da igual si son de trabajo o de estudio
     unidad: "unidadHoras",
     paso: 1,

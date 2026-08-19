@@ -60,6 +60,21 @@ describe.each(cada)("fondo %s", (_id, fondo) => {
        "el botón Poner no se lee". */
     expect(contraste(contratinta, tinta)).toBeGreaterThanOrEqual(MINIMO_TEXTO_NORMAL);
   });
+
+  it("lo que escribís en un campo se lee", () => {
+    /* Los campos de texto, las tarjetas y los puntitos van
+       sobre un parche (--blanco, el color `campo` al 42%) y la
+       letra encima es la tinta.
+
+       Ese parche estaba fijo en blanco para los cuatro fondos.
+       En los claros aclara y todo bien, pero en Noche dejaba un
+       recuadro claro con la tinta clara encima: escribías y no
+       veías lo que escribías. */
+    for (const punta of puntas) {
+      const parche = mezclar(desdeTrio(fondo.campo), punta, 0.42);
+      expect(contraste(tinta, parche)).toBeGreaterThanOrEqual(MINIMO_TEXTO_NORMAL);
+    }
+  });
 });
 
 describe("el catálogo de fondos", () => {
@@ -72,6 +87,7 @@ describe("el catálogo de fondos", () => {
       expect(fondo.tinta, `${id} sin tinta`).toBeTruthy();
       expect(fondo.contratinta, `${id} sin contratinta`).toBeTruthy();
       expect(fondo.brillo, `${id} sin brillo`).toBeTruthy();
+      expect(fondo.campo, `${id} sin color de campo`).toBeTruthy();
     }
   });
 });

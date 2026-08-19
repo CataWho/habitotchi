@@ -27,6 +27,7 @@ export const FONDOS: Record<string, Fondo> = {
     degradado: "linear-gradient(180deg, #d5e878 0%, #c3d94f 100%)",
     tinta: "22, 36, 10",
     contratinta: "#cbf265",
+    campo: "255, 255, 255",
     brillo: "rgba(185, 234, 61, 0.28)",
   },
   atardecer: {
@@ -39,6 +40,7 @@ export const FONDOS: Record<string, Fondo> = {
        abajo de la pantalla, que es donde el fondo se oscurece. */
     tinta: "70, 24, 27",
     contratinta: "#ffe4c4",
+    campo: "255, 255, 255",
     brillo: "rgba(245, 163, 163, 0.32)",
   },
   noche: {
@@ -47,6 +49,9 @@ export const FONDOS: Record<string, Fondo> = {
     degradado: "linear-gradient(180deg, #4a5488 0%, #232a4a 100%)",
     tinta: "232, 238, 255",
     contratinta: "#2b3358",
+    /* El único oscuro: acá el parche tiene que oscurecer para
+       que la tinta clara se lea encima. */
+    campo: "10, 14, 32",
     brillo: "rgba(90, 104, 168, 0.34)",
   },
   algodon: {
@@ -55,6 +60,7 @@ export const FONDOS: Record<string, Fondo> = {
     degradado: "linear-gradient(180deg, #ffd9f0 0%, #d5b8ee 100%)",
     tinta: "74, 30, 78",
     contratinta: "#ffe0f4",
+    campo: "255, 255, 255",
     brillo: "rgba(213, 184, 238, 0.34)",
   },
 };

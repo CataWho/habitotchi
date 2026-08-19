@@ -31,10 +31,44 @@ export function Juegos() {
   const activo = useRef<any>(null);
   const { vida } = useHabitotchi();
 
+  /* Qué fondo de pantalla tenés puesto. Se mira solo para
+     repintar la pantallita cuando lo cambiás (ver abajo). */
+  const fondoEquipado = useHabitotchi((e) => e.equipado.fondo);
+
   const [elegido, setElegido] = useState("viborita");
   const [puntos, setPuntos] = useState(0);
   const [mensaje, setMensaje] = useState(tr("elegiUnJuego"));
   const [record, setRecord] = useState(() => recordDe("viborita"));
+
+  /* ---------- MIENTRAS JUGÁS, SOLO EL JUEGO ----------
+     La pantallita del aparato mide lo que mide, y con el D-pad
+     grande no entraban a la vez el tablero, el mensaje, el
+     botón Jugar, la ayuda Y las flechas: la de abajo quedaba
+     cortada contra el borde.
+
+     En vez de achicar los botones (que era justo el problema a
+     resolver), se esconde lo que no se usa jugando. El mensaje
+     cuenta cómo te fue, el botón sirve para empezar y la ayuda
+     explica los controles: las tres cosas son de ANTES o de
+     DESPUÉS de la partida, nunca durante. */
+  const [jugando, setJugando] = useState(false);
+
+  /* Dónde va la paleta de Pong.
+
+     Vive acá y no adentro de un control porque la mueven DOS
+     cosas: las flechas del teclado y los botones de la
+     pantalla. Con una posición para cada una, usar las dos se
+     sentiría como pelearse con el juego. */
+  const paletaX = useRef<number | null>(null);
+
+  const moverPaleta = (rumbo: number) => {
+    const nodo = canvas.current;
+    if (!nodo || !activo.current?.moverA || !rumbo) return;
+
+    const desde = paletaX.current ?? nodo.width / 2;
+    paletaX.current = Math.max(0, Math.min(nodo.width, desde + rumbo * 7));
+    activo.current.moverA(paletaX.current);
+  };
 
   /* Apagar el juego al salir es importante: si no, sigue
      corriendo invisible y gastando batería. */
@@ -76,10 +110,30 @@ export function Juegos() {
   useEffect(() => {
     detener();
     limpiarPantalla();
+    setJugando(false);
     setPuntos(0);
     setRecord(recordDe(elegido));
     setMensaje(tr("tocaJugar"));
   }, [elegido]);
+
+  /* ----------------------------------------------------------
+     LA PANTALLITA ACOMPAÑA AL FONDO QUE ELEGÍS
+     ----------------------------------------------------------
+     El canvas no es HTML: se pinta una vez y se queda pintado.
+     Todo lo demás de la app cambia de color solo, porque son
+     variables de CSS, pero acá los píxeles ya están puestos y
+     nadie los vuelve a tocar.
+
+     Por eso, al cambiar el fondo en la tienda, la pantallita
+     del juego se quedaba con el color VIEJO hasta que tocabas
+     Jugar — recién ahí el juego repintaba su fondo.
+
+     Se repinta aunque estés jugando: si hay partida, el juego
+     va a dibujar su cuadro 16ms después y no se nota.
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    limpiarPantalla();
+  }, [fondoEquipado]);
 
   /* ----------------------------------------------------------
      EL CANVAS TAMBIÉN ES UN CONTROL
@@ -143,6 +197,106 @@ export function Juegos() {
     };
   }, []);
 
+  /* ----------------------------------------------------------
+     EN LA COMPUTADORA SE JUEGA CON EL TECLADO
+     ----------------------------------------------------------
+     Se suma a los botones de la pantalla, no los reemplaza. En
+     una compu, ir con el mouse hasta una flechita y hacer clic
+     para cada giro es incomodísimo.
+
+     Qué juego está andando se sabe preguntando qué sabe hacer
+     el motor, igual que los eventos del canvas de acá arriba:
+       · girar   -> la viborita, con las cuatro flechas
+       · saltar  -> el saltador, con espacio o flecha arriba
+       · moverA  -> pong, con izquierda y derecha
+
+     ---------- POR QUÉ MIRA SI LA PANTALLA SE VE ----------
+     Las nueve pantallas están montadas todas juntas en el
+     carril, así que esta función escucha el teclado aunque
+     estés en Alimentación. Sin ese control, empezar una
+     partida y cambiar de pestaña dejaba las flechas robadas:
+     no podías bajar la página porque las tomaba el juego.
+     ---------------------------------------------------------- */
+  useEffect(() => {
+    const apretadas = new Set<string>();
+    let reloj: number | undefined;
+
+    const escribiendo = (destino: EventTarget | null) => {
+      const nodo = destino as HTMLElement | null;
+      if (!nodo || !nodo.tagName) return false;
+      return /^(INPUT|TEXTAREA|SELECT)$/.test(nodo.tagName) || nodo.isContentEditable;
+    };
+
+    /* ¿La pestaña de Juegos es la que está a la vista? */
+    const seVe = () => {
+      const nodo = canvas.current;
+      const marco = nodo?.closest(".app-pages");
+      if (!nodo || !marco) return true;   // ante la duda, que responda
+
+      const caja = nodo.getBoundingClientRect();
+      const borde = marco.getBoundingClientRect();
+      return caja.right > borde.left + 1 && caja.left < borde.right - 1;
+    };
+
+    const soltarTodo = () => {
+      apretadas.clear();
+      if (reloj !== undefined) { clearInterval(reloj); reloj = undefined; }
+    };
+
+    /* La paleta se mueve con su propio reloj mientras tengas la
+       tecla apretada. Si avanzara un paso por cada golpe de
+       tecla, el sistema operativo mete casi medio segundo antes
+       de empezar a repetir y la paleta arrancaría tarde. */
+    const pasoDeLaPaleta = () => {
+      moverPaleta((apretadas.has("ArrowRight") ? 1 : 0) - (apretadas.has("ArrowLeft") ? 1 : 0));
+    };
+
+    const RUMBOS: Record<string, string> = {
+      ArrowUp: "arriba", ArrowDown: "abajo", ArrowLeft: "izquierda", ArrowRight: "derecha",
+    };
+
+    const alApretarTecla = (e: KeyboardEvent) => {
+      if (!activo.current || !seVe() || escribiendo(e.target)) return;
+
+      const hacia = RUMBOS[e.key];
+      const esSalto = e.key === " " || e.key === "ArrowUp";
+
+      /* Sin esto la página se va scrolleando mientras jugás. */
+      if (hacia || e.key === " ") e.preventDefault();
+
+      if (activo.current.girar && hacia) return activo.current.girar(hacia);
+      if (activo.current.saltar && esSalto) return activo.current.saltar();
+
+      if (activo.current.moverA && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        apretadas.add(e.key);
+        if (reloj === undefined) reloj = window.setInterval(pasoDeLaPaleta, 16);
+      }
+    };
+
+    const alSoltarTecla = (e: KeyboardEvent) => {
+      apretadas.delete(e.key);
+      if (apretadas.size === 0 && reloj !== undefined) { clearInterval(reloj); reloj = undefined; }
+
+      if (activo.current?.soltarSalto && (e.key === " " || e.key === "ArrowUp")) {
+        activo.current.soltarSalto();
+      }
+    };
+
+    window.addEventListener("keydown", alApretarTecla);
+    window.addEventListener("keyup", alSoltarTecla);
+
+    /* Si cambiás de ventana con la tecla apretada nunca llega el
+       "la solté", y la paleta seguiría sola para siempre. */
+    window.addEventListener("blur", soltarTodo);
+
+    return () => {
+      window.removeEventListener("keydown", alApretarTecla);
+      window.removeEventListener("keyup", alSoltarTecla);
+      window.removeEventListener("blur", soltarTodo);
+      soltarTodo();
+    };
+  }, []);
+
   const dibujarMascotaEnCanvas = (
     ctx: CanvasRenderingContext2D, x: number, y: number, ancho: number, alto: number
   ) => {
@@ -186,14 +340,17 @@ export function Juegos() {
       /* El motor ya paró su reloj, pero el último cuadro sigue
          dibujado. Se deja un instante para que se vea dónde
          perdiste, y después se limpia. */
+      setJugando(false);
       window.setTimeout(limpiarPantalla, 900);
     };
+
+    paletaX.current = null;   // cada partida arranca con la paleta al medio
 
     if (elegido === "viborita") activo.current = crearViborita(nodo, setPuntos, alPerder);
     else if (elegido === "pong") activo.current = crearPong(nodo, setPuntos, alPerder);
     else activo.current = crearSaltador(nodo, setPuntos, alPerder, dibujarMascotaEnCanvas);
 
-    setMensaje(tr("dale"));
+    setJugando(true);
     activo.current.arrancar();
   };
 
@@ -222,15 +379,104 @@ export function Juegos() {
 
         <canvas id="juegoCanvas" ref={canvas} width={300} height={230} />
 
-        <p className="juego-mensaje">{mensaje}</p>
+        {!jugando && <p className="juego-mensaje">{mensaje}</p>}
 
-        <button type="button" className="habit-btn" onClick={jugar}>{tr("jugar")}</button>
+        {!jugando && (
+          <button type="button" className="habit-btn" onClick={jugar}>{tr("jugar")}</button>
+        )}
 
-        {elegido === "viborita" && <Dpad activo={activo} />}
+        {/* Las flechas aparecen recién al empezar: son para
+            manejar algo que todavía no se está moviendo, y si
+            están siempre no entra todo junto en la pantallita
+            y quedan cortadas contra el borde de abajo. */}
+        {jugando && <Controles juego={elegido} activo={activo} moverPaleta={moverPaleta} />}
 
-        <Ayuda>{ayuda}</Ayuda>
+        {!jugando && <Ayuda>{ayuda}</Ayuda>}
       </Panel>
     </Pagina>
+  );
+}
+
+/* ==========================================================
+   LOS BOTONES DE CADA JUEGO
+   ==========================================================
+   Los tres se manejan con el dedo sobre el canvas, pero eso en
+   una pantallita chica es incómodo: tapás con la mano justo lo
+   que tenés que mirar. Cada juego tiene además sus botones, y
+   son los que necesita — ni más ni menos:
+
+     viborita · la cruz entera
+     pong     · izquierda y derecha
+     saltador · una sola flecha para saltar
+   ========================================================== */
+function Controles({ juego, activo, moverPaleta }: {
+  juego: string;
+  activo: React.RefObject<any>;
+  moverPaleta: (rumbo: number) => void;
+}) {
+  if (juego === "viborita") return <Dpad activo={activo} />;
+  if (juego === "pong") return <BotonesDePong moverPaleta={moverPaleta} />;
+  return <BotonDeSalto activo={activo} />;
+}
+
+/* Pong: mantener apretado corre la paleta sin parar.
+
+   Con un toque = un paso no alcanzaba: para cruzar la cancha
+   había que dar veinte golpecitos. */
+function BotonesDePong({ moverPaleta }: { moverPaleta: (rumbo: number) => void }) {
+  const reloj = useRef<number | undefined>(undefined);
+
+  const parar = () => {
+    clearInterval(reloj.current);
+    reloj.current = undefined;
+  };
+
+  const empezar = (rumbo: number) => {
+    moverPaleta(rumbo);            // el primer paso, ya
+    parar();
+    reloj.current = window.setInterval(() => moverPaleta(rumbo), 16);
+  };
+
+  /* Si te vas de la pantalla con el dedo apoyado, nunca llega
+     el "lo solté" y la paleta seguiría sola para siempre. */
+  useEffect(() => parar, []);
+
+  const gatillo = (rumbo: number) => ({
+    onPointerDown: (e: React.PointerEvent) => { e.preventDefault(); empezar(rumbo); },
+    onPointerUp: parar,
+    onPointerLeave: parar,
+    onPointerCancel: parar,
+  });
+
+  return (
+    <div className="juego-dpad juego-dpad--fila">
+      <button type="button" className="dpad-btn" aria-label={tr("izquierda")} {...gatillo(-1)}>◀</button>
+      <button type="button" className="dpad-btn" aria-label={tr("derecha")} {...gatillo(1)}>▶</button>
+    </div>
+  );
+}
+
+/* Saltador: una sola flecha, pero avisando también cuándo se
+   suelta — mantenerla apretada salta más alto, igual que tocar
+   la pantalla. Si solo escucháramos el apretón, desde el botón
+   todos los saltos saldrían cortos. */
+function BotonDeSalto({ activo }: { activo: React.RefObject<any> }) {
+  const soltar = () => activo.current?.soltarSalto?.();
+
+  return (
+    <div className="juego-dpad juego-dpad--fila">
+      <button
+        type="button"
+        className="dpad-btn"
+        aria-label={tr("arriba")}
+        onPointerDown={(e) => { e.preventDefault(); activo.current?.saltar?.(); }}
+        onPointerUp={soltar}
+        onPointerLeave={soltar}
+        onPointerCancel={soltar}
+      >
+        ▲
+      </button>
+    </div>
   );
 }
 
@@ -239,16 +485,21 @@ export function Juegos() {
 function Dpad({ activo }: { activo: React.RefObject<any> }) {
   const girar = (hacia: string) => activo.current?.girar?.(hacia);
 
-  /* Los cuatro botones son hijos directos de la grilla: cada
-     uno se ubica con su clase (dpad-arriba, dpad-izquierda...).
+  /* Los botones son hijos directos de la grilla: cada uno se
+     ubica con su clase (dpad-arriba, dpad-izquierda...).
      Agruparlos en filas rompe la crucecita, porque el div del
-     medio pasa a ocupar una sola celda. */
+     medio pasa a ocupar una sola celda.
+
+     El del medio es puro adorno: va con aria-hidden para que
+     el lector de pantalla no anuncie un botón que no hace
+     nada. */
   return (
     <div className="juego-dpad">
       <button type="button" className="dpad-btn dpad-arriba" onClick={() => girar("arriba")} aria-label={tr("arriba")}>▲</button>
       <button type="button" className="dpad-btn dpad-izquierda" onClick={() => girar("izquierda")} aria-label={tr("izquierda")}>◀</button>
-      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label={tr("abajo")}>▼</button>
+      <span className="dpad-centro" aria-hidden="true" />
       <button type="button" className="dpad-btn dpad-derecha" onClick={() => girar("derecha")} aria-label={tr("derecha")}>▶</button>
+      <button type="button" className="dpad-btn dpad-abajo" onClick={() => girar("abajo")} aria-label={tr("abajo")}>▼</button>
     </div>
   );
 }

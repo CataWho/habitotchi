@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tr } from "@/lib/idioma";
 import { CLAVES, leerTexto } from "@/lib/almacenamiento";
 import { archivoABase64, estimarCaloriasDeTexto, reconocerComidaConIA } from "@/lib/ia";
 import { TIPOS_COMIDA, agregarComida, cargarComidas } from "@/lib/alimentacion";
@@ -101,7 +102,7 @@ export function Chef({ onCerrar }: { onCerrar: () => void }) {
               valor={tipo}
               alCambiar={setTipo}
               etiqueta="Tipo de comida"
-              opciones={TIPOS_COMIDA.map((t: any) => ({ id: t.id, nombre: t.nombre }))}
+              opciones={TIPOS_COMIDA.map((t) => ({ id: t.id, nombre: tr(t.clave) }))}
             />
           </div>
 

@@ -21,6 +21,7 @@ import {
   resumenEjercicioPorBuckets,
   totalMinutosDelDia,
 } from "@/lib/ejercicio";
+import { obtenerMeta } from "@/lib/registro";
 import { ListaDeHabitos } from "@/componentes/comunes/BarraHabito";
 import { GraficoDeBarras } from "@/componentes/comunes/Grafico";
 import { Pagina } from "@/componentes/comunes/Pagina";
@@ -38,6 +39,8 @@ import { Ayuda, Fila, Panel, Select } from "@/componentes/comunes/Panel";
 
 export function Ejercicio() {
   const { fijarHabito } = useHabitotchi();
+  /* Para la línea de referencia del gráfico. */
+  const metas = useHabitotchi((e) => e.metas);
   const [sesiones, setSesiones] = useState(() => cargarSesionesEjercicio());
   const [propios, setPropios] = useState(() => cargarEjerciciosPropios());
   const [perfil] = useState(() => cargarPerfil());
@@ -82,6 +85,7 @@ export function Ejercicio() {
           }}
           etiquetaA="cardio"
           etiquetaB="pesas"
+          metaDiaria={obtenerMeta(metas, "ejercicio")}
         />
       </Panel>
 

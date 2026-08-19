@@ -1,4 +1,5 @@
 import { CLAVES, escribir, leerTexto } from "./almacenamiento";
+import { fechaComoTexto } from "./fechas";
 
 /* Los modulos portados leian con localStorage.getItem y
    parseaban a mano. Esto mantiene esa forma pero centraliza
@@ -125,6 +126,30 @@ export function borrarAnimo(datos: any, fecha: string, indice: number) {
 
 export function animosDelDia(datos: any, fecha: string) {
   return datos[fecha] || [];
+}
+
+/* Los ánimos de los últimos días, del más nuevo al más viejo.
+
+   El panel mostraba SOLO los de hoy, con la hora suelta: no
+   había manera de mirar para atrás, y una hora sin fecha al
+   lado no dice de cuándo es.
+
+   Cada registro se devuelve con su fecha y con el índice que
+   tiene DENTRO de su día, porque borrarAnimo() borra por
+   (fecha, índice) y si mandáramos la posición en esta lista
+   mezclada borraría el ánimo equivocado. */
+export function animosRecientes(datos: any, dias = 7) {
+  const desde = new Date();
+  desde.setDate(desde.getDate() - (dias - 1));
+  const limite = fechaComoTexto(desde);
+
+  return Object.keys(datos)
+    .filter((fecha) => fecha >= limite)
+    .sort()
+    .reverse()
+    .flatMap((fecha) =>
+      (datos[fecha] || []).map((registro: any, indice: number) => ({ ...registro, fecha, indice }))
+    );
 }
 
 export function datosDeAnimo(animoId: string) {

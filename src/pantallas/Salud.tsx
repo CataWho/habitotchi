@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { tr } from "@/lib/idioma";
-import { fechaDeHoy, ultimosSieteDias } from "@/lib/fechas";
+import { diaYMes, fechaDeHoy, ultimosSieteDias } from "@/lib/fechas";
 import {
   ANIMOS,
   ANIMO_PIXELES,
   agregarMedicacion,
   alternarToma,
-  animosDelDia,
+  animosRecientes,
   anotarAnimo,
   borrarAnimo,
   cargarAnimoDiario,
@@ -23,7 +23,7 @@ import {
 } from "@/lib/perfil";
 import { CLAVES } from "@/lib/almacenamiento";
 import { useGuardado } from "@/estado/useGuardado";
-import { GraficoDeLineas } from "@/componentes/comunes/Grafico";
+import { GraficoDeLineas, GraficoDePuntos } from "@/componentes/comunes/Grafico";
 import { Pagina } from "@/componentes/comunes/Pagina";
 import { Ayuda, Fila, Panel } from "@/componentes/comunes/Panel";
 
@@ -53,6 +53,7 @@ export function Salud() {
       {perfil.cicloActivado !== false && <Ciclo />}
 
       <Ayuda>{tr("disclaimerSalud")}</Ayuda>
+      <Ayuda>{tr("consultarProfesional")}</Ayuda>
     </Pagina>
   );
 }
@@ -83,7 +84,9 @@ function AnimoDelDia() {
   const [nota, setNota] = useState("");
 
   const hoy = fechaDeHoy();
-  const delDia = animosDelDia(datos, hoy);
+  /* Los últimos 7 días, no solo hoy: el panel mostraba una
+     hora suelta y no había forma de mirar para atrás. */
+  const recientes = animosRecientes(datos, 7);
   const resumen = resumenDeAnimo(datos, ultimosSieteDias());
 
   const anotar = (animoId: string) => {
@@ -118,24 +121,36 @@ function AnimoDelDia() {
         />
       </div>
 
-      {delDia.length === 0 ? (
+      {recientes.length === 0 ? (
         <Ayuda>{tr("sinAnimoHoy")}</Ayuda>
       ) : (
         <ul className="lista-simple">
-          {delDia.map((registro: any, i: number) => {
+          {recientes.map((registro: any) => {
             const datosAnimo = ANIMOS.find((a) => a.id === registro.animo);
+            const esDeHoy = registro.fecha === hoy;
+
             return (
               <Fila
-                key={i}
-                alBorrar={() => setDatos({ ...borrarAnimo(datos, hoy, i) })}
+                key={`${registro.fecha}-${registro.indice}`}
+                alBorrar={() => setDatos({ ...borrarAnimo(datos, registro.fecha, registro.indice) })}
               >
-                {registro.hora} · <b>{datosAnimo ? tr(datosAnimo.clave) : registro.animo}</b>
+                {/* Los de hoy van solo con la hora: poner la fecha
+                    de hoy en todos es ruido. Los de antes sí la
+                    llevan, que es lo que faltaba para saber de
+                    cuándo era cada uno. */}
+                {esDeHoy ? registro.hora : `${diaYMes(registro.fecha)} · ${registro.hora}`} ·{" "}
+                <b>{datosAnimo ? tr(datosAnimo.clave) : registro.animo}</b>
                 {registro.nota && ` · ${registro.nota}`}
               </Fila>
             );
           })}
         </ul>
       )}
+
+      {/* El balance: un punto por registro, a la altura del
+          ánimo. Va después de la lista porque primero anotás y
+          después mirás cómo venís. */}
+      <BalanceDeAnimo datos={datos} />
 
       <Ayuda>
         {tr("estaSemana", {
@@ -316,5 +331,50 @@ function Ciclo() {
         </ul>
       )}
     </Panel>
+  );
+}
+
+/* ==========================================================
+   EL BALANCE DE ÁNIMO
+   ==========================================================
+   Un punto por registro, a la altura del ánimo que anotaste, y
+   una línea punteada en el medio ("normal") para ver de un
+   vistazo si el período se fue para arriba o para abajo.
+
+   Los ánimos vienen ordenados del mejor al peor en ANIMOS, así
+   que la posición en esa lista ES la altura: el índice 0 va
+   arriba de todo. Si algún día se agrega un ánimo nuevo en el
+   medio, el gráfico lo acomoda solo.
+   ========================================================== */
+function BalanceDeAnimo({ datos }: { datos: any }) {
+  /* useCallback para que el gráfico no se redibuje en cada
+     tecla que toques en el campo de la nota. */
+  const calcular = useCallback(
+    (baldes: any[]) =>
+      baldes.map((balde) => {
+        const puntos: { nivel: number; color: string }[] = [];
+
+        for (const fecha of Object.keys(datos).sort()) {
+          if (fecha < balde.desde || fecha > balde.hasta) continue;
+
+          for (const registro of datos[fecha] || []) {
+            const nivel = ANIMOS.findIndex((a) => a.id === registro.animo);
+            if (nivel < 0) continue;
+
+            puntos.push({ nivel, color: ANIMOS[nivel]!.color });
+          }
+        }
+
+        return puntos;
+      }),
+    [datos]
+  );
+
+  return (
+    <GraficoDePuntos
+      calcular={calcular}
+      niveles={ANIMOS.length}
+      vacio={tr("balanceVacio")}
+    />
   );
 }

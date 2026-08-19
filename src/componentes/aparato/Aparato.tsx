@@ -67,22 +67,34 @@ export function Aparato({ children }: Props) {
    Sin esta parte, los botones quedaban con la letra del color
    equivocado y no se leían.
    ========================================================== */
-export function Pantalla({ children }: { children: ReactNode }) {
+/* Los colores del fondo de pantalla que tengas puesto.
+
+   Vive suelto porque no lo usa solo la pantallita: los tres
+   modales del aparato (cementerio, hoy y estadísticas) se
+   montan FUERA, como hermanos del aparato, y sin esto no se
+   enteraban del fondo elegido — caían al verde clásico de
+   base.css y quedaban verdes con cualquier fondo puesto. */
+export function usarEstiloDelFondo(): React.CSSProperties {
   const idFondo = useHabitotchi((e) => e.equipado.fondo);
   const fondo = FONDOS[idFondo] ?? FONDOS.clasico!;
+
+  return {
+    "--lcd-degradado": fondo.degradado,
+    "--lcd-tinta-rgb": fondo.tinta,
+    "--lcd-campo-rgb": fondo.campo,
+    "--lcd-contratinta": fondo.contratinta,
+    "--lcd-brillo": fondo.brillo,
+  } as React.CSSProperties;
+}
+
+export function Pantalla({ children }: { children: ReactNode }) {
+  const estilo = usarEstiloDelFondo();
 
   return (
     <section
       className="screen"
       aria-label={tr("aparatoPantalla")}
-      style={
-        {
-          background: fondo.degradado,
-          "--lcd-tinta-rgb": fondo.tinta,
-          "--lcd-contratinta": fondo.contratinta,
-          "--lcd-brillo": fondo.brillo,
-        } as React.CSSProperties
-      }
+      style={{ ...estilo, background: "var(--lcd-degradado)" }}
     >
       <div className="screen-grid" />
       {children}

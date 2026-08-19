@@ -5,6 +5,7 @@ import {
   borrarTodoDeLaNube, cambiarContraseña, cerrarSesion, hayNubeConfigurada, usarSesion,
 } from "@/lib/nube";
 import { CLAVES } from "@/lib/almacenamiento";
+import { usarEstiloDelFondo } from "@/componentes/aparato/Aparato";
 import { useGuardado } from "@/estado/useGuardado";
 import { tr, usarIdioma } from "@/lib/idioma";
 import { CampoDeContraseña } from "@/componentes/comunes/CampoDeContraseña";
@@ -32,7 +33,7 @@ import { Ayuda, Panel, Select } from "@/componentes/comunes/Panel";
 
 export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
   return (
-    <div className="chef-overlay" onClick={onCerrar}>
+    <div className="chef-overlay chef-overlay--pantalla" style={usarEstiloDelFondo()} onClick={onCerrar}>
       <div className="chef-modal" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label={tr("cerrar")}>
           ✕
@@ -40,10 +41,14 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
 
         <h2 className="panel-title">{tr("ajustes")}</h2>
 
+        {/* Primero, antes que "Cuenta en la nube": con sesión
+            iniciada ese panel (mail, cambiar contraseña, cerrar
+            sesión) empuja a Idioma bien abajo del modal, y en el
+            celular queda tapado sin hacer scroll. */}
+        <Idioma />
         <SobreVos />
         <QueMostrar />
         <CuentaEnLaNube />
-        <Idioma />
         <TusDatos />
         <Privacidad />
       </div>
@@ -290,12 +295,6 @@ function Privacidad() {
           {t("verPolitica")}
         </a>
       </div>
-
-      {/* La política queda en español aunque la app esté en
-          inglés, y conviene avisarlo para que no parezca un
-          olvido: es un documento legal que cita la ley
-          argentina, y traducirlo mal sería peor. */}
-      <Ayuda>{t("notaPolitica")}</Ayuda>
     </Panel>
   );
 }

@@ -48,6 +48,21 @@ export function guardarPerfil(perfil: any) {
 /* Peso a usar en los cálculos de calorías: el tuyo si lo
    cargaste, o un promedio genérico si todavía no. */
 export function pesoParaCalculos(perfil: any) {
+  /* ---------- GANA EL PESO MÁS NUEVO QUE ANOTASTE ----------
+     Este número se usa para estimar las calorías del ejercicio.
+     Antes salía SOLO del campo de Ajustes, el que cargaste
+     cuando te hiciste la cuenta: te pesabas en Salud todas las
+     semanas y las calorías seguían calculándose con el peso
+     viejo, salvo que te acordaras de editarlo también allá.
+
+     Ahora manda el último registro del historial, y el campo de
+     Ajustes queda como punto de partida para quien todavía no
+     se pesó ninguna vez. Un solo dato, un solo lugar. */
+  const historial = cargarHistorialPeso();
+  const ultimo = historial[historial.length - 1];
+
+  if (ultimo && ultimo.pesoKg > 0) return ultimo.pesoKg;
+
   return perfil && perfil.pesoKg ? perfil.pesoKg : 65;
 }
 

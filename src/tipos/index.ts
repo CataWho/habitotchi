@@ -38,6 +38,17 @@ export interface Habito {
   color: string;
   /* En qué página aparece. Si no dice nada, va en Hogar. */
   pagina?: string;
+  /* El valor sale del detalle que cargás abajo (las sesiones de
+     trabajo, las de ejercicio, las comidas) y no de un botón.
+
+     Estos NO llevan +/−: antes lo llevaban, y era una trampa.
+     Sumabas dos horas a mano, después cargabas una sesión y el
+     total se recalculaba desde las sesiones, borrándote lo que
+     habías puesto. Parecía que había que cargar todo dos veces.
+
+     La meta sí se puede editar: lo que no se toca a mano es
+     cuánto llevás. */
+  seCalculaSolo?: boolean;
 }
 
 export type IdHabito = string;
@@ -101,6 +112,15 @@ export interface Fondo {
   /* Para escribir ENCIMA de la tinta (los botones son una
      pastilla de tinta llena). */
   contratinta: string;
+  /* Los tres canales del parche sobre el que van los campos de
+     texto, las tarjetas y los puntitos.
+
+     Tiene que alejarse de la tinta, no acercarse: en los fondos
+     claros es blanco (aclara), y en uno oscuro tiene que
+     OSCURECER. Estaba fijo en blanco para todos, y por eso en
+     Noche los campos quedaban claros con la letra clara
+     encima — invisibles. */
+  campo: string;
   brillo: string;
 }
 

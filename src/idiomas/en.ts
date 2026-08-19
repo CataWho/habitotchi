@@ -164,13 +164,15 @@ export const EN: Textos = {
   estaSemana: "This week: {resumen}",
   pesoVacio: "Log your weight at least twice to see how it moves.",
   disclaimerSalud: "Nothing you log here adds or takes away points. It's your record, not a goal to hit.",
+  consultarProfesional: "This is a personal record, not medical advice. If anything worries you, talk to a health professional.",
+  balanceVacio: "Log how you feel for a few days and the pattern shows up here.",
 
   /* ---------- Games ---------- */
   viborita: "Snake",
   pong: "Pong",
   saltador: "Jumper",
   ayudaViborita: "Swipe on the screen to turn (or use the arrows).",
-  ayudaPong: "Move the paddle with your finger or the mouse. The first 5 rallies are slow.",
+  ayudaPong: "Move the paddle with your finger or the mouse.",
   ayudaSaltador: "Tap the screen to jump over the obstacles.",
   puntos: "Score: {n}",
   record: "Best: {n}",
@@ -234,7 +236,6 @@ export const EN: Textos = {
   confirmarBorrar2: "Really, there's no going back. Delete everything?",
   noSePudoBorrarNube: "Couldn't delete from your account. Nothing was deleted.",
   verPolitica: "Read the privacy policy",
-  notaPolitica: "The policy is in Spanish even if you use the app in English: it's a legal document, and translating it badly would be worse than not translating it.",
   notaDatos: "Everything is saved to your account, so you'll find it on any device. The downloaded backup is for keeping a copy outside the app.",
 
   /* ---------- the login gate ---------- */

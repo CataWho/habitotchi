@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { tr } from "@/lib/idioma";
-import { Aparato, Pantalla } from "@/componentes/aparato/Aparato";
+import { Aparato, Pantalla, usarEstiloDelFondo } from "@/componentes/aparato/Aparato";
 import { Botonera } from "@/componentes/aparato/Chasis";
 import { Paginas, Puntitos, usePaginas } from "@/componentes/aparato/Paginas";
 import { Hogar } from "@/pantallas/Hogar";
@@ -145,7 +145,7 @@ function Cementerio({ onCerrar }: { onCerrar: () => void }) {
   const cementerio = useHabitotchi((e) => e.cementerio);
 
   return (
-    <div className="chef-overlay" onClick={onCerrar}>
+    <div className="chef-overlay chef-overlay--pantalla" style={usarEstiloDelFondo()} onClick={onCerrar}>
       <div className="chef-modal" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label="Cerrar">
           ×
@@ -191,7 +191,7 @@ function PanelDeHoy({ onCerrar }: { onCerrar: () => void }) {
   const buenDia = diaEsBueno(registro, metas, hoy);
 
   return (
-    <div className="chef-overlay" onClick={onCerrar}>
+    <div className="chef-overlay chef-overlay--pantalla" style={usarEstiloDelFondo()} onClick={onCerrar}>
       <div className="chef-modal" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label="Cerrar">
           ×
@@ -259,7 +259,7 @@ function PanelDeEstadisticas({ onCerrar }: { onCerrar: () => void }) {
   const semana = ultimosSieteDias().filter((d) => diaEsBueno(registro, metas, d.texto) === true).length;
 
   return (
-    <div className="chef-overlay" onClick={onCerrar}>
+    <div className="chef-overlay chef-overlay--pantalla" style={usarEstiloDelFondo()} onClick={onCerrar}>
       <div className="chef-modal" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="chef-cerrar" onClick={onCerrar} aria-label="Cerrar">
           ×
